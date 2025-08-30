@@ -264,37 +264,109 @@
         }
 
         // Función para procesar el registro
-        function procesarRegistro() {
-            // Generar credenciales
-            credencialesGeneradas = generarCredenciales();
+        async function procesarRegistro() {
+            // Obtener datos del formulario
+            const nombreTaller = document.getElementById('nombreTaller').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const propietario = document.getElementById('propietario').value;
+            const direccion = document.getElementById('direccion').value;
             
             // Mostrar loading
             const submitBtn = document.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando cuenta...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando solicitud...';
             submitBtn.disabled = true;
             
-            // Simular procesamiento
-            setTimeout(() => {
-                mostrarConfirmacion();
+            try {
+                // Enviar datos al API real para notificación
+                const response = await fetch('https://api.fixlytaller.com/api/lead-registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        empresa: nombreTaller,
+                        email: email,
+                        telefono: telefono,
+                        propietario: propietario,
+                        direccion: direccion,
+                        tipo: 'registro_landing'
+                    })
+                });
+
+                const resultado = await response.json();
+                
+                if (resultado.success) {
+                    // Mostrar confirmación de envío exitoso
+                    mostrarConfirmacionEnvio();
+                } else {
+                    throw new Error(resultado.error || 'Error al enviar solicitud');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Hubo un problema al enviar tu solicitud. Por favor intenta nuevamente.');
+                
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-            }, 2000);
+            }
         }
 
-        // Función para mostrar confirmación
-        function mostrarConfirmacion() {
+        // Función para mostrar confirmación - SIN CREDENCIALES AUTOMÁTICAS
+        function mostrarConfirmacionEnvio() {
             // Ocultar formulario y mostrar confirmación
             document.getElementById('registroForm').classList.add('hidden');
             document.getElementById('confirmacion').classList.remove('hidden');
             
-            // Llenar datos
-            document.getElementById('usuarioGenerado').textContent = credencialesGeneradas.usuario;
-            document.getElementById('passwordGenerado').textContent = credencialesGeneradas.password;
-            document.getElementById('emailDestino').textContent = credencialesGeneradas.email;
-            
-            // Simular envío de email
-            simularEnvioEmail();
+            // Cambiar el contenido de confirmación
+            const confirmacionDiv = document.getElementById('confirmacion');
+            confirmacionDiv.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl mx-auto">
+                    <div class="text-center mb-6">
+                        <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-green-600 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Solicitud Enviada Exitosamente!</h2>
+                        <p class="text-gray-600">Hemos recibido tu información correctamente.</p>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                        <h3 class="text-blue-800 font-semibold mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            ¿Qué sigue ahora?
+                        </h3>
+                        <div class="space-y-2 text-blue-700">
+                            <p><i class="fas fa-clock mr-2"></i><strong>En las próximas 24 horas</strong> nuestro equipo revisará tu solicitud</p>
+                            <p><i class="fas fa-envelope mr-2"></i>Te contactaremos por <strong>email o WhatsApp</strong> con tus credenciales de acceso</p>
+                            <p><i class="fas fa-gift mr-2"></i>Tendrás <strong>15 días gratuitos</strong> para probar todas las funcionalidades</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-2">Datos enviados:</h4>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <p><strong>Taller:</strong> ${document.getElementById('nombreTaller').value}</p>
+                            <p><strong>Email:</strong> ${document.getElementById('email').value}</p>
+                            <p><strong>Teléfono:</strong> ${document.getElementById('telefono').value || 'No proporcionado'}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button onclick="window.location.href='https://fixlytaller.com'" 
+                                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Volver al Inicio
+                        </button>
+                        
+                        <button onclick="window.open('https://wa.me/1234567890?text=Hola, acabo de enviar mi solicitud de registro para Fixly Taller', '_blank')" 
+                                class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                            <i class="fab fa-whatsapp mr-2"></i>
+                            Contactar por WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
         // Función para simular envío de email
