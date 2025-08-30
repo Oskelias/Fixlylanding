@@ -46,29 +46,13 @@ const allowedOrigins = [
 function handleCORS(request) {
   const origin = request.headers.get('Origin');
   
-  // Check if origin is allowed
-  let allowedOrigin = allowedOrigins[0]; // Default fallback
-  
-  if (origin) {
-    // Check exact matches
-    if (allowedOrigins.includes(origin)) {
-      allowedOrigin = origin;
-    }
-    // Allow any e2b.dev subdomain for testing
-    else if (origin.includes('.e2b.dev')) {
-      allowedOrigin = origin;
-    }
-    // Allow localhost for development
-    else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      allowedOrigin = origin;
-    }
-  }
-  
+  // CORS súper permisivo para solucionar el problema
   const corsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': origin || '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-    'Access-Control-Allow-Credentials': 'true'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Access-Control-Request-Method, Access-Control-Request-Headers',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400'
   };
   
   if (request.method === 'OPTIONS') {
