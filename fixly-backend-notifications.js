@@ -70,26 +70,29 @@ function handleCORS(request) {
  * Enviar notificación a Telegram
  */
 async function sendTelegramNotification(message) {
-  if (!TELEGRAM_CONFIG.CHAT_ID) {
+  const BOT_TOKEN = '7659942257:AAE1ajAek4aC86fQqTWWhoOYmpCkhv0b0Oc';
+  const CHAT_ID = '1819527108';
+  
+  if (!CHAT_ID) {
     console.log('Telegram CHAT_ID no configurado');
     return false;
   }
 
   try {
-    const url = `${TELEGRAM_CONFIG.API_URL}${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TELEGRAM_CONFIG.CHAT_ID,
+        chat_id: CHAT_ID,
         text: message
-        // Removido parse_mode para evitar errores con caracteres especiales
       })
     });
 
     const result = await response.json();
-    return result.ok;
+    console.log('Telegram response:', result);
+    return result.ok || false;
   } catch (error) {
     console.error('Error enviando Telegram:', error);
     return false;
