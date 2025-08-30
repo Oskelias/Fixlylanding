@@ -1,0 +1,24 @@
+Server running on port 3000
+30/Aug/2025 07:46:55 - "GET /test-form.html HTTP/1.1" 200 -
+30/Aug/2025 07:46:55 - code 404, message File not found
+30/Aug/2025 07:46:55 - "GET /favicon.ico HTTP/1.1" 404 -
+30/Aug/2025 07:47:07 - "GET /test-form.html HTTP/1.1" 200 -
+30/Aug/2025 07:47:44 - "GET /test-form.html HTTP/1.1" 200 -
+30/Aug/2025 07:47:45 - code 404, message File not found
+30/Aug/2025 07:47:45 - "GET /favicon.ico HTTP/1.1" 404 -
+30/Aug/2025 07:48:07 - "GET /test-form.html HTTP/1.1" 304 -
+30/Aug/2025 08:03:53 - "GET /test-form.html HTTP/1.1" 304 -
+30/Aug/2025 08:04:18 - "GET /formulario_nuevo_updated.html HTTP/1.1" 200 -
+30/Aug/2025 08:04:19 - code 501, message Unsupported method ('POST')
+30/Aug/2025 08:04:19 - "POST /cdn-cgi/rum? HTTP/1.1" 501 -
+30/Aug/2025 08:04:35 - code 501, message Unsupported method ('POST')
+30/Aug/2025 08:04:35 - "POST /cdn-cgi/rum? HTTP/1.1" 501 -
+30/Aug/2025 08:19:26 - "GET /test-form.html HTTP/1.1" 200 -
+30/Aug/2025 08:19:26 - code 404, message File not found
+30/Aug/2025 08:19:26 - "GET /favicon.ico HTTP/1.1" 404 -
+30/Aug/2025 08:20:36 - "GET /test-form.html HTTP/1.1" 304 -
+30/Aug/2025 08:21:33 - "GET /simple-test.html HTTP/1.1" 200 -
+30/Aug/2025 08:22:09 - "GET /simple-test.html HTTP/1.1" 304 -
+30/Aug/2025 08:36:43 - "GET /test-form.html HTTP/1.1" 304 -
+30/Aug/2025 08:37:08 - "GET /simple-test.html HTTP/1.1" 304 -
+30/Aug/2025 08:39:02 - "GET /formulario-funcionando.html HTTP/1.1" 200 -

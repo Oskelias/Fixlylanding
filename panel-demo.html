@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin Panel - Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .chart-container {
+            height: 300px;
+        }
+        .sidebar-active {
+            background-color: #4F46E5;
+            color: white;
+        }
+        .demo-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10B981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Demo Badge -->
+    <div class="demo-badge">
+        <i class="fas fa-eye mr-2"></i>Vista Previa - Fixly Admin
+    </div>
+
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold">
+                        <i class="fas fa-tools mr-2"></i>
+                        Fixly Admin Panel
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm">Panel de Administración</span>
+                    <i class="fas fa-user-cog"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <nav class="mt-8">
+                <a href="#dashboard" class="sidebar-item sidebar-active flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="dashboard">
+                    <i class="fas fa-chart-dashboard mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#codes" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="codes">
+                    <i class="fas fa-key mr-3"></i>
+                    Códigos de Activación
+                </a>
+                <a href="#users" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="users">
+                    <i class="fas fa-users mr-3"></i>
+                    Gestión de Usuarios
+                </a>
+                <a href="#emails" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="emails">
+                    <i class="fas fa-envelope mr-3"></i>
+                    Emails Automáticos
+                </a>
+                <a href="#webhooks" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="webhooks">
+                    <i class="fab fa-cc-mastercard mr-3"></i>
+                    MercadoPago Webhooks
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Principal</h2>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100">
+                                <i class="fas fa-users text-indigo-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Usuarios Totales</p>
+                                <p class="text-2xl font-bold text-gray-900" id="total-users">245</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100">
+                                <i class="fas fa-key text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Códigos Activos</p>
+                                <p class="text-2xl font-bold text-gray-900" id="active-codes">89</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100">
+                                <i class="fas fa-dollar-sign text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Ingresos del Mes</p>
+                                <p class="text-2xl font-bold text-gray-900" id="monthly-revenue">$12,450</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-red-100">
+                                <i class="fas fa-chart-line text-red-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Conversión</p>
+                                <p class="text-2xl font-bold text-gray-900" id="conversion-rate">68%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Conversión de Pruebas</h3>
+                        <div class="chart-container">
+                            <canvas id="conversionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ingresos Mensuales</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-8 bg-white rounded-lg p-6 shadow">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button class="p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                            <i class="fas fa-plus text-indigo-600 mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Generar Código</p>
+                        </button>
+                        <button class="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                            <i class="fas fa-envelope text-green-600 mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Enviar Email</p>
+                        </button>
+                        <button class="p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
+                            <i class="fas fa-download text-yellow-600 mb-2"></i>
+                            <p class="text-sm font-medium text-gray-800">Exportar Datos</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Codes Section -->
+            <div id="codes-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Códigos de Activación</h2>
+                
+                <!-- Generate Code Form -->
+                <div class="bg-white rounded-lg p-6 shadow mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Generar Nuevo Código</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email del Usuario</label>
+                            <input type="email" id="new-code-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500" placeholder="usuario@email.com" value="juan@tallermecánico.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                            <input type="text" id="new-code-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500" placeholder="Nombre completo" value="Juan Pérez">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
+                            <input type="text" id="new-code-company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500" placeholder="Nombre de la empresa" value="Taller Mecánico Los Pinos">
+                        </div>
+                    </div>
+                    <button id="generate-code-btn" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Generar Código
+                    </button>
+                </div>
+
+                <!-- Codes Table -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Códigos Generados</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="codes-tbody">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">FIX_2024_A7B9</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">juan@taller.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Taller Los Pinos</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Usado</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">29/08/2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-red-600 hover:text-red-900">Eliminar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">FIX_2024_K3M8</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">maria@autocentro.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">AutoCentro Express</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Activo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30/08/2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-red-600 hover:text-red-900">Eliminar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Usuarios</h2>
+                
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Usuarios Registrados</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Taller Los Pinos</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">juan@taller.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Premium</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-2">Ver</button>
+                                        <button class="text-red-600 hover:text-red-900">Desactivar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">AutoCentro Express</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">maria@autocentro.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Prueba</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Prueba</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">8</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-2">Ver</button>
+                                        <button class="text-green-600 hover:text-green-900">Activar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emails Section -->
+            <div id="emails-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Sistema de Emails Automáticos</h2>
+                
+                <!-- Email Templates -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-key mr-2 text-indigo-600"></i>
+                            Email Código de Activación
+                        </h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">🎉 ¡Bienvenido a Fixly Taller!</p>
+                            <p class="text-sm text-gray-600">Tu código de activación: <strong class="text-indigo-600">[CODIGO]</strong></p>
+                            <p class="text-sm text-gray-600">⏰ 15 días de prueba gratuita</p>
+                            <p class="text-sm text-gray-600">Usuario: <strong class="text-indigo-600">[USERNAME]</strong></p>
+                            <p class="text-sm text-gray-600">Contraseña: <strong class="text-indigo-600">[PASSWORD]</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-credit-card mr-2 text-green-600"></i>
+                            Email Cliente Pago
+                        </h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">✅ ¡Pago confirmado!</p>
+                            <p class="text-sm text-gray-600">Usuario: <strong class="text-green-600">[EMAIL]</strong></p>
+                            <p class="text-sm text-gray-600">Contraseña: <strong class="text-green-600">[PASSWORD]</strong></p>
+                            <p class="text-sm text-gray-600">Acceso ilimitado activado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email History -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Historial de Emails</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Para</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plantilla</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30/08/2024 14:32</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">juan@taller.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Código de Activación</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Enviado</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">29/08/2024 09:15</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">maria@autocentro.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Pago Confirmado</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Enviado</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webhooks Section -->
+            <div id="webhooks-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">MercadoPago Webhooks</h2>
+                
+                <!-- Webhook Configuration -->
+                <div class="bg-white rounded-lg p-6 shadow mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-cog mr-2 text-indigo-600"></i>
+                        Configuración
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">URL del Webhook</label>
+                            <input type="url" id="webhook-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500" placeholder="https://api.fixlytaller.com/webhook" value="https://api.fixlytaller.com/webhook">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Precio Suscripción</label>
+                            <input type="number" id="subscription-price" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500" placeholder="29.99" step="0.01" value="29.99">
+                        </div>
+                    </div>
+                    <button id="save-webhook-btn" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Guardar Configuración
+                    </button>
+                </div>
+
+                <!-- Recent Payments -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            <i class="fas fa-credit-card mr-2 text-green-600"></i>
+                            Pagos Recientes
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID Pago</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#MP123456</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">juan@taller.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$29.99</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aprobado</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30/08/2024</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#MP789012</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">maria@autocentro.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$29.99</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">29/08/2024</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ CONFIGURACIÓN PARA CLOUDFLARE
+        const API_BASE_URL = 'https://api.fixlytaller.com';
+
+        // Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar navigation
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    sidebarItems.forEach(i => i.classList.remove('sidebar-active'));
+                    // Add active class to clicked item
+                    this.classList.add('sidebar-active');
+                    
+                    // Hide all sections
+                    contentSections.forEach(section => section.classList.add('hidden'));
+                    // Show target section
+                    const targetSection = document.getElementById(this.dataset.section + '-section');
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Initialize charts
+            setTimeout(initCharts, 1000);
+            
+            // Demo buttons
+            document.getElementById('generate-code-btn').addEventListener('click', function() {
+                alert('🎉 Código generado: FIX_2024_X9K7\n\n¡Esta es una demostración del panel!');
+            });
+            
+            document.getElementById('save-webhook-btn').addEventListener('click', function() {
+                alert('✅ Configuración guardada exitosamente\n\n¡Esta es una demostración del panel!');
+            });
+        });
+
+        // Initialize charts
+        function initCharts() {
+            // Conversion Chart
+            const conversionCtx = document.getElementById('conversionChart');
+            if (conversionCtx) {
+                new Chart(conversionCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Conversión (%)',
+                            data: [45, 52, 48, 61, 58, 68],
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx) {
+                new Chart(revenueCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Ingresos ($)',
+                            data: [8500, 9200, 7800, 11200, 10800, 12450],
+                            backgroundColor: '#7C3AED',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

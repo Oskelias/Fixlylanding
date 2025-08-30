@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Form - Fixly Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            background: #ff9800;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🧪 Test Formulario Fixly</h1>
+        <p>Prueba del endpoint /api/lead-registro</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="empresa">Nombre del Taller *</label>
+                <input type="text" id="empresa" name="empresa" required placeholder="Ej: Taller García" value="Taller Test API">
+            </div>
+            
+            <div class="form-group">
+                <label for="propietario">Propietario *</label>
+                <input type="text" id="propietario" name="propietario" required placeholder="Ej: Juan García" value="Juan Test">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required placeholder="tu@email.com" value="test@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" name="telefono" placeholder="+54 11 1234-5678" value="+34 123 456 789">
+            </div>
+            
+            <div class="form-group">
+                <label for="direccion">Ciudad/Dirección</label>
+                <input type="text" id="direccion" name="direccion" placeholder="Buenos Aires" value="Madrid, España">
+            </div>
+            
+            <button type="submit" id="submitBtn">
+                🚀 Enviar Solicitud de Registro
+            </button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            
+            // Obtener datos del formulario
+            const formData = {
+                empresa: document.getElementById('empresa').value,
+                propietario: document.getElementById('propietario').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                direccion: document.getElementById('direccion').value,
+                tipo: 'test_form'
+            };
+            
+            // Validar campos obligatorios
+            if (!formData.empresa || !formData.email || !formData.propietario) {
+                resultDiv.innerHTML = '<div class="result error">❌ Por favor completa todos los campos obligatorios</div>';
+                return;
+            }
+            
+            // Mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.className = 'loading';
+            submitBtn.textContent = '⏳ Enviando...';
+            resultDiv.innerHTML = '';
+            
+            console.log('🧪 Testing form submission with data:', formData);
+            
+            try {
+                const response = await fetch('https://api.fixlytaller.com/api/lead-registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+                
+                const result = await response.json();
+                console.log('API Response:', result);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ <strong>Solicitud enviada exitosamente</strong><br>
+                            📋 Lead ID: ${result.leadId}<br>
+                            📱 Telegram: ${result.notificaciones?.telegram || 'No enviado'}<br>
+                            💬 Mensaje: ${result.mensaje}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ <strong>Error:</strong> ${result.error}
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ <strong>Error de conexión:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Restaurar botón
+                submitBtn.disabled = false;
+                submitBtn.className = '';
+                submitBtn.textContent = '🚀 Enviar Solicitud de Registro';
+            }
+        });
+    </script>
+</body>
+</html>
