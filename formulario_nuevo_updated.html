@@ -233,14 +233,8 @@
         // Variables globales
         let credencialesGeneradas = {};
 
-        // Event listener para el formulario
+        // Inicialización del script
         console.log('🧪 Script cargado correctamente');
-        
-        document.getElementById('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('📝 Formulario enviado - llamando procesarRegistro()');
-            procesarRegistro();
-        });
 
         // Función para generar credenciales
         function generarCredenciales() {
@@ -456,6 +450,13 @@
                     form.requestSubmit();
                 }
             });
+        });
+
+        // Event listener para el formulario - DEBE IR AL FINAL
+        document.getElementById('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('📝 Formulario enviado - llamando procesarRegistro()');
+            procesarRegistro();
         });
 
         // Test que el JavaScript funcione

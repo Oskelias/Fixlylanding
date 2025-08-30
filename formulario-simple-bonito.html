@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Taller - Registro Gratuito</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .floating-shapes::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            top: 10%;
+            right: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .floating-shapes::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            bottom: 10%;
+            left: 10%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            transition: all 0.3s ease;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+        .success-animation {
+            animation: successPulse 2s ease-in-out;
+        }
+        @keyframes successPulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg floating-shapes relative overflow-x-hidden">
+    
+    <!-- Formulario de Registro -->
+    <div id="registroForm" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10 transform transition-all duration-300">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-tools text-white text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Fixly Taller</h1>
+                <p class="text-gray-600">Registro Gratuito - 15 días de prueba</p>
+            </div>
+
+            <!-- Formulario -->
+            <div class="space-y-6">
+                <!-- Nombre del Taller -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-store mr-2 text-blue-500"></i>Nombre del Taller
+                    </label>
+                    <input type="text" id="nombreTaller" required 
+                           class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: Electrónica García">
+                </div>
+
+                <!-- Nombre del Propietario -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-user mr-2 text-green-500"></i>Nombre del Propietario
+                    </label>
+                    <input type="text" id="nombrePropietario" required
+                           class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: Juan García">
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-envelope mr-2 text-purple-500"></i>Email
+                    </label>
+                    <input type="email" id="email" required
+                           class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="tu@email.com">
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-phone mr-2 text-orange-500"></i>Teléfono
+                    </label>
+                    <input type="tel" id="telefono" required
+                           class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="+54 11 1234-5678">
+                </div>
+
+                <!-- Ciudad -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-map-marker-alt mr-2 text-red-500"></i>Ciudad
+                    </label>
+                    <input type="text" id="ciudad" required
+                           class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Buenos Aires">
+                </div>
+
+                <!-- Botón Submit -->
+                <button onclick="enviarFormulario()" 
+                        class="btn-submit w-full py-4 text-white font-bold rounded-lg text-lg">
+                    <i class="fas fa-rocket mr-2"></i>Crear Mi Cuenta Gratuita
+                </button>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p><i class="fas fa-shield-alt mr-1"></i>100% Seguro y Gratuito</p>
+                <p class="mt-1">Sin tarjeta de crédito requerida</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página de Confirmación -->
+    <div id="confirmacion" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative z-10 success-animation">
+            <!-- Success Icon -->
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-white text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">¡Registro Exitoso!</h1>
+                <p class="text-gray-600">Tu solicitud ha sido enviada correctamente</p>
+            </div>
+
+            <!-- Resultado dinámico -->
+            <div id="resultadoDetalle"></div>
+
+            <!-- Botones -->
+            <div class="space-y-3 mt-6">
+                <button onclick="window.location.href='https://fixlytaller.com'" 
+                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver al Inicio
+                </button>
+                
+                <button onclick="window.open('https://wa.me/1234567890?text=Hola, acabo de enviar mi solicitud de registro para Fixly Taller', '_blank')" 
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    <i class="fab fa-whatsapp mr-2"></i>Contactar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🧪 Script simple cargado correctamente');
+        
+        async function enviarFormulario() {
+            console.log('🚀 Función enviarFormulario ejecutada');
+            
+            const empresa = document.getElementById('nombreTaller').value;
+            const propietario = document.getElementById('nombrePropietario').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const ciudad = document.getElementById('ciudad').value;
+            
+            console.log('📋 Datos capturados:', { empresa, propietario, email, telefono, ciudad });
+            
+            // Validación básica
+            if (!empresa || !propietario || !email) {
+                alert('❌ Por favor completa los campos obligatorios: Taller, Propietario y Email');
+                return;
+            }
+            
+            // Mostrar loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando solicitud...';
+            btn.disabled = true;
+            
+            try {
+                console.log('🌐 Enviando request a API...');
+                
+                const response = await fetch('https://api.fixlytaller.com/api/lead-registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        empresa: empresa,
+                        propietario: propietario,
+                        email: email,
+                        telefono: telefono,
+                        direccion: ciudad,
+                        tipo: 'formulario_simple_bonito'
+                    })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                const resultado = await response.json();
+                console.log('📋 Response data:', resultado);
+                
+                if (resultado.success) {
+                    console.log('✅ Solicitud enviada exitosamente');
+                    mostrarConfirmacion(resultado);
+                } else {
+                    throw new Error(resultado.error || 'Error desconocido del servidor');
+                }
+                
+            } catch (error) {
+                console.error('💥 Error:', error);
+                alert(`❌ Error de conexión: ${error.message}. Por favor intenta nuevamente.`);
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        function mostrarConfirmacion(resultado) {
+            // Ocultar formulario y mostrar confirmación
+            document.getElementById('registroForm').classList.add('hidden');
+            document.getElementById('confirmacion').classList.remove('hidden');
+            
+            // Llenar detalles del resultado
+            document.getElementById('resultadoDetalle').innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-green-800 font-semibold mb-3">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        ¡Solicitud Procesada Exitosamente!
+                    </h3>
+                    <div class="space-y-2 text-green-700">
+                        <p><i class="fas fa-id-badge mr-2"></i><strong>Lead ID:</strong> ${resultado.leadId || 'Generado'}</p>
+                        <p><i class="fas fa-telegram mr-2"></i><strong>Notificación:</strong> ${resultado.notificaciones?.telegram || 'Enviada a nuestro equipo'}</p>
+                        <p><i class="fas fa-clock mr-2"></i><strong>Te contactaremos en las próximas 24 horas</strong></p>
+                        <p><i class="fas fa-gift mr-2"></i><strong>15 días gratuitos</strong> para probar todas las funcionalidades</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">Datos enviados:</h4>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p><strong>Taller:</strong> ${document.getElementById('nombreTaller').value}</p>
+                        <p><strong>Email:</strong> ${document.getElementById('email').value}</p>
+                        <p><strong>Teléfono:</strong> ${document.getElementById('telefono').value || 'No proporcionado'}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Test que el JavaScript funcione
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM cargado correctamente - Formulario simple bonito listo');
+        });
+    </script>
+</body>
+</html>
