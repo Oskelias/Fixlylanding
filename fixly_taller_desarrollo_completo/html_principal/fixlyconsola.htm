@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly - Consola de Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(2px);
+        }
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-admin { background-color: #fef3c7; color: #d97706; }
+        .status-tecnico { background-color: #dbeafe; color: #2563eb; }
+        .status-recepcionista { background-color: #d1fae5; color: #059669; }
+        .status-activo { background-color: #d1fae5; color: #059669; }
+        .status-inactivo { background-color: #fee2e2; color: #dc2626; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .trial-warning {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="p-6 border-b">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-users-cog text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-800">Fixly Admin</h1>
+                        <p class="text-sm text-gray-600">Consola de Administración</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="mt-6">
+                <a class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 active" 
+                   href="#" onclick="showSection(event, 'dashboard-admin')">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard Admin
+                </a>
+                <a class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" 
+                   href="#" onclick="showSection(event, 'usuarios')">
+                    <i class="fas fa-users mr-3"></i>
+                    Gestión de Usuarios
+                </a>
+                <a class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" 
+                   href="#" onclick="showSection(event, 'roles')">
+                    <i class="fas fa-user-tag mr-3"></i>
+                    Roles y Permisos
+                </a>
+                <a class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" 
+                   href="#" onclick="showSection(event, 'auditoria')">
+                    <i class="fas fa-clipboard-list mr-3"></i>
+                    Auditoría
+                </a>
+                <a class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" 
+                   href="#" onclick="showSection(event, 'configuracion-cuenta')">
+                    <i class="fas fa-cog mr-3"></i>
+                    Configuración
+                </a>
+                <a class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" 
+                   href="#" onclick="volverSistema()">
+                    <i class="fas fa-arrow-left mr-3"></i>
+                    Volver al Sistema
+                </a>
+            </nav>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="flex-1 overflow-hidden">
+            <!-- Trial Warning -->
+            <div id="trial-warning" class="trial-warning">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-clock mr-2"></i>
+                        <span id="trial-message">Prueba gratuita: 12 días restantes</span>
+                    </div>
+                    <button onclick="upgradeAccount()" class="bg-white text-orange-600 px-4 py-1 rounded-full text-sm font-bold hover:bg-gray-100">
+                        Actualizar a Pro
+                    </button>
+                </div>
+            </div>
+
+            <div class="h-full overflow-y-auto p-8">
+                <!-- Dashboard Admin -->
+                <div class="section active" id="dashboard-admin">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-bold text-gray-800">Dashboard Administrativo</h1>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-calendar mr-2"></i>
+                            <span id="fecha-actual"></span>
+                        </div>
+                    </div>
+
+                    <!-- KPIs Admin -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Usuarios Activos</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-usuarios">5</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Técnicos</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-tecnicos">3</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <i class="fas fa-user-tie text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Sesiones Hoy</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-sesiones">12</p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded-full">
+                                    <i class="fas fa-sign-in-alt text-yellow-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Días de Prueba</p>
+                                    <p class="text-2xl font-bold text-orange-600" id="kpi-trial">12</p>
+                                </div>
+                                <div class="bg-orange-100 p-3 rounded-full">
+                                    <i class="fas fa-clock text-orange-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actividad Reciente -->
+                    <div class="card bg-white p-6 rounded-xl mb-8">
+                        <h3 class="text-xl font-semibold mb-6">Actividad Reciente</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="bg-green-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-user-plus text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Usuario creado</p>
+                                        <p class="text-sm text-gray-600">Ana Silva agregada como Técnico</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-gray-500">Hace 2 horas</span>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-sign-in-alt text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Inicio de sesión</p>
+                                        <p class="text-sm text-gray-600">Juan Pérez inició sesión</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-gray-500">Hace 1 hora</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestión de Usuarios -->
+                <div class="section" id="usuarios">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h1>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200" 
+                                onclick="showModal('modal-usuario')">
+                            <i class="fas fa-plus mr-2"></i>
+                            Nuevo Usuario
+                        </button>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="card bg-white p-6 rounded-xl mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input class="px-4 py-2 border border-gray-300 rounded-lg" 
+                                   id="filtro-usuarios" placeholder="Buscar usuarios..." type="text">
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg" id="filtro-rol">
+                                <option value="">Todos los roles</option>
+                                <option value="admin">Administrador</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="recepcionista">Recepcionista</option>
+                            </select>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg" id="filtro-estado">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                            <button class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700" 
+                                    onclick="filtrarUsuarios()">
+                                <i class="fas fa-filter mr-2"></i>Filtrar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Usuarios -->
+                    <div class="card bg-white p-6 rounded-xl">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Usuario</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Rol</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Último Acceso</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-usuarios">
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-3 px-4">
+                                            <div class="flex items-center">
+                                                <div class="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-blue-600 font-semibold text-sm">AD</span>
+                                                </div>
+                                                <span class="font-medium">Admin Principal</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-4"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="355451585c5b754154595950471b565a58">[email&#160;protected]</a></td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge status-admin">Admin</span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge status-activo">Activo</span>
+                                        </td>
+                                        <td class="py-3 px-4">Hace 5 min</td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex gap-2">
+                                                <button class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700" 
+                                                        onclick="editarUsuario(1)" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="bg-red-600 text-white p-2 rounded hover:bg-red-700" 
+                                                        onclick="eliminarUsuario(1)" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-3 px-4">
+                                            <div class="flex items-center">
+                                                <div class="bg-green-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-green-600 font-semibold text-sm">AS</span>
+                                                </div>
+                                                <span class="font-medium">Ana Silva</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-4"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="79181718570a10150f18390d1815151c0b571a1614">[email&#160;protected]</a></td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge status-tecnico">Técnico</span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge status-activo">Activo</span>
+                                        </td>
+                                        <td class="py-3 px-4">Hace 1 hora</td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex gap-2">
+                                                <button class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700" 
+                                                        onclick="editarUsuario(2)" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="bg-red-600 text-white p-2 rounded hover:bg-red-700" 
+                                                        onclick="eliminarUsuario(2)" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles y Permisos -->
+                <div class="section" id="roles">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-8">Roles y Permisos</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Admin Role -->
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-800">Administrador</h3>
+                                <div class="bg-orange-100 p-2 rounded-full">
+                                    <i class="fas fa-crown text-orange-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Acceso completo al sistema</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Gestionar usuarios</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Ver reportes</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Configurar sistema</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Eliminar registros</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tecnico Role -->
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-800">Técnico</h3>
+                                <div class="bg-blue-100 p-2 rounded-full">
+                                    <i class="fas fa-tools text-blue-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Gestión de reparaciones</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Crear reparaciones</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Actualizar estados</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Ver historial</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-times text-red-600 mr-2"></i>
+                                    <span class="text-sm">Eliminar registros</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recepcionista Role -->
+                        <div class="card bg-white p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-800">Recepcionista</h3>
+                                <div class="bg-green-100 p-2 rounded-full">
+                                    <i class="fas fa-user-tie text-green-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Atención al cliente</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Recibir equipos</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Entregar equipos</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-600 mr-2"></i>
+                                    <span class="text-sm">Enviar WhatsApp</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-times text-red-600 mr-2"></i>
+                                    <span class="text-sm">Ver reportes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auditoría -->
+                <div class="section" id="auditoria">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-8">Auditoría del Sistema</h1>
+                    
+                    <div class="card bg-white p-6 rounded-xl">
+                        <div class="mb-4 flex justify-between items-center">
+                            <h3 class="text-xl font-semibold">Log de Actividades</h3>
+                            <div class="flex gap-2">
+                                <input type="date" class="px-3 py-2 border rounded-lg" id="filtro-fecha">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    Exportar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Fecha</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Usuario</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Acción</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Detalles</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">IP</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-auditoria">
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-3 px-4">2025-01-19 14:30</td>
+                                        <td class="py-3 px-4">Ana Silva</td>
+                                        <td class="py-3 px-4">
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                                                LOGIN
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">Inicio de sesión exitoso</td>
+                                        <td class="py-3 px-4">192.168.1.101</td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-3 px-4">2025-01-19 14:15</td>
+                                        <td class="py-3 px-4">Admin Principal</td>
+                                        <td class="py-3 px-4">
+                                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                                CREATE
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">Usuario creado: Luis Rodríguez</td>
+                                        <td class="py-3 px-4">192.168.1.100</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración -->
+                <div class="section" id="configuracion-cuenta">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-8">Configuración de Cuenta</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Información del Taller -->
+                        <div class="card bg-white p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-6">Información del Taller</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Nombre del Taller
+                                    </label>
+                                    <input type="text" class="w-full px-4 py-2 border rounded-lg" 
+                                           value="Mundo Electrónico" id="nombre-taller">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Email de Contacto
+                                    </label>
+                                    <input type="email" class="w-full px-4 py-2 border rounded-lg" 
+                                           value="contacto@mundoelectronico.com" id="email-taller">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Teléfono
+                                    </label>
+                                    <input type="tel" class="w-full px-4 py-2 border rounded-lg" 
+                                           value="+54 11 1234-5678" id="telefono-taller">
+                                </div>
+                                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Estado de la Cuenta -->
+                        <div class="card bg-white p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-6">Estado de la Cuenta</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-4 bg-orange-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-orange-800">Plan Actual</p>
+                                        <p class="text-sm text-orange-600">Prueba Gratuita</p>
+                                    </div>
+                                    <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        12 días restantes
+                                    </span>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Usuarios</span>
+                                        <span class="font-medium">5 / 5</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Reparaciones este mes</span>
+                                        <span class="font-medium">47</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Almacenamiento</span>
+                                        <span class="font-medium">2.1 GB / 5 GB</span>
+                                    </div>
+                                </div>
+
+                                <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium" 
+                                        onclick="upgradeAccount()">
+                                    <i class="fas fa-crown mr-2"></i>
+                                    Actualizar a Plan Pro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Usuario -->
+    <div class="modal" id="modal-usuario">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold">Nuevo Usuario</h3>
+                <button onclick="hideModal('modal-usuario')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="form-usuario" onsubmit="guardarUsuario(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre Completo
+                        </label>
+                        <input type="text" name="nombre" class="w-full px-4 py-2 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Email
+                        </label>
+                        <input type="email" name="email" class="w-full px-4 py-2 border rounded-lg" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Rol
+                        </label>
+                        <select name="rol" class="w-full px-4 py-2 border rounded-lg" required>
+                            <option value="">Seleccionar rol</option>
+                            <option value="admin">Administrador</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="recepcionista">Recepcionista</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Contraseña Temporal
+                        </label>
+                        <input type="password" name="password" class="w-full px-4 py-2 border rounded-lg" required>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="hideModal('modal-usuario')" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Crear Usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Variables globales
+        let usuariosData = [
+            {id: 1, nombre: 'Admin Principal', email: 'admin@taller.com', rol: 'admin', estado: 'activo', ultimo_acceso: 'Hace 5 min'},
+            {id: 2, nombre: 'Ana Silva', email: 'ana.silva@taller.com', rol: 'tecnico', estado: 'activo', ultimo_acceso: 'Hace 1 hora'},
+            {id: 3, nombre: 'Juan Pérez', email: 'juan.perez@taller.com', rol: 'tecnico', estado: 'activo', ultimo_acceso: 'Hace 3 horas'},
+            {id: 4, nombre: 'María González', email: 'maria@taller.com', rol: 'recepcionista', estado: 'activo', ultimo_acceso: 'Ayer'},
+            {id: 5, nombre: 'Luis Rodríguez', email: 'luis@taller.com', rol: 'tecnico', estado: 'inactivo', ultimo_acceso: 'Hace 2 días'}
+        ];
+
+        let auditoria = [
+            {fecha: '2025-01-19 14:30', usuario: 'Ana Silva', accion: 'LOGIN', detalles: 'Inicio de sesión exitoso', ip: '192.168.1.101'},
+            {fecha: '2025-01-19 14:15', usuario: 'Admin Principal', accion: 'CREATE', detalles: 'Usuario creado: Luis Rodríguez', ip: '192.168.1.100'},
+            {fecha: '2025-01-19 13:45', usuario: 'Juan Pérez', accion: 'UPDATE', detalles: 'Reparación #1001 actualizada a "Listo"', ip: '192.168.1.102'},
+            {fecha: '2025-01-19 12:30', usuario: 'María González', accion: 'CREATE', detalles: 'Nueva reparación #1003 creada', ip: '192.168.1.103'}
+        ];
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFecha();
+            updateTrialStatus();
+            cargarTablaUsuarios();
+            cargarTablaAuditoria();
+        });
+
+        // Navegación entre secciones
+        function showSection(event, sectionId) {
+            event.preventDefault();
+            
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remover clase active de todos los sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Agregar clase active al sidebar item clickeado
+            event.target.closest('.sidebar-item').classList.add('active');
+        }
+
+        // Funciones de fecha y trial
+        function updateFecha() {
+            const fecha = new Date();
+            const opciones = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('fecha-actual').textContent = 
+                fecha.toLocaleDateString('es-ES', opciones);
+        }
+
+        function updateTrialStatus() {
+            const diasRestantes = 12; // Simulado
+            document.getElementById('trial-message').textContent = 
+                `Prueba gratuita: ${diasRestantes} días restantes`;
+            document.getElementById('kpi-trial').textContent = diasRestantes;
+        }
+
+        // Gestión de usuarios
+        function cargarTablaUsuarios() {
+            const tbody = document.getElementById('tabla-usuarios');
+            tbody.innerHTML = '';
+            
+            usuariosData.forEach(usuario => {
+                const iniciales = usuario.nombre.split(' ').map(n => n[0]).join('');
+                const colorRol = usuario.rol === 'admin' ? 'blue' : 
+                               usuario.rol === 'tecnico' ? 'green' : 'purple';
+                
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center">
+                                <div class="bg-${colorRol}-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-${colorRol}-600 font-semibold text-sm">${iniciales}</span>
+                                </div>
+                                <span class="font-medium">${usuario.nombre}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">${usuario.email}</td>
+                        <td class="py-3 px-4">
+                            <span class="status-badge status-${usuario.rol}">${usuario.rol}</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="status-badge status-${usuario.estado}">${usuario.estado}</span>
+                        </td>
+                        <td class="py-3 px-4">${usuario.ultimo_acceso}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex gap-2">
+                                <button class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700" 
+                                        onclick="editarUsuario(${usuario.id})" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="bg-red-600 text-white p-2 rounded hover:bg-red-700" 
+                                        onclick="eliminarUsuario(${usuario.id})" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function cargarTablaAuditoria() {
+            const tbody = document.getElementById('tabla-auditoria');
+            tbody.innerHTML = '';
+            
+            auditoria.forEach(log => {
+                const colorAccion = log.accion === 'LOGIN' ? 'green' : 
+                                   log.accion === 'CREATE' ? 'blue' : 
+                                   log.accion === 'UPDATE' ? 'yellow' : 'red';
+                
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4">${log.fecha}</td>
+                        <td class="py-3 px-4">${log.usuario}</td>
+                        <td class="py-3 px-4">
+                            <span class="bg-${colorAccion}-100 text-${colorAccion}-800 px-2 py-1 rounded-full text-xs">
+                                ${log.accion}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">${log.detalles}</td>
+                        <td class="py-3 px-4">${log.ip}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Modales
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // CRUD Usuarios
+        function guardarUsuario(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const nuevoUsuario = {
+                id: usuariosData.length + 1,
+                nombre: formData.get('nombre'),
+                email: formData.get('email'),
+                rol: formData.get('rol'),
+                estado: 'activo',
+                ultimo_acceso: 'Nunca'
+            };
+            
+            usuariosData.push(nuevoUsuario);
+            cargarTablaUsuarios();
+            hideModal('modal-usuario');
+            
+            // Agregar a auditoría
+            auditoria.unshift({
+                fecha: new Date().toLocaleString('es-ES'),
+                usuario: 'Admin Principal',
+                accion: 'CREATE',
+                detalles: `Usuario creado: ${nuevoUsuario.nombre}`,
+                ip: '192.168.1.100'
+            });
+            
+            alert('Usuario creado exitosamente');
+            event.target.reset();
+        }
+
+        function editarUsuario(id) {
+            const usuario = usuariosData.find(u => u.id === id);
+            if (usuario) {
+                alert(`Editando usuario: ${usuario.nombre}`);
+                // Aquí implementarías la lógica de edición
+            }
+        }
+
+        function eliminarUsuario(id) {
+            if (confirm('¿Está seguro de eliminar este usuario?')) {
+                const usuario = usuariosData.find(u => u.id === id);
+                usuariosData = usuariosData.filter(u => u.id !== id);
+                cargarTablaUsuarios();
+                
+                // Agregar a auditoría
+                auditoria.unshift({
+                    fecha: new Date().toLocaleString('es-ES'),
+                    usuario: 'Admin Principal',
+                    accion: 'DELETE',
+                    detalles: `Usuario eliminado: ${usuario.nombre}`,
+                    ip: '192.168.1.100'
+                });
+                
+                alert('Usuario eliminado exitosamente');
+            }
+        }
+
+        // Filtros
+        function filtrarUsuarios() {
+            const filtroTexto = document.getElementById('filtro-usuarios').value.toLowerCase();
+            const filtroRol = document.getElementById('filtro-rol').value;
+            const filtroEstado = document.getElementById('filtro-estado').value;
+            
+            let usuariosFiltrados = usuariosData;
+            
+            if (filtroTexto) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => 
+                    u.nombre.toLowerCase().includes(filtroTexto) || 
+                    u.email.toLowerCase().includes(filtroTexto)
+                );
+            }
+            
+            if (filtroRol) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => u.rol === filtroRol);
+            }
+            
+            if (filtroEstado) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => u.estado === filtroEstado);
+            }
+            
+            // Actualizar tabla con usuarios filtrados
+            const tbody = document.getElementById('tabla-usuarios');
+            tbody.innerHTML = '';
+            
+            usuariosFiltrados.forEach(usuario => {
+                const iniciales = usuario.nombre.split(' ').map(n => n[0]).join('');
+                const colorRol = usuario.rol === 'admin' ? 'blue' : 
+                               usuario.rol === 'tecnico' ? 'green' : 'purple';
+                
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center">
+                                <div class="bg-${colorRol}-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-${colorRol}-600 font-semibold text-sm">${iniciales}</span>
+                                </div>
+                                <span class="font-medium">${usuario.nombre}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">${usuario.email}</td>
+                        <td class="py-3 px-4">
+                            <span class="status-badge status-${usuario.rol}">${usuario.rol}</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="status-badge status-${usuario.estado}">${usuario.estado}</span>
+                        </td>
+                        <td class="py-3 px-4">${usuario.ultimo_acceso}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex gap-2">
+                                <button class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700" 
+                                        onclick="editarUsuario(${usuario.id})" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="bg-red-600 text-white p-2 rounded hover:bg-red-700" 
+                                        onclick="eliminarUsuario(${usuario.id})" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Funciones adicionales
+        function upgradeAccount() {
+            alert('Redirigiendo a MercadoPago para actualizar a Plan Pro ($19.900/mes)');
+            // Aquí integrarías con MercadoPago
+        }
+
+        function volverSistema() {
+            alert('Volviendo al sistema principal de Fixly Taller');
+            // Aquí redirigirias al sistema principal
+        }
+
+        // Cerrar modales al hacer click fuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDoYgptFgCF5eVJONO3LlMK5cLtX6i2rDp4%2F3Dy4vthIJTl%2BvEqq68iKm2uEob1Gr4Al%2FhNO4rOZEoNxutiyqedCcU2A1SqidskQ2dryleQyHj2QtnL6uflYHtOJfirn2J%2FE6ESTSSxdV%2F3G2okL8maZ3p6ozoTqzX3sg1IfDL8r9tsYtC6MxScMIwIkLhNzbYxgjVXGvTRMv%2B6WE9EGSCS3k19C0ZXTgvXUJJvA4%2FqrXbK3HK5zvbv%2FWc0otgVWGkpu3ypFUifDKKrQlCuZC0oyvDvrthcA4GZ4g0pTYcq6dV%2BE0OYHfoApmsXVFGg6Ab6YTvu0M4YiNZjt1e9Jm%2BgNqfgIjU8QiBVJ9%2FY%2FFg6rwyRK0nazY6PTX068WvI51TssjZ8P%2FT%2Bc1Afhoo%2BUV3aW2Vc9qLsYNc7a1LQbX%2FCalGYGtrkY9c3Vt9O1M%2F3OGMZ%2F537k7NSJ%2FsiuxxbXGqDkpL0kc9HysQxjdYcJHuds%2FnuO8bP5YmdZ%2B3Nw%2F3B8npg%3D%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDoYgptFgCF5eVJONO3LlMK5cLtX6i2rDp4/3Dy4vthIJTl+vEqq68iKm2uEob1Gr4Al/hNO4rOZEoNxutiyqedCcU2A1SqidskQ2dryleQyHj2QtnL6uflYHtOJfirn2J/E6ESTSSxdV/3G2okL8maZ3p6ozoTqzX3sg1IfDL8r9tsYtC6MxScMIwIkLhNzbYxgjVXGvTRMv+6WE9EGSCS3k19C0ZXTgvXUJJvA4/qrXbK3HK5zvbv/Wc0otgVWGkpu3ypFUifDKKrQlCuZC0oyvDvrthcA4GZ4g0pTYcq6dV+E0OYHfoApmsXVFGg6Ab6YTvu0M4YiNZjt1e9Jm+gNqfgIjU8QiBVJ9/Y/Fg6rwyRK0nazY6PTX068WvI51TssjZ8P/T+c1Afhoo+UV3aW2Vc9qLsYNc7a1LQbX/CalGYGtrkY9c3Vt9O1M/3OGMZ/537k7NSJ/siuxxbXGqDkpL0kc9HysQxjdYcJHuds/nuO8bP5YmdZ+3Nw/3B8npg==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    
