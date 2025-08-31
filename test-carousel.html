@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Carousel</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; }
+        .carousel-container { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .carousel-slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            min-height: 300px;
+            padding: 20px;
+        }
+        .carousel-slide.active {
+            display: block;
+            opacity: 1;
+        }
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .carousel-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .carousel-indicator.active {
+            background: #4F46E5;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .control-btn {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .slide1 { background: linear-gradient(45deg, #e3f2fd, #f3e5f5); }
+        .slide2 { background: linear-gradient(45deg, #e8f5e8, #f0f4ff); }
+        .slide3 { background: linear-gradient(45deg, #fff3e0, #f1f8e9); }
+        .slide4 { background: linear-gradient(45deg, #fce4ec, #f3e5f5); }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Carrusel Fixly</h1>
+    
+    <div class="carousel-container">
+        <!-- Indicadores -->
+        <div class="carousel-indicators">
+            <div class="carousel-indicator active" data-slide="0"></div>
+            <div class="carousel-indicator" data-slide="1"></div>
+            <div class="carousel-indicator" data-slide="2"></div>
+            <div class="carousel-indicator" data-slide="3"></div>
+        </div>
+
+        <!-- Slides -->
+        <div class="carousel-slide active slide1" data-slide="0">
+            <h3>🎯 Dashboard - Estados Hoy</h3>
+            <div style="display: flex; gap: 20px; margin: 20px 0;">
+                <div style="text-align: center;">
+                    <div style="font-size: 32px; color: #7C3AED; font-weight: bold;">12</div>
+                    <div style="font-size: 14px; color: #666;">Reparaciones Hoy</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 32px; color: #10B981; font-weight: bold;">7</div>
+                    <div style="font-size: 14px; color: #666;">Listos para Retirar</div>
+                </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                <strong>#1001 • María González</strong><br>
+                <small>iPhone 13 Pro - Diagnosticando</small>
+            </div>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                <strong>#1002 • Carlos López</strong><br>
+                <small>Samsung Galaxy A54 - Listo</small>
+            </div>
+        </div>
+
+        <div class="carousel-slide slide2" data-slide="1">
+            <h3>🔧 Gestión de Reparaciones</h3>
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2196F3;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>#1016 - oscar elias</strong><br>
+                        <small>iphone 14</small>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <span style="background: #fff3cd; padding: 4px 8px; border-radius: 12px; font-size: 12px;">RECIBIDO</span>
+                        <button style="background: #ff9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px;">📄</button>
+                        <button style="background: #2196F3; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px;">✏️</button>
+                        <button style="background: #4CAF50; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px;">📱</button>
+                    </div>
+                </div>
+            </div>
+            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>#1017 - oscar elias</strong><br>
+                        <small>notebook lenovo</small>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <span style="background: #d4edda; padding: 4px 8px; border-radius: 12px; font-size: 12px;">LISTO</span>
+                        <button style="background: #ff9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px;">📄</button>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button style="background: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 6px;">➕ Nueva Reparación</button>
+            </div>
+        </div>
+
+        <div class="carousel-slide slide3" data-slide="2">
+            <h3>📱 WhatsApp Automático</h3>
+            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <strong>Reparación Seleccionada:</strong><br>
+                <small>#1016 - oscar elias - iphone 14</small>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>Cliente:</strong> oscar elias<br>
+                <small>Teléfono: 1165689145</small>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <strong>Mensaje:</strong><br>
+                <em>Hola oscar elias, hemos recibido su iphone 14. Le mantendremos informado del progreso. Ticket: #1016</em><br>
+                <small style="color: #666;">- Mundo Electrónico</small>
+            </div>
+            <div style="text-align: center;">
+                <button style="background: #25D366; color: white; padding: 10px 20px; border: none; border-radius: 6px;">📱 Enviar por WhatsApp</button>
+            </div>
+        </div>
+
+        <div class="carousel-slide slide4" data-slide="3">
+            <h3>🛒 Formulario de Pedidos</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                <div>
+                    <strong>Cliente:</strong><br>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-top: 4px;">Jose Sosa</div>
+                </div>
+                <div>
+                    <strong>Teléfono:</strong><br>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-top: 4px;">1123686414</div>
+                </div>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>Producto:</strong><br>
+                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-top: 4px;">Cargador Lenovo Yoga</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                <div>
+                    <strong>¿Deja seña?</strong><br>
+                    <div style="margin-top: 4px;">🔵 Sí</div>
+                </div>
+                <div>
+                    <strong>Precio:</strong><br>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-top: 4px; font-weight: bold;">$30000</div>
+                </div>
+            </div>
+            <div style="background: #fff3cd; padding: 10px; border-radius: 8px;">
+                <strong>#1 - sdf</strong><br>
+                <small>Tel: 50/05 | Total: $3232</small><br>
+                <span style="background: #ffc107; padding: 2px 6px; border-radius: 8px; font-size: 12px;">PENDIENTE</span>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button style="background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 6px;">➕ Crear Pedido</button>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="controls">
+            <button class="control-btn carousel-prev">← Anterior</button>
+            <span id="slideTitle">Dashboard - Estados Hoy</span>
+            <button class="control-btn carousel-next">Siguiente →</button>
+        </div>
+    </div>
+
+    <script>
+        console.log('🔧 Iniciando test del carrusel...');
+        
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicators = document.querySelectorAll('.carousel-indicator');
+        const totalSlides = slides.length;
+        let carouselInterval;
+        
+        const slideTitles = [
+            'Dashboard - Estados Hoy',
+            'Gestión de Reparaciones', 
+            'WhatsApp Automático',
+            'Formulario de Pedidos'
+        ];
+        
+        function showSlide(slideIndex) {
+            console.log(`Mostrando slide ${slideIndex}: ${slideTitles[slideIndex]}`);
+            
+            // Ocultar todas las slides
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                console.log(`Slide ${index} ocultada`);
+            });
+            
+            // Desactivar todos los indicadores
+            indicators.forEach((indicator, index) => {
+                indicator.classList.remove('active');
+                console.log(`Indicador ${index} desactivado`);
+            });
+            
+            // Mostrar slide actual
+            if (slides[slideIndex]) {
+                slides[slideIndex].classList.add('active');
+                console.log(`✅ Slide ${slideIndex} activada`);
+            }
+            
+            // Activar indicador actual
+            if (indicators[slideIndex]) {
+                indicators[slideIndex].classList.add('active');
+                console.log(`✅ Indicador ${slideIndex} activado`);
+            }
+            
+            // Actualizar título
+            const titleElement = document.getElementById('slideTitle');
+            if (titleElement && slideTitles[slideIndex]) {
+                titleElement.textContent = slideTitles[slideIndex];
+                console.log(`✅ Título actualizado: ${slideTitles[slideIndex]}`);
+            }
+            
+            currentSlide = slideIndex;
+        }
+        
+        function nextSlide() {
+            const nextIndex = (currentSlide + 1) % totalSlides;
+            console.log(`⏭️ Siguiente slide: ${currentSlide} -> ${nextIndex}`);
+            showSlide(nextIndex);
+        }
+        
+        function prevSlide() {
+            const prevIndex = (currentSlide - 1 + totalSlides) % totalSlides;
+            console.log(`⏮️ Slide anterior: ${currentSlide} -> ${prevIndex}`);
+            showSlide(prevIndex);
+        }
+        
+        function startAutoSlide() {
+            console.log('▶️ Iniciando auto-rotación...');
+            carouselInterval = setInterval(() => {
+                console.log('🔄 Auto-rotación ejecutándose...');
+                nextSlide();
+            }, 3000); // 3 segundos para test
+        }
+        
+        function stopAutoSlide() {
+            console.log('⏹️ Deteniendo auto-rotación...');
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 DOM cargado, configurando eventos...');
+            
+            // Botones de navegación
+            const prevButton = document.querySelector('.carousel-prev');
+            const nextButton = document.querySelector('.carousel-next');
+            
+            if (prevButton) {
+                prevButton.addEventListener('click', () => {
+                    console.log('👆 Click en botón anterior');
+                    stopAutoSlide();
+                    prevSlide();
+                    startAutoSlide();
+                });
+                console.log('✅ Botón anterior configurado');
+            }
+            
+            if (nextButton) {
+                nextButton.addEventListener('click', () => {
+                    console.log('👆 Click en botón siguiente');
+                    stopAutoSlide();
+                    nextSlide();
+                    startAutoSlide();
+                });
+                console.log('✅ Botón siguiente configurado');
+            }
+            
+            // Indicadores
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    console.log(`👆 Click en indicador ${index}`);
+                    stopAutoSlide();
+                    showSlide(index);
+                    startAutoSlide();
+                });
+            });
+            console.log(`✅ ${indicators.length} indicadores configurados`);
+            
+            // Pausar en hover
+            const carouselContainer = document.querySelector('.carousel-container');
+            if (carouselContainer) {
+                carouselContainer.addEventListener('mouseenter', () => {
+                    console.log('🖱️ Mouse sobre carrusel - pausando');
+                    stopAutoSlide();
+                });
+                carouselContainer.addEventListener('mouseleave', () => {
+                    console.log('🖱️ Mouse fuera del carrusel - reanudando');
+                    startAutoSlide();
+                });
+                console.log('✅ Eventos de hover configurados');
+            }
+            
+            // Inicializar
+            console.log('🚀 Inicializando carrusel...');
+            showSlide(0);
+            startAutoSlide();
+            
+            console.log('✅ Carrusel inicializado correctamente');
+        });
+    </script>
+</body>
+</html>

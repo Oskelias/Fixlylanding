@@ -86,22 +86,23 @@
             overflow: visible;
         }
         
-        /* CARRUSEL STYLES */
+        /* CARRUSEL STYLES - IMPORTANT OVERRIDES */
         .carousel-container {
-            position: relative;
-            width: 100%;
+            position: relative !important;
+            width: 100% !important;
         }
         
         .carousel-slide {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            width: 100%;
+            display: none !important;
+            opacity: 0 !important;
+            transition: opacity 0.5s ease-in-out !important;
+            width: 100% !important;
+            position: relative !important;
         }
         
         .carousel-slide.active {
-            display: block;
-            opacity: 1;
+            display: block !important;
+            opacity: 1 !important;
         }
         
         .carousel-indicator {
@@ -1146,13 +1147,15 @@
         console.log('✅ Modal de registro integrado cargado correctamente');
         
         // ===========================================
-        // CARRUSEL FUNCTIONALITY
+        // CARRUSEL FUNCTIONALITY - CON DEBUG
         // ===========================================
         let currentSlide = 0;
         const slides = document.querySelectorAll('.carousel-slide');
         const indicators = document.querySelectorAll('.carousel-indicator');
         const totalSlides = slides.length;
         let carouselInterval;
+        
+
         
         const slideTitles = [
             'Dashboard - Estados Hoy',
@@ -1162,20 +1165,24 @@
         ];
         
         function showSlide(slideIndex) {
-            // Ocultar todas las slides
-            slides.forEach(slide => {
+            // Ocultar todas las slides usando style directo
+            slides.forEach((slide) => {
+                slide.style.display = 'none';
+                slide.style.opacity = '0';
                 slide.classList.remove('active');
             });
             
             // Desactivar todos los indicadores
-            indicators.forEach(indicator => {
+            indicators.forEach((indicator) => {
                 indicator.classList.remove('active');
                 indicator.classList.remove('bg-purple-600');
                 indicator.classList.add('bg-gray-300');
             });
             
-            // Mostrar slide actual
+            // Mostrar slide actual usando style directo
             if (slides[slideIndex]) {
+                slides[slideIndex].style.display = 'block';
+                slides[slideIndex].style.opacity = '1';
                 slides[slideIndex].classList.add('active');
             }
             
