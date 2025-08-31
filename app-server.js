@@ -22,7 +22,11 @@ class FixlyAuthServer {
             '/': 'app-index.html',
             '/login': 'app-login.html',
             '/dashboard': 'app-dashboard.html',
-            '/admin': 'app-dashboard.html'
+            '/admin': 'app-dashboard.html',
+            '/taller': 'taller-login.html',
+            '/taller-login': 'taller-login.html',
+            '/taller-sistema': 'taller-sistema.html',
+            '/sistema': 'taller-sistema.html'
         };
     }
 
@@ -32,12 +36,16 @@ class FixlyAuthServer {
         });
 
         server.listen(this.port, '0.0.0.0', () => {
-            console.log(`🚀 Fixly Auth Server running on http://0.0.0.0:${this.port}`);
-            console.log(`📱 Access the app at: http://localhost:${this.port}`);
-            console.log(`🔐 Demo credentials:`);
+            console.log(`🚀 Fixly Complete System running on http://0.0.0.0:${this.port}`);
+            console.log(`📱 URLs disponibles:`);
+            console.log(`   🏠 Inicio: http://localhost:${this.port}/`);
+            console.log(`   🔐 Admin: http://localhost:${this.port}/admin`);
+            console.log(`   🔧 Taller: http://localhost:${this.port}/taller`);
+            console.log(`🔐 Credenciales Admin:`);
             console.log(`   - admin / admin123`);
-            console.log(`   - fixly / fixly2024`);
-            console.log(`   - taller / taller123`);
+            console.log(`   - fixly-admin / admin2024`);
+            console.log(`🛠️ Credenciales Taller: Usar las generadas por API`);
+            console.log(`📡 API Backend: https://api.fixlytaller.com`);
         });
 
         return server;

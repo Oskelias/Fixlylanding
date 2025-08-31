@@ -182,6 +182,10 @@
                     <i class="fab fa-cc-mastercard mr-3"></i>
                     MercadoPago Webhooks
                 </a>
+                <a href="#registros" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="registros">
+                    <i class="fas fa-user-plus mr-3"></i>
+                    Nuevos Registros
+                </a>
             </nav>
         </div>
 
@@ -400,11 +404,57 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Registros Section -->
+            <div id="registros-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Nuevos Registros del Formulario</h2>
+                
+                <!-- Registros Pendientes -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Solicitudes Pendientes</h3>
+                        <button id="refresh-registros-btn" class="text-indigo-600 hover:text-indigo-800">
+                            <i class="fas fa-sync-alt mr-2"></i>Actualizar
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div id="registros-pendientes" class="space-y-4">
+                            <!-- Los registros se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Usuarios Creados -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Usuarios Creados</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuarios-creados-table" class="bg-white divide-y divide-gray-200">
+                                    <!-- Usuarios se cargarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ✅ CONFIGURACIÓN ACTUALIZADA PARA CLOUDFLARE
+        // ✅ CONFIGURACIÓN ACTUALIZADA PARA CLOUDFLARE - API REAL
         const API_BASE_URL = 'https://api.fixlytaller.com';
 
         // Navigation & Session Management
@@ -456,9 +506,12 @@
             // Event listeners for buttons
             document.getElementById('generate-code-btn').addEventListener('click', generateCode);
             document.getElementById('save-webhook-btn').addEventListener('click', saveWebhookConfig);
+            document.getElementById('refresh-registros-btn').addEventListener('click', loadRegistros);
             
-            // Initialize charts
+            // Initialize charts and load data
             initCharts();
+            loadRegistros();
+            loadUsuariosCreados();
         });
 
         // Dashboard functions
@@ -622,6 +675,247 @@
             } catch (error) {
                 console.error('Error saving webhook config:', error);
                 alert('Configuración guardada (demo)');
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE GESTIÓN DE REGISTROS
+        // ==========================================
+
+        async function loadRegistros() {
+            try {
+                // Simular carga de registros pendientes (esto vendría de tu KV storage)
+                const registrosPendientes = [
+                    {
+                        id: 'lead_1735678800000',
+                        empresa: 'Taller El Rayo',
+                        email: 'contacto@tallerelrayo.com',
+                        telefono: '+54 11 4567-8901',
+                        propietario: 'Juan Carlos Pérez',
+                        direccion: 'Av. San Martín 1234, CABA',
+                        fechaRegistro: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
+                        estado: 'pendiente'
+                    },
+                    {
+                        id: 'lead_1735675200000',
+                        empresa: 'AutoService Premium',
+                        email: 'admin@autoservicepremium.com',
+                        telefono: '+54 11 9876-5432',
+                        propietario: 'María González',
+                        direccion: 'Calle Belgrano 567, La Plata',
+                        fechaRegistro: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 horas atrás
+                        estado: 'pendiente'
+                    }
+                ];
+
+                updateRegistrosPendientes(registrosPendientes);
+            } catch (error) {
+                console.error('Error cargando registros:', error);
+            }
+        }
+
+        function updateRegistrosPendientes(registros) {
+            const container = document.getElementById('registros-pendientes');
+            
+            if (registros.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-4"></i>
+                        <p>No hay registros pendientes</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = registros.map(registro => `
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900">${registro.empresa}</h4>
+                            <p class="text-sm text-gray-600">Propietario: ${registro.propietario}</p>
+                            <p class="text-sm text-gray-600">📧 ${registro.email}</p>
+                            <p class="text-sm text-gray-600">📱 ${registro.telefono}</p>
+                            <p class="text-sm text-gray-600">📍 ${registro.direccion}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                Pendiente
+                            </span>
+                            <p class="text-xs text-gray-500 mt-2">
+                                ${new Date(registro.fechaRegistro).toLocaleString('es-ES')}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="crearUsuarioFromRegistro('${registro.id}')" 
+                                class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-md hover:from-green-600 hover:to-green-700 transition-all">
+                            <i class="fas fa-user-plus mr-2"></i>Crear Usuario
+                        </button>
+                        <button onclick="rechazarRegistro('${registro.id}')" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-all">
+                            <i class="fas fa-times mr-2"></i>Rechazar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function crearUsuarioFromRegistro(registroId) {
+            try {
+                // Encontrar el registro
+                const registros = [
+                    {
+                        id: 'lead_1735678800000',
+                        empresa: 'Taller El Rayo',
+                        email: 'contacto@tallerelrayo.com',
+                        telefono: '+54 11 4567-8901'
+                    },
+                    {
+                        id: 'lead_1735675200000',
+                        empresa: 'AutoService Premium',
+                        email: 'admin@autoservicepremium.com',
+                        telefono: '+54 11 9876-5432'
+                    }
+                ];
+
+                const registro = registros.find(r => r.id === registroId);
+                if (!registro) {
+                    alert('Registro no encontrado');
+                    return;
+                }
+
+                // Confirmar creación
+                if (!confirm(`¿Crear usuario para ${registro.empresa}?`)) {
+                    return;
+                }
+
+                // Llamar a tu API para generar el código y usuario
+                const response = await fetch(`${API_BASE_URL}/api/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        empresa: registro.empresa,
+                        email: registro.email,
+                        telefono: registro.telefono
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert(`✅ Usuario creado exitosamente!
+                        
+👤 Usuario: ${result.username}
+🔑 Contraseña: ${result.password}
+📧 Email enviado a: ${result.email}
+🎟️ Código: ${result.codigo}
+
+El usuario recibirá sus credenciales por email automáticamente.`);
+                        
+                        // Recargar listas
+                        loadRegistros();
+                        loadUsuariosCreados();
+                    } else {
+                        alert('Error al crear usuario: ' + (result.error || 'Error desconocido'));
+                    }
+                } else {
+                    alert('Error de conexión con la API');
+                }
+
+            } catch (error) {
+                console.error('Error creando usuario:', error);
+                alert('Error al crear usuario');
+            }
+        }
+
+        async function rechazarRegistro(registroId) {
+            if (confirm('¿Estás seguro de rechazar este registro?')) {
+                // Aquí podrías actualizar el estado en tu KV storage
+                alert('Registro rechazado');
+                loadRegistros();
+            }
+        }
+
+        async function loadUsuariosCreados() {
+            try {
+                // Simular usuarios creados (esto vendría de tu KV storage)
+                const usuarios = [
+                    {
+                        username: 'taller_premium_123456',
+                        empresa: 'Taller Premium Service',
+                        email: 'admin@premium.com',
+                        estado: 'activo',
+                        fechaRegistro: '2024-08-30T10:30:00Z',
+                        plan: 'prueba'
+                    },
+                    {
+                        username: 'taller_rapido_789012',
+                        empresa: 'Servicio Rápido',
+                        email: 'contacto@rapidoservice.com',
+                        estado: 'activo',
+                        fechaRegistro: '2024-08-29T15:45:00Z',
+                        plan: 'premium'
+                    }
+                ];
+
+                updateUsuariosTable(usuarios);
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+            }
+        }
+
+        function updateUsuariosTable(usuarios) {
+            const tableBody = document.getElementById('usuarios-creados-table');
+            tableBody.innerHTML = '';
+            
+            usuarios.forEach(usuario => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${usuario.empresa}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">${usuario.username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            usuario.estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }">
+                            ${usuario.estado.charAt(0).toUpperCase() + usuario.estado.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(usuario.fechaRegistro).toLocaleDateString('es-ES')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="toggleUsuarioEstado('${usuario.username}')" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i class="fas fa-toggle-${usuario.estado === 'activo' ? 'on' : 'off'}"></i>
+                        </button>
+                        <button onclick="resetPassword('${usuario.username}')" class="text-yellow-600 hover:text-yellow-900 mr-3">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button onclick="deleteUsuario('${usuario.username}')" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function toggleUsuarioEstado(username) {
+            // Implementar activar/desactivar usuario
+            alert(`Cambiar estado de usuario: ${username}`);
+        }
+
+        async function resetPassword(username) {
+            // Implementar reset de contraseña
+            alert(`Reset password para: ${username}`);
+        }
+
+        async function deleteUsuario(username) {
+            if (confirm(`¿Eliminar usuario ${username}?`)) {
+                alert(`Usuario ${username} eliminado`);
+                loadUsuariosCreados();
             }
         }
 

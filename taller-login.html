@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixly Admin - Iniciar Sesión</title>
+    <title>Fixly Taller - Acceso al Sistema</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <style>
         .gradient-bg {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .login-container {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -28,11 +28,11 @@
         }
         .btn-login {
             transition: all 0.3s ease;
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.4);
         }
         .logo-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -60,26 +60,26 @@
     <div class="login-card rounded-2xl p-8 w-full max-w-md relative z-10">
         <!-- Logo -->
         <div class="text-center mb-8">
-            <div class="logo-pulse inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4">
-                <i class="fas fa-wrench text-white text-2xl"></i>
+            <div class="logo-pulse inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4">
+                <i class="fas fa-tools text-white text-2xl"></i>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">Fixly Admin</h1>
-            <p class="text-gray-600 mt-2">Panel de Administración</p>
+            <h1 class="text-2xl font-bold text-gray-800">Fixly Taller</h1>
+            <p class="text-gray-600 mt-2">Sistema de Gestión</p>
         </div>
 
         <!-- Login Form -->
-        <form id="loginForm" class="space-y-6">
+        <form id="tallerLoginForm" class="space-y-6">
             <!-- Username Field -->
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-user mr-2 text-indigo-500"></i>Usuario
+                    <i class="fas fa-user mr-2 text-blue-500"></i>Usuario del Taller
                 </label>
                 <input 
                     type="text" 
                     id="username" 
                     name="username" 
                     required 
-                    class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Ingresa tu usuario"
                     autocomplete="username"
                 >
@@ -88,7 +88,7 @@
             <!-- Password Field -->
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-2 text-indigo-500"></i>Contraseña
+                    <i class="fas fa-lock mr-2 text-blue-500"></i>Contraseña
                 </label>
                 <div class="relative">
                     <input 
@@ -96,7 +96,7 @@
                         id="password" 
                         name="password" 
                         required 
-                        class="input-field w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        class="input-field w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Ingresa tu contraseña"
                         autocomplete="current-password"
                     >
@@ -113,10 +113,10 @@
             <!-- Remember Me -->
             <div class="flex items-center justify-between">
                 <label class="flex items-center">
-                    <input type="checkbox" id="rememberMe" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                    <span class="ml-2 text-sm text-gray-600">Recordarme</span>
+                    <input type="checkbox" id="rememberMe" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-gray-600">Recordar sesión</span>
                 </label>
-                <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500">¿Olvidaste tu contraseña?</a>
+                <a href="#" id="forgotPassword" class="text-sm text-blue-600 hover:text-blue-500">¿Olvidaste tu contraseña?</a>
             </div>
 
             <!-- Error Message -->
@@ -127,32 +127,49 @@
                 </div>
             </div>
 
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden bg-green-50 border border-green-200 rounded-lg p-3">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                    <span class="text-green-700 text-sm" id="successText"></span>
+                </div>
+            </div>
+
             <!-- Login Button -->
             <button 
                 type="submit" 
                 id="loginBtn"
-                class="btn-login w-full py-3 px-4 text-white font-medium rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                class="btn-login w-full py-3 px-4 text-white font-medium rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
                 <span id="loginBtnText">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+                    <i class="fas fa-sign-in-alt mr-2"></i>Acceder al Taller
                 </span>
                 <span id="loginBtnLoading" class="hidden">
-                    <i class="fas fa-spinner fa-spin mr-2"></i>Iniciando sesión...
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Verificando credenciales...
                 </span>
             </button>
         </form>
 
-        <!-- Footer -->
+        <!-- Help Section -->
         <div class="mt-8 text-center">
+            <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                <h4 class="text-sm font-medium text-blue-800 mb-2">¿No tienes credenciales?</h4>
+                <p class="text-xs text-blue-600 mb-3">
+                    Si completaste el formulario en fixlytaller.com, recibirás tus credenciales por email.
+                </p>
+                <a href="https://fixlytaller.com" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                    <i class="fas fa-external-link-alt mr-1"></i>Ir a fixlytaller.com
+                </a>
+            </div>
             <p class="text-xs text-gray-500">
-                © 2024 Fixly Taller. Todos los derechos reservados.
+                © 2024 Fixly Taller. Sistema de Gestión Professional
             </p>
         </div>
     </div>
 
     <script>
-        // Authentication System
-        class AuthSystem {
+        // Taller Authentication System
+        class TallerAuthSystem {
             constructor() {
                 this.API_BASE_URL = 'https://api.fixlytaller.com';
                 this.initializeEventListeners();
@@ -161,7 +178,7 @@
 
             initializeEventListeners() {
                 // Form submission
-                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                document.getElementById('tallerLoginForm').addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleLogin();
                 });
@@ -169,10 +186,16 @@
                 // Toggle password visibility
                 document.getElementById('togglePassword').addEventListener('click', this.togglePasswordVisibility);
 
+                // Forgot password
+                document.getElementById('forgotPassword').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.handleForgotPassword();
+                });
+
                 // Enter key handling
                 document.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        document.getElementById('loginForm').requestSubmit();
+                        document.getElementById('tallerLoginForm').requestSubmit();
                     }
                 });
             }
@@ -202,22 +225,25 @@
                 }
 
                 this.setLoading(true);
-                this.hideError();
+                this.hideMessages();
 
                 try {
-                    // For demo purposes, using hardcoded credentials
-                    // In production, this should call your authentication API
+                    // Autenticación con tu API real
                     const success = await this.authenticateUser(username, password);
                     
                     if (success) {
-                        this.setSession(username, rememberMe);
-                        this.redirectToDashboard();
+                        this.showSuccess('¡Credenciales válidas! Accediendo al sistema...');
+                        this.setSession(this.userData, rememberMe);
+                        
+                        setTimeout(() => {
+                            this.redirectToTaller();
+                        }, 1500);
                     } else {
-                        this.showError('Usuario o contraseña incorrectos.');
+                        this.showError('Usuario o contraseña incorrectos. Verifica tus credenciales.');
                     }
                 } catch (error) {
                     console.error('Login error:', error);
-                    this.showError('Error de conexión. Inténtalo nuevamente.');
+                    this.showError('Error de conexión. Verifica tu internet e inténtalo nuevamente.');
                 } finally {
                     this.setLoading(false);
                 }
@@ -225,7 +251,7 @@
 
             async authenticateUser(username, password) {
                 try {
-                    // Usar API real de Cloudflare Worker
+                    // Llamada a tu API real
                     const response = await fetch(`${this.API_BASE_URL}/api/login`, {
                         method: 'POST',
                         headers: {
@@ -236,45 +262,56 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.success) {
-                            // Guardar datos del usuario en la sesión
-                            this.userData = data.user;
+                        
+                        if (data.success && data.user) {
+                            // Guardar datos del usuario
+                            this.userData = {
+                                ...data.user,
+                                token: data.token,
+                                loginTime: new Date().toISOString()
+                            };
                             return true;
                         }
                     }
+                    
+                    // Si la API falla, verificar si es un usuario admin
+                    if (response.status === 401 || response.status === 404) {
+                        return false; // Credenciales incorrectas
+                    }
+                    
                     return false;
                 } catch (error) {
                     console.error('Error en autenticación:', error);
                     
-                    // Fallback a credenciales demo para admin
-                    const adminCredentials = [
-                        { username: 'admin', password: 'admin123' },
-                        { username: 'fixly-admin', password: 'admin2024' }
-                    ];
+                    // Fallback para administradores (solo en caso de fallo de API)
+                    if (username === 'admin' && password === 'admin123') {
+                        this.userData = {
+                            username: 'admin',
+                            empresa: 'Administrador del Sistema',
+                            email: 'admin@fixlytaller.com',
+                            plan: 'admin',
+                            loginTime: new Date().toISOString()
+                        };
+                        return true;
+                    }
                     
-                    return adminCredentials.some(cred => 
-                        cred.username === username && cred.password === password
-                    );
+                    throw error;
                 }
             }
 
-            setSession(username, remember) {
+            setSession(userData, remember) {
                 const sessionData = {
-                    username: username,
-                    loginTime: new Date().toISOString(),
+                    ...userData,
                     remember: remember
                 };
 
-                if (remember) {
-                    localStorage.setItem('fixly_session', JSON.stringify(sessionData));
-                } else {
-                    sessionStorage.setItem('fixly_session', JSON.stringify(sessionData));
-                }
+                const storage = remember ? localStorage : sessionStorage;
+                storage.setItem('fixly_taller_session', JSON.stringify(sessionData));
             }
 
             checkExistingSession() {
-                const sessionData = localStorage.getItem('fixly_session') || 
-                                  sessionStorage.getItem('fixly_session');
+                const sessionData = localStorage.getItem('fixly_taller_session') || 
+                                  sessionStorage.getItem('fixly_taller_session');
                 
                 if (sessionData) {
                     try {
@@ -285,7 +322,7 @@
                         
                         // Session expires after 24 hours
                         if (hoursSinceLogin < 24) {
-                            this.redirectToDashboard();
+                            this.redirectToTaller();
                         } else {
                             this.clearSession();
                         }
@@ -297,19 +334,23 @@
             }
 
             clearSession() {
-                localStorage.removeItem('fixly_session');
-                sessionStorage.removeItem('fixly_session');
+                localStorage.removeItem('fixly_taller_session');
+                sessionStorage.removeItem('fixly_taller_session');
             }
 
-            redirectToDashboard() {
-                // Show success message briefly before redirect
-                document.getElementById('loginBtnText').innerHTML = 
-                    '<i class="fas fa-check mr-2"></i>¡Acceso concedido!';
-                document.getElementById('loginBtn').classList.add('bg-green-500');
-                
-                setTimeout(() => {
-                    window.location.href = 'app-dashboard.html';
-                }, 1000);
+            redirectToTaller() {
+                window.location.href = 'taller-sistema.html';
+            }
+
+            handleForgotPassword() {
+                alert(`Para recuperar tu contraseña:
+
+1. Contacta al soporte técnico
+2. Email: soporte@fixlytaller.com  
+3. WhatsApp: +54 11 6568-9145
+
+O solicita nuevas credenciales completando el formulario en:
+https://fixlytaller.com`);
             }
 
             setLoading(loading) {
@@ -335,10 +376,23 @@
                 errorText.textContent = message;
                 errorMessage.classList.remove('hidden');
                 
-                // Auto-hide after 5 seconds
+                // Auto-hide after 8 seconds
                 setTimeout(() => {
                     this.hideError();
-                }, 5000);
+                }, 8000);
+            }
+
+            showSuccess(message) {
+                const successMessage = document.getElementById('successMessage');
+                const successText = document.getElementById('successText');
+                
+                successText.textContent = message;
+                successMessage.classList.remove('hidden');
+            }
+
+            hideMessages() {
+                document.getElementById('errorMessage').classList.add('hidden');
+                document.getElementById('successMessage').classList.add('hidden');
             }
 
             hideError() {
@@ -346,9 +400,9 @@
             }
         }
 
-        // Initialize authentication system
+        // Initialize taller authentication system
         document.addEventListener('DOMContentLoaded', () => {
-            new AuthSystem();
+            new TallerAuthSystem();
         });
     </script>
 </body>
