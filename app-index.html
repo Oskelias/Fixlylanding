@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin - Portal de Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center">
+    <div class="fade-in text-center text-white">
+        <!-- Logo -->
+        <div class="mb-8">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-3xl mb-4">
+                <i class="fas fa-wrench text-4xl text-white"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-2">Fixly Admin</h1>
+            <p class="text-xl opacity-90">Portal de Administración</p>
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="mb-8">
+            <div class="loading-spinner inline-block w-8 h-8 border-4 border-white border-opacity-30 border-t-white rounded-full"></div>
+        </div>
+
+        <!-- Status message -->
+        <p id="status-message" class="text-lg mb-6">Verificando credenciales...</p>
+
+        <!-- Manual access link (fallback) -->
+        <div id="manual-access" class="hidden">
+            <p class="mb-4">¿Problemas para acceder?</p>
+            <a href="app-login.html" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all duration-300">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Acceder Manualmente
+            </a>
+        </div>
+    </div>
+
+    <script>
+        class AppEntryPoint {
+            constructor() {
+                this.init();
+            }
+
+            async init() {
+                // Check if user is already authenticated
+                const sessionData = this.getSession();
+                
+                if (sessionData && this.isSessionValid(sessionData)) {
+                    // User is authenticated, redirect to dashboard
+                    this.updateStatus('¡Sesión válida encontrada!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'app-dashboard.html';
+                    }, 1000);
+                } else {
+                    // No valid session, redirect to login
+                    this.updateStatus('Redirigiendo al inicio de sesión...');
+                    setTimeout(() => {
+                        window.location.href = 'app-login.html';
+                    }, 1500);
+                }
+
+                // Show manual access after 3 seconds as fallback
+                setTimeout(() => {
+                    document.getElementById('manual-access').classList.remove('hidden');
+                }, 3000);
+            }
+
+            getSession() {
+                const sessionData = localStorage.getItem('fixly_session') || 
+                                  sessionStorage.getItem('fixly_session');
+                
+                if (sessionData) {
+                    try {
+                        return JSON.parse(sessionData);
+                    } catch (error) {
+                        console.error('Session parsing error:', error);
+                        this.clearSession();
+                        return null;
+                    }
+                }
+                return null;
+            }
+
+            isSessionValid(session) {
+                if (!session || !session.loginTime) {
+                    return false;
+                }
+
+                const loginTime = new Date(session.loginTime);
+                const now = new Date();
+                const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                
+                // Session expires after 24 hours
+                if (hoursSinceLogin >= 24) {
+                    this.clearSession();
+                    return false;
+                }
+                
+                return true;
+            }
+
+            clearSession() {
+                localStorage.removeItem('fixly_session');
+                sessionStorage.removeItem('fixly_session');
+            }
+
+            updateStatus(message, type = 'info') {
+                const statusElement = document.getElementById('status-message');
+                statusElement.textContent = message;
+                
+                if (type === 'success') {
+                    statusElement.classList.add('text-green-200');
+                }
+            }
+        }
+
+        // Initialize the app entry point
+        document.addEventListener('DOMContentLoaded', () => {
+            new AppEntryPoint();
+        });
+    </script>
+</body>
+</html>
