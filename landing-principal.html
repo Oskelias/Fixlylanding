@@ -85,6 +85,41 @@
             max-height: none;
             overflow: visible;
         }
+        
+        /* CARRUSEL STYLES */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .carousel-slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            width: 100%;
+        }
+        
+        .carousel-slide.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .carousel-indicator {
+            cursor: pointer;
+        }
+        
+        .carousel-indicator.active {
+            background-color: #4F46E5 !important;
+        }
+        
+        .carousel-prev, .carousel-next {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .carousel-prev:hover, .carousel-next:hover {
+            color: #4F46E5;
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -142,47 +177,216 @@
                         <span class="ml-2 text-blue-100">Calificación 4.8/5 por +120 talleres</span>
                     </div>
                 </div>
+                <!-- CARRUSEL DE FUNCIONALIDADES -->
                 <div class="relative">
-                    <div class="bg-white rounded-2xl shadow-2xl p-6 text-gray-800 h-full flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-purple-600">Dashboard - Estados Hoy</h3>
-                            <i class="fas fa-chart-bar text-purple-600"></i>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-purple-600">12</div>
-                                <div class="text-sm text-gray-600">Reparaciones Hoy</div>
-                                <div class="w-full bg-purple-200 rounded-full h-2 mt-2">
-                                    <div class="bg-purple-600 h-2 rounded-full w-3/4"></div>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-green-600">7</div>
-                                <div class="text-sm text-gray-600">Listos para Retirar</div>
-                                <div class="w-full bg-green-200 rounded-full h-2 mt-2">
-                                    <div class="bg-green-600 h-2 rounded-full w-2/3"></div>
-                                </div>
+                    <div class="bg-white rounded-2xl shadow-2xl p-6 text-gray-800 h-full flex flex-col overflow-hidden">
+                        
+                        <!-- Indicadores del carrusel -->
+                        <div class="flex justify-center mb-4">
+                            <div class="flex space-x-2">
+                                <button class="carousel-indicator w-2 h-2 rounded-full bg-purple-600 transition-all duration-300" data-slide="0"></button>
+                                <button class="carousel-indicator w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-slide="1"></button>
+                                <button class="carousel-indicator w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-slide="2"></button>
+                                <button class="carousel-indicator w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-slide="3"></button>
                             </div>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-semibold">#1001 • María González</div>
-                                    <div class="text-sm text-gray-600">iPhone 13 Pro</div>
+
+                        <!-- Contenedor del carrusel -->
+                        <div class="carousel-container relative flex-1 overflow-hidden">
+                            
+                            <!-- Slide 1: Dashboard - Estados Hoy -->
+                            <div class="carousel-slide active" data-slide="0">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-purple-600">Dashboard - Estados Hoy</h3>
+                                    <i class="fas fa-chart-bar text-purple-600"></i>
                                 </div>
-                                <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm">Diagnosticando</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-semibold">#1002 • Carlos López</div>
-                                    <div class="text-sm text-gray-600">Samsung Galaxy A54</div>
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="text-3xl font-bold text-purple-600">12</div>
+                                        <div class="text-sm text-gray-600">Reparaciones Hoy</div>
+                                        <div class="w-full bg-purple-200 rounded-full h-2 mt-2">
+                                            <div class="bg-purple-600 h-2 rounded-full w-3/4"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-3xl font-bold text-green-600">7</div>
+                                        <div class="text-sm text-gray-600">Listos para Retirar</div>
+                                        <div class="w-full bg-green-200 rounded-full h-2 mt-2">
+                                            <div class="bg-green-600 h-2 rounded-full w-2/3"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm">Listo</span>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <div class="font-semibold text-sm">#1001 • María González</div>
+                                            <div class="text-xs text-gray-600">iPhone 13 Pro</div>
+                                        </div>
+                                        <span class="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-xs">Diagnosticando</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <div class="font-semibold text-sm">#1002 • Carlos López</div>
+                                            <div class="text-xs text-gray-600">Samsung Galaxy A54</div>
+                                        </div>
+                                        <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-xs">Listo</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-center text-sm text-gray-600">
+                                    <i class="fab fa-whatsapp text-green-500 mr-2"></i>
+                                    "Tu equipo está listo para retirar 🙌"
+                                </div>
                             </div>
+
+                            <!-- Slide 2: Gestión de Reparaciones -->
+                            <div class="carousel-slide" data-slide="1">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-blue-600">Gestión de Reparaciones</h3>
+                                    <i class="fas fa-tools text-blue-600"></i>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                                                <span class="text-white text-xs font-bold">#1016</span>
+                                            </div>
+                                            <div>
+                                                <div class="font-semibold text-sm">oscar elias</div>
+                                                <div class="text-xs text-gray-600">iphone 14</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-xs">RECIBIDO</span>
+                                            <div class="flex space-x-1">
+                                                <button class="w-6 h-6 bg-orange-500 rounded text-white text-xs"><i class="fas fa-print"></i></button>
+                                                <button class="w-6 h-6 bg-blue-500 rounded text-white text-xs"><i class="fas fa-edit"></i></button>
+                                                <button class="w-6 h-6 bg-green-500 rounded text-white text-xs"><i class="fab fa-whatsapp"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                                                <span class="text-white text-xs font-bold">#1017</span>
+                                            </div>
+                                            <div>
+                                                <div class="font-semibold text-sm">oscar elias</div>
+                                                <div class="text-xs text-gray-600">notebook lenovo</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-xs">LISTO</span>
+                                            <div class="flex space-x-1">
+                                                <button class="w-6 h-6 bg-orange-500 rounded text-white text-xs"><i class="fas fa-print"></i></button>
+                                                <button class="w-6 h-6 bg-blue-500 rounded text-white text-xs"><i class="fas fa-edit"></i></button>
+                                                <button class="w-6 h-6 bg-green-500 rounded text-white text-xs"><i class="fab fa-whatsapp"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                                        <i class="fas fa-plus mr-2"></i>Nueva Reparación
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Slide 3: WhatsApp Automático -->
+                            <div class="carousel-slide" data-slide="2">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-green-600">Notificar Cliente</h3>
+                                    <i class="fab fa-whatsapp text-green-600"></i>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-lg mb-3">
+                                    <div class="text-sm text-gray-700 mb-2">
+                                        <strong>Reparación:</strong> #1016 - oscar elias - iphone 14
+                                    </div>
+                                    <div class="text-xs text-gray-600">
+                                        <strong>Cliente:</strong> oscar elias | <strong>Tel:</strong> 1165689145
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="text-sm font-semibold mb-1">Tipo de Mensaje:</div>
+                                        <div class="bg-white p-2 rounded border text-sm">Equipo Recibido</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <div class="text-xs text-gray-600 mb-1">Mensaje:</div>
+                                        <div class="text-sm">Hola oscar elias, hemos recibido su iphone 14. Le mantendremos informado del progreso. Ticket: #1016</div>
+                                        <div class="text-xs text-gray-500 mt-2">- Mundo Electrónico</div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button class="w-full bg-green-500 text-white py-2 px-4 rounded-lg text-sm font-semibold">
+                                        <i class="fab fa-whatsapp mr-2"></i>Enviar por WhatsApp
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Slide 4: Formulario de Pedidos -->
+                            <div class="carousel-slide" data-slide="3">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-orange-600">Formulario de Pedidos</h3>
+                                    <i class="fas fa-shopping-cart text-orange-600"></i>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                            <label class="text-xs text-gray-600">Cliente:</label>
+                                            <div class="bg-gray-50 p-2 rounded text-xs">Jose Sosa</div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-600">Teléfono:</label>
+                                            <div class="bg-gray-50 p-2 rounded text-xs">1123686414</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-600">Producto:</label>
+                                        <div class="bg-gray-50 p-2 rounded text-sm">Cargador Lenovo Yoga</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="text-xs text-gray-600">¿Deja seña?</label>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                                <span class="text-xs">Sí</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-600">Precio:</label>
+                                            <div class="bg-gray-50 p-2 rounded text-sm font-bold">$30000</div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-orange-50 p-2 rounded-lg">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="text-sm font-semibold">#1 - sdf</div>
+                                                <div class="text-xs text-gray-600">Tel: 50/05 | Total: $3232</div>
+                                            </div>
+                                            <span class="px-2 py-1 bg-orange-200 text-orange-800 rounded text-xs">PENDIENTE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button class="w-full bg-orange-500 text-white py-2 px-4 rounded-lg text-sm font-semibold">
+                                        <i class="fas fa-plus mr-2"></i>Crear Pedido
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-600">
-                            <i class="fab fa-whatsapp text-green-500 mr-2"></i>
-                            "Tu equipo está listo para retirar 🙌"
+
+                        <!-- Controles de navegación -->
+                        <div class="flex justify-between items-center mt-4">
+                            <button class="carousel-prev text-gray-400 hover:text-gray-600 transition-colors">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="text-xs text-gray-500 text-center">
+                                <span class="carousel-title">Dashboard - Estados Hoy</span>
+                            </div>
+                            <button class="carousel-next text-gray-400 hover:text-gray-600 transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -940,6 +1144,123 @@
         });
         
         console.log('✅ Modal de registro integrado cargado correctamente');
+        
+        // ===========================================
+        // CARRUSEL FUNCTIONALITY
+        // ===========================================
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicators = document.querySelectorAll('.carousel-indicator');
+        const totalSlides = slides.length;
+        let carouselInterval;
+        
+        const slideTitles = [
+            'Dashboard - Estados Hoy',
+            'Gestión de Reparaciones', 
+            'WhatsApp Automático',
+            'Formulario de Pedidos'
+        ];
+        
+        function showSlide(slideIndex) {
+            // Ocultar todas las slides
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Desactivar todos los indicadores
+            indicators.forEach(indicator => {
+                indicator.classList.remove('active');
+                indicator.classList.remove('bg-purple-600');
+                indicator.classList.add('bg-gray-300');
+            });
+            
+            // Mostrar slide actual
+            if (slides[slideIndex]) {
+                slides[slideIndex].classList.add('active');
+            }
+            
+            // Activar indicador actual
+            if (indicators[slideIndex]) {
+                indicators[slideIndex].classList.add('active');
+                indicators[slideIndex].classList.remove('bg-gray-300');
+                indicators[slideIndex].classList.add('bg-purple-600');
+            }
+            
+            // Actualizar título
+            const titleElement = document.querySelector('.carousel-title');
+            if (titleElement && slideTitles[slideIndex]) {
+                titleElement.textContent = slideTitles[slideIndex];
+            }
+            
+            currentSlide = slideIndex;
+        }
+        
+        function nextSlide() {
+            const nextIndex = (currentSlide + 1) % totalSlides;
+            showSlide(nextIndex);
+        }
+        
+        function prevSlide() {
+            const prevIndex = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(prevIndex);
+        }
+        
+        function startAutoSlide() {
+            carouselInterval = setInterval(() => {
+                nextSlide();
+            }, 4000); // Cambiar cada 4 segundos
+        }
+        
+        function stopAutoSlide() {
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botones de navegación
+            const prevButton = document.querySelector('.carousel-prev');
+            const nextButton = document.querySelector('.carousel-next');
+            
+            if (prevButton) {
+                prevButton.addEventListener('click', () => {
+                    stopAutoSlide();
+                    prevSlide();
+                    startAutoSlide(); // Reiniciar auto-slide
+                });
+            }
+            
+            if (nextButton) {
+                nextButton.addEventListener('click', () => {
+                    stopAutoSlide();
+                    nextSlide();
+                    startAutoSlide(); // Reiniciar auto-slide
+                });
+            }
+            
+            // Indicadores
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    stopAutoSlide();
+                    showSlide(index);
+                    startAutoSlide(); // Reiniciar auto-slide
+                });
+            });
+            
+            // Pausar en hover
+            const carouselContainer = document.querySelector('.carousel-container');
+            if (carouselContainer) {
+                carouselContainer.addEventListener('mouseenter', stopAutoSlide);
+                carouselContainer.addEventListener('mouseleave', startAutoSlide);
+            }
+            
+            // Inicializar carrusel
+            showSlide(0);
+            startAutoSlide();
+            
+            console.log('✅ Carrusel de funcionalidades iniciado correctamente');
+        });
     </script>
 </body>
 </html>
