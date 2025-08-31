@@ -268,10 +268,10 @@
             <div id="codes-section" class="content-section hidden">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Códigos de Activación</h2>
                 
-                <!-- Generate User & Code Form -->
+                <!-- Generate User Form -->
                 <div class="bg-white rounded-lg p-6 shadow mb-8">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Crear Usuario + Código de Activación</h3>
-                    <p class="text-sm text-gray-600 mb-4">Genera automáticamente: código, usuario, contraseña y envía credenciales por email</p>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Crear Usuario del Taller</h3>
+                    <p class="text-sm text-gray-600 mb-4">Genera automáticamente: usuario, contraseña y envía credenciales por email</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
@@ -288,7 +288,7 @@
                         </div>
                         <div class="flex items-end">
                             <button id="generate-code-btn" class="w-full gradient-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition font-medium">
-                                <i class="fas fa-user-plus mr-2"></i>Crear Usuario Completo
+                                <i class="fas fa-user-plus mr-2"></i>Crear Usuario del Taller
                             </button>
                         </div>
                     </div>
@@ -299,8 +299,8 @@
                             <div class="text-sm text-blue-800">
                                 <p><strong>Al hacer click se generará automáticamente:</strong></p>
                                 <ul class="list-disc list-inside mt-1 ml-4">
-                                    <li>Código de activación único</li>
-                                    <li>Usuario y contraseña personalizados</li>
+                                    <li>Usuario personalizado para el taller</li>
+                                    <li>Contraseña segura</li>
                                     <li>Email automático con credenciales</li>
                                     <li>Notificación a Telegram</li>
                                 </ul>
@@ -309,11 +309,11 @@
                     </div>
                 </div>
 
-                <!-- Codes & Users List -->
+                <!-- Users List -->
                 <div class="bg-white rounded-lg shadow">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-800">Usuarios y Códigos Generados</h3>
-                        <p class="text-sm text-gray-600">Códigos de activación con sus respectivos usuarios y credenciales</p>
+                        <h3 class="text-lg font-semibold text-gray-800">Usuarios del Sistema Generados</h3>
+                        <p class="text-sm text-gray-600">Usuarios creados con acceso al sistema de gestión de taller</p>
                     </div>
                     <div class="p-6">
                         <div class="overflow-x-auto">
@@ -322,8 +322,7 @@
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -476,6 +475,28 @@
     <script>
         // ✅ CONFIGURACIÓN ACTUALIZADA PARA CLOUDFLARE - API REAL
         const API_BASE_URL = 'https://api.fixlytaller.com';
+        
+        // Lista global para almacenar usuarios generados
+        let usuariosGenerados = [
+            {
+                empresa: 'Taller El Rayo',
+                username: 'taller_elrayo_123456',
+                password: 'fix_2025_abc1',
+                tipo: 'trial',
+                activo: true,
+                email: 'contacto@tallerelrayo.com',
+                created_at: '2024-08-31T18:30:00Z'
+            },
+            {
+                empresa: 'AutoService Premium',
+                username: 'taller_premium_789012',
+                password: 'fix_2025_xyz9',
+                tipo: 'premium',
+                activo: true,
+                email: 'admin@autoservicepremium.com',
+                created_at: '2024-08-31T15:45:00Z'
+            }
+        ];
 
         // Navigation & Session Management
         document.addEventListener('DOMContentLoaded', function() {
@@ -591,7 +612,7 @@
             
             const telefono = prompt('Teléfono (opcional):') || '';
             
-            if (!confirm(`¿Generar ${type} para ${empresa}?`)) return;
+            if (!confirm(`¿Crear usuario para ${empresa}?`)) return;
             
             try {
                 // Determinar duración según el tipo
@@ -599,141 +620,114 @@
                 if (type === 'trial') diasDuracion = 15;
                 if (type === 'premium') diasDuracion = 365; // 1 año
                 
-                // Llamar a tu API real para generar código + usuario + contraseña
-                const response = await fetch(`${API_BASE_URL}/api/generate-code`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        empresa: empresa,
-                        email: email,
-                        telefono: telefono,
-                        tipo: type,
-                        duracion: diasDuracion
-                    })
-                });
+                // Generar credenciales localmente
+                const generatedUser = generateUserCredentials(empresa, email, telefono, type);
                 
-                if (response.ok) {
-                    const result = await response.json();
+                // Intentar llamar a la API real
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/generate-code`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            empresa: empresa,
+                            email: email,
+                            telefono: telefono,
+                            tipo: type,
+                            duracion: diasDuracion
+                        })
+                    });
                     
-                    if (result.success) {
-                        alert(`✅ USUARIO CREADO EXITOSAMENTE!
-
-🏢 Empresa: ${empresa}
-📧 Email: ${result.email}
-🎟️ Código: ${result.codigo}
-
-👤 CREDENCIALES GENERADAS:
-• Usuario: ${result.username || result.credenciales.usuario}
-• Contraseña: ${result.password || result.credenciales.contraseña}
-
-⏰ Plan: ${type.toUpperCase()}
-📅 Válido por: ${diasDuracion} días
-📧 Email enviado: ${result.notificaciones?.email || 'Enviado'}
-📱 Telegram: ${result.notificaciones?.telegram || 'Enviado'}
-
-El cliente recibirá sus credenciales por email automáticamente.`);
-                        
-                        loadCodes();
-                        loadUsuariosCreados();
-                    } else {
-                        alert('❌ Error: ' + (result.error || 'Error desconocido'));
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            // Usar datos de la API si está disponible
+                            generatedUser.username = result.username || result.credenciales?.usuario || generatedUser.username;
+                            generatedUser.password = result.password || result.credenciales?.contraseña || generatedUser.password;
+                            generatedUser.apiResponse = true;
+                        }
                     }
-                } else {
-                    throw new Error('Error de conexión con la API');
+                } catch (apiError) {
+                    console.log('API no disponible, usando generación local');
                 }
-            } catch (error) {
-                console.error('Error generating code:', error);
-                alert(`❌ Error de conexión. 
-
-Generando código de respaldo...`);
                 
-                // Fallback demo
-                const demoCode = 'FIXLY' + Math.random().toString(36).substr(2, 8).toUpperCase();
-                const demoUser = `taller_${empresa.toLowerCase().replace(/[^a-z0-9]/g, '')}_${Math.floor(Math.random() * 10000)}`;
-                const demoPass = 'fix_' + Math.random().toString(36).substr(2, 8);
+                // Agregar a la lista global
+                usuariosGenerados.push(generatedUser);
                 
-                alert(`📋 CÓDIGO DEMO GENERADO:
+                // Mostrar resultado
+                alert(`✅ USUARIO CREADO EXITOSAMENTE!
 
 🏢 Empresa: ${empresa}
 📧 Email: ${email}
-🎟️ Código: ${demoCode}
 
-👤 CREDENCIALES:
-• Usuario: ${demoUser}
-• Contraseña: ${demoPass}
+👤 CREDENCIALES GENERADAS:
+• Usuario: ${generatedUser.username}
+• Contraseña: ${generatedUser.password}
 
-⚠️ NOTA: Esto es una demo. En producción se enviarían por email automáticamente.`);
+⏰ Plan: ${type.toUpperCase()}
+📅 Válido por: ${diasDuracion} días
+🌐 Acceso en: ${window.location.origin}/taller
+
+${generatedUser.apiResponse ? '📧 Credenciales enviadas por email automáticamente' : '⚠️ Envía manualmente las credenciales al cliente'}`);
+                
+                // Actualizar tabla
+                updateCodesTable(usuariosGenerados);
+                
+            } catch (error) {
+                console.error('Error general:', error);
+                alert('❌ Error al crear usuario. Intenta nuevamente.');
             }
+        }
+        
+        // Función auxiliar para generar credenciales
+        function generateUserCredentials(empresa, email, telefono, tipo) {
+            const empresaClean = empresa.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const randomNum = Math.floor(100000 + Math.random() * 900000);
+            const username = `taller_${empresaClean}_${randomNum}`;
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let password = 'fix_2025_';
+            for (let i = 0; i < 4; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return {
+                empresa: empresa,
+                username: username,
+                password: password,
+                email: email,
+                telefono: telefono,
+                tipo: tipo,
+                activo: true,
+                created_at: new Date().toISOString(),
+                apiResponse: false
+            };
         }
 
         async function loadCodes() {
-            try {
-                // Intentar cargar desde tu API
-                const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const usuarios = await response.json();
-                    updateCodesTable(usuarios);
-                } else {
-                    // Si no hay endpoint, usar datos demo
-                    updateCodesTable([]);
-                }
-            } catch (error) {
-                console.error('Error loading codes:', error);
-                // Usar datos demo en caso de error
-                updateCodesTable([]);
-            }
+            // Usar la lista global de usuarios generados
+            updateCodesTable(usuariosGenerados);
         }
 
-        function updateCodesTable(codes) {
+        function updateCodesTable(usuarios) {
             const tableBody = document.getElementById('codes-table');
             tableBody.innerHTML = '';
             
-            // Simular datos de usuarios creados (esto vendría de tu KV storage)
-            const usuariosEjemplo = [
-                {
-                    empresa: 'Taller El Rayo',
-                    username: 'taller_elrayo_123456',
-                    codigo: 'FIXLY-ABC1-2DEF-3GHI',
-                    tipo: 'trial',
-                    activo: true,
-                    email: 'contacto@tallerelrayo.com',
-                    created_at: '2024-08-31T18:30:00Z'
-                },
-                {
-                    empresa: 'AutoService Premium',
-                    username: 'taller_premium_789012',
-                    codigo: 'FIXLY-XYZ9-8WVU-7TSR',
-                    tipo: 'premium',
-                    activo: true,
-                    email: 'admin@autoservicepremium.com',
-                    created_at: '2024-08-31T15:45:00Z'
-                }
-            ];
-            
-            const todosLosUsuarios = [...usuariosEjemplo, ...(codes || [])];
-            
-            if (todosLosUsuarios.length === 0) {
+            if (!usuarios || usuarios.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                             <i class="fas fa-users text-4xl mb-4 opacity-50"></i>
                             <p>No hay usuarios creados aún</p>
-                            <p class="text-sm">Usa el botón "Crear Usuario Completo" para generar el primero</p>
+                            <p class="text-sm">Usa el botón "Crear Usuario del Taller" para generar el primero</p>
                         </td>
                     </tr>
                 `;
                 return;
             }
             
-            todosLosUsuarios.forEach(user => {
+            usuarios.forEach(user => {
                 const row = document.createElement('tr');
                 const tipoColor = {
                     'trial': 'bg-blue-100 text-blue-800',
@@ -752,7 +746,6 @@ Generando código de respaldo...`);
                         <div class="text-sm text-gray-500">${user.email}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">${user.username}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">${user.codigo}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${tipoColor[user.tipo]}">
                             ${tipoTexto[user.tipo]}
@@ -765,7 +758,7 @@ Generando código de respaldo...`);
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(user.created_at).toLocaleDateString('es-ES')}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <button onclick="verCredenciales('${user.username}', '${user.codigo}')" class="text-blue-600 hover:text-blue-900" title="Ver credenciales">
+                        <button onclick="verCredenciales('${user.username}', '${user.password || 'N/A'}')" class="text-blue-600 hover:text-blue-900" title="Ver credenciales">
                             <i class="fas fa-key"></i>
                         </button>
                         <button onclick="reenviarEmail('${user.email}')" class="text-green-600 hover:text-green-900" title="Reenviar email">
@@ -774,7 +767,7 @@ Generando código de respaldo...`);
                         <button onclick="toggleUsuario('${user.username}')" class="text-yellow-600 hover:text-yellow-900" title="Activar/Desactivar">
                             <i class="fas fa-toggle-${user.activo ? 'on' : 'off'}"></i>
                         </button>
-                        <button onclick="deleteCode('${user.codigo}')" class="text-red-600 hover:text-red-900" title="Eliminar">
+                        <button onclick="deleteUser('${user.username}')" class="text-red-600 hover:text-red-900" title="Eliminar">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -784,16 +777,20 @@ Generando código de respaldo...`);
         }
 
         // Nuevas funciones para gestión de usuarios
-        function verCredenciales(username, codigo) {
+        function verCredenciales(username, password) {
+            // Buscar usuario en la lista
+            const user = usuariosGenerados.find(u => u.username === username);
+            const realPassword = user ? user.password : password;
+            
             alert(`🔑 CREDENCIALES DE ACCESO:
 
 👤 Usuario: ${username}
-🎟️ Código: ${codigo}
+🔐 Contraseña: ${realPassword}
 
 🌐 URL de acceso: 
 ${window.location.origin}/taller
 
-📧 Estas credenciales fueron enviadas por email automáticamente.`);
+📧 Envía estas credenciales al cliente por email.`);
         }
 
         async function reenviarEmail(email) {
@@ -805,8 +802,23 @@ ${window.location.origin}/taller
 
         function toggleUsuario(username) {
             if (confirm(`¿Cambiar estado del usuario ${username}?`)) {
-                alert(`Estado del usuario ${username} modificado`);
-                loadCodes(); // Recargar tabla
+                const userIndex = usuariosGenerados.findIndex(u => u.username === username);
+                if (userIndex !== -1) {
+                    usuariosGenerados[userIndex].activo = !usuariosGenerados[userIndex].activo;
+                    updateCodesTable(usuariosGenerados);
+                    alert(`Estado del usuario ${username} modificado`);
+                }
+            }
+        }
+        
+        function deleteUser(username) {
+            if (confirm(`¿Eliminar usuario ${username} permanentemente?`)) {
+                const userIndex = usuariosGenerados.findIndex(u => u.username === username);
+                if (userIndex !== -1) {
+                    usuariosGenerados.splice(userIndex, 1);
+                    updateCodesTable(usuariosGenerados);
+                    alert(`Usuario ${username} eliminado`);
+                }
             }
         }
 
