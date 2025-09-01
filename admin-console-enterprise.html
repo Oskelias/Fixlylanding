@@ -319,10 +319,10 @@
                                         <div class="col-md-3">
                                             <select class="form-select" id="plan-filter">
                                                 <option value="">Todos los planes</option>
-                                                <option value="trial">Trial (15 días)</option>
-                                                <option value="standard">Standard</option>
-                                                <option value="premium">Premium</option>
-                                                <option value="enterprise">Enterprise</option>
+                                                <option value="starter">Starter (15 días gratis)</option>
+                                                <option value="trial">Starter (15 días gratis)</option>
+                                                <option value="pro">Pro ($14.999/mes)</option>
+                                                <option value="enterprise">Enterprise (A medida)</option>
                                             </select>
                                         </div>
                                     </div>
@@ -397,10 +397,10 @@
                                                 <div class="mb-3">
                                                     <label class="form-label">Plan</label>
                                                     <select class="form-select" id="new-plan">
-                                                        <option value="trial">Trial (15 días)</option>
-                                                        <option value="standard">Standard</option>
-                                                        <option value="premium">Premium</option>
-                                                        <option value="enterprise">Enterprise</option>
+                                                        <option value="starter">Starter (Gratis - 15 días)</option>
+                                                        <option value="trial">Starter (Gratis - 15 días)</option>
+                                                        <option value="pro" selected>Pro ($14.999/mes)</option>
+                                                        <option value="enterprise">Enterprise (A medida)</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -520,14 +520,12 @@
             document.getElementById('new-plan').addEventListener('change', function() {
                 const duracionField = document.getElementById('new-duracion');
                 switch(this.value) {
+                    case 'starter':
                     case 'trial':
                         duracionField.value = 15;
                         break;
-                    case 'standard':
-                        duracionField.value = 365;
-                        break;
-                    case 'premium':
-                        duracionField.value = 365;
+                    case 'pro':
+                        duracionField.value = 30; // Plan mensual
                         break;
                     case 'enterprise':
                         duracionField.value = 365;
@@ -660,6 +658,18 @@
             }
         }
 
+        function getPlanBadge(plan) {
+            const planConfigs = {
+                'starter': { name: 'Starter', color: 'bg-info', icon: 'fas fa-gift' },
+                'trial': { name: 'Starter', color: 'bg-info', icon: 'fas fa-gift' },
+                'pro': { name: 'Pro', color: 'bg-success', icon: 'fas fa-star' },
+                'enterprise': { name: 'Enterprise', color: 'bg-warning text-dark', icon: 'fas fa-crown' }
+            };
+            
+            const config = planConfigs[plan] || { name: plan, color: 'bg-secondary', icon: 'fas fa-user' };
+            return `<span class="badge ${config.color}"><i class="${config.icon} me-1"></i>${config.name}</span>`;
+        }
+
         function createUserRow(user) {
             const tr = document.createElement('tr');
             
@@ -677,7 +687,7 @@
                 </td>
                 <td>${user.empresa}</td>
                 <td>
-                    <span class="badge bg-secondary">${user.plan}</span>
+                    ${getPlanBadge(user.plan)}
                 </td>
                 <td>
                     <span class="status-badge ${statusClass}">${user.status}</span>
