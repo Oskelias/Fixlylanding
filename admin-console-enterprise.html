@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 Fixly Admin Console - Enterprise</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+        
+        body { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-container { 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            overflow: hidden;
+        }
+        
+        .navbar-custom { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); 
+            color: white; 
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            min-height: 600px;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .nav-pills .nav-link {
+            color: #495057;
+            border-radius: 10px;
+            margin: 5px 0;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: #e9ecef;
+            color: var(--primary-color);
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background-color: var(--success-color); color: white; }
+        .status-trial { background-color: var(--info-color); color: white; }
+        .status-expired { background-color: var(--danger-color); color: white; }
+        .status-paused { background-color: var(--warning-color); color: white; }
+        
+        .btn-custom {
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .loading { background: #fff3cd; color: #856404; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .action-buttons .btn {
+            margin: 0 2px;
+            padding: 5px 10px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+        }
+        
+        .search-box input {
+            padding-left: 45px;
+            border-radius: 25px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-11">
+                <div class="admin-container">
+                    <!-- Header -->
+                    <nav class="navbar navbar-custom">
+                        <div class="container-fluid">
+                            <span class="navbar-brand mb-0 h1">
+                                <i class="fas fa-cogs"></i> Fixly Admin Console Enterprise
+                            </span>
+                            <div class="navbar-nav flex-row">
+                                <span class="nav-link text-white me-3" id="admin-info">
+                                    <i class="fas fa-user-shield"></i> Admin
+                                </span>
+                                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i> Salir
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Login Section -->
+                    <div id="login-section" class="p-5 text-center">
+                        <h2><i class="fas fa-shield-alt"></i> Acceso Administrativo</h2>
+                        <p class="text-muted">Sistema de gestión empresarial</p>
+                        <form id="login-form" class="row justify-content-center">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" id="admin-username" placeholder="Usuario" value="admin" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="password" class="form-control" id="admin-password" placeholder="Contraseña" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom btn-custom">
+                                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                                </button>
+                            </div>
+                        </form>
+                        <div id="login-status" class="mt-3"></div>
+                    </div>
+
+                    <!-- Admin Dashboard -->
+                    <div id="admin-dashboard" style="display:none;">
+                        <div class="row">
+                            <!-- Sidebar -->
+                            <div class="col-md-3 sidebar p-4">
+                                <nav class="nav nav-pills flex-column">
+                                    <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('users')">
+                                        <i class="fas fa-users"></i> Gestión de Usuarios
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('create-user')">
+                                        <i class="fas fa-user-plus"></i> Crear Usuario
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('subscriptions')">
+                                        <i class="fas fa-credit-card"></i> Suscripciones
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('payments')">
+                                        <i class="fas fa-dollar-sign"></i> Pagos MercadoPago
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('analytics')">
+                                        <i class="fas fa-chart-bar"></i> Analytics
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('system')">
+                                        <i class="fas fa-cog"></i> Sistema
+                                    </a>
+                                </nav>
+                            </div>
+
+                            <!-- Main Content -->
+                            <div class="col-md-9 p-4">
+                                <!-- Dashboard Section -->
+                                <div id="dashboard-section" class="content-section">
+                                    <h3><i class="fas fa-tachometer-alt"></i> Dashboard Ejecutivo</h3>
+                                    
+                                    <!-- Metrics Cards -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card">
+                                                <div class="metric-value" id="total-users">0</div>
+                                                <div>Usuarios Total</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                                <div class="metric-value" id="active-users">0</div>
+                                                <div>Activos</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                                                <div class="metric-value" id="trial-users">0</div>
+                                                <div>En Prueba</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                                <div class="metric-value" id="revenue">$0</div>
+                                                <div>Ingresos</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Actions -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card card-custom">
+                                                <div class="card-body">
+                                                    <h5><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                                                    <button class="btn btn-primary-custom btn-custom me-2" onclick="showSection('create-user')">
+                                                        <i class="fas fa-user-plus"></i> Nuevo Usuario
+                                                    </button>
+                                                    <button class="btn btn-outline-primary btn-custom" onclick="refreshDashboard()">
+                                                        <i class="fas fa-sync"></i> Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card card-custom">
+                                                <div class="card-body">
+                                                    <h5><i class="fas fa-heartbeat"></i> Estado del Sistema</h5>
+                                                    <div id="system-health"></div>
+                                                    <button class="btn btn-outline-success btn-custom btn-sm" onclick="checkSystemHealth()">
+                                                        <i class="fas fa-check"></i> Verificar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Users Management Section -->
+                                <div id="users-section" class="content-section" style="display:none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3><i class="fas fa-users"></i> Gestión de Usuarios</h3>
+                                        <button class="btn btn-primary-custom btn-custom" onclick="loadUsers()">
+                                            <i class="fas fa-sync"></i> Actualizar Lista
+                                        </button>
+                                    </div>
+
+                                    <!-- Search and Filters -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="search-box">
+                                                <i class="fas fa-search"></i>
+                                                <input type="text" class="form-control" id="user-search" placeholder="Buscar usuarios...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="status-filter">
+                                                <option value="">Todos los estados</option>
+                                                <option value="active">Activos</option>
+                                                <option value="trial">En Prueba</option>
+                                                <option value="expired">Expirados</option>
+                                                <option value="paused">Pausados</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="plan-filter">
+                                                <option value="">Todos los planes</option>
+                                                <option value="trial">Trial (15 días)</option>
+                                                <option value="standard">Standard</option>
+                                                <option value="premium">Premium</option>
+                                                <option value="enterprise">Enterprise</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Users Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Usuario</th>
+                                                    <th>Empresa</th>
+                                                    <th>Plan</th>
+                                                    <th>Estado</th>
+                                                    <th>Creado</th>
+                                                    <th>Expira</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="users-table-body">
+                                                <tr>
+                                                    <td colspan="7" class="text-center">
+                                                        <i class="fas fa-spinner fa-spin"></i> Cargando usuarios...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Create User Section -->
+                                <div id="create-user-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h3>
+                                    
+                                    <form id="create-user-form">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Username *</label>
+                                                    <input type="text" class="form-control" id="new-username" required>
+                                                    <small class="text-muted">Identificador único del tenant</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Password *</label>
+                                                    <input type="password" class="form-control" id="new-password" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email *</label>
+                                                    <input type="email" class="form-control" id="new-email" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Teléfono</label>
+                                                    <input type="text" class="form-control" id="new-telefono">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Empresa/Taller *</label>
+                                                    <input type="text" class="form-control" id="new-empresa" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Plan</label>
+                                                    <select class="form-select" id="new-plan">
+                                                        <option value="trial">Trial (15 días)</option>
+                                                        <option value="standard">Standard</option>
+                                                        <option value="premium">Premium</option>
+                                                        <option value="enterprise">Enterprise</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Duración (días)</label>
+                                                    <input type="number" class="form-control" id="new-duracion" value="15">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary-custom btn-custom">
+                                            <i class="fas fa-user-plus"></i> Crear Usuario
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-custom" onclick="clearCreateForm()">
+                                            <i class="fas fa-eraser"></i> Limpiar
+                                        </button>
+                                    </form>
+                                    <div id="create-user-status" class="mt-3"></div>
+                                </div>
+
+                                <!-- Other sections will be added in next parts... -->
+                                <div id="subscriptions-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-credit-card"></i> Gestión de Suscripciones</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Panel de gestión de suscripciones en desarrollo...
+                                    </div>
+                                </div>
+
+                                <div id="payments-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-dollar-sign"></i> Integración MercadoPago</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Webhook MercadoPago en desarrollo...
+                                    </div>
+                                </div>
+
+                                <div id="analytics-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-chart-bar"></i> Analytics y Reportes</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Dashboard de analytics en desarrollo...
+                                    </div>
+                                </div>
+
+                                <div id="system-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-cog"></i> Configuración del Sistema</h3>
+                                    <div id="system-config-content">
+                                        <div class="card card-custom">
+                                            <div class="card-body">
+                                                <h5>Estado del Sistema</h5>
+                                                <div id="detailed-system-status"></div>
+                                                <button class="btn btn-primary-custom btn-custom" onclick="checkDetailedSystemHealth()">
+                                                    <i class="fas fa-diagnostics"></i> Diagnóstico Completo
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'https://api.fixlytaller.com';
+        let currentUsers = [];
+        let adminLoggedIn = false;
+
+        // Login functionality
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            const statusDiv = document.getElementById('login-status');
+            
+            statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Verificando credenciales...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.user.role === 'admin') {
+                    statusDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check"></i> ¡Acceso autorizado!</div>';
+                    adminLoggedIn = true;
+                    
+                    setTimeout(() => {
+                        document.getElementById('login-section').style.display = 'none';
+                        document.getElementById('admin-dashboard').style.display = 'block';
+                        initializeDashboard();
+                    }, 1000);
+                } else {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Credenciales incorrectas</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error de conexión: ${error.message}</div>`;
+            }
+        });
+
+        // Dashboard initialization
+        function initializeDashboard() {
+            checkSystemHealth();
+            refreshDashboard();
+            loadUsers();
+            
+            // Setup plan change handler
+            document.getElementById('new-plan').addEventListener('change', function() {
+                const duracionField = document.getElementById('new-duracion');
+                switch(this.value) {
+                    case 'trial':
+                        duracionField.value = 15;
+                        break;
+                    case 'standard':
+                        duracionField.value = 365;
+                        break;
+                    case 'premium':
+                        duracionField.value = 365;
+                        break;
+                    case 'enterprise':
+                        duracionField.value = 365;
+                        break;
+                }
+            });
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Add active class to clicked nav link
+            event.target.classList.add('active');
+        }
+
+        // System health check
+        async function checkSystemHealth() {
+            const statusDiv = document.getElementById('system-health');
+            statusDiv.innerHTML = '<div class="loading p-2 rounded"><i class="fas fa-spinner fa-spin"></i> Verificando...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div class="success p-2 rounded">
+                        <strong><i class="fas fa-check-circle"></i> Sistema Operativo</strong><br>
+                        <small>Versión: ${data.version} | CORS: ${data.corsStatus || 'OK'}</small>
+                    </div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error p-2 rounded"><i class="fas fa-exclamation-triangle"></i> Error: ${error.message}</div>`;
+            }
+        }
+
+        // Detailed system health for system section
+        async function checkDetailedSystemHealth() {
+            const statusDiv = document.getElementById('detailed-system-status');
+            statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Ejecutando diagnóstico completo...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle"></i> Sistema Operativo</h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Backend:</strong><br>
+                                • Versión: ${data.version}<br>
+                                • CORS: ${data.corsStatus || 'Activo'}<br>
+                                • Email: ${data.emailStatus || 'Configurado'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Features:</strong><br>
+                                ${data.features.map(f => `• ${f}`).join('<br>')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error del sistema: ${error.message}</div>`;
+            }
+        }
+
+        // Dashboard refresh
+        function refreshDashboard() {
+            // This would normally fetch real metrics from API
+            // For now, we'll use mock data
+            updateDashboardMetrics();
+        }
+
+        function updateDashboardMetrics() {
+            // These would be real API calls in production
+            document.getElementById('total-users').textContent = currentUsers.length || '0';
+            document.getElementById('active-users').textContent = '0';
+            document.getElementById('trial-users').textContent = '0';
+            document.getElementById('revenue').textContent = '$0';
+        }
+
+        // User management
+        async function loadUsers() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</td></tr>';
+            
+            try {
+                // In a real implementation, this would be an API call to list users
+                // For now, we'll show the users we know exist
+                const knownUsers = [
+                    {
+                        username: 'test_debug',
+                        empresa: 'Debug Taller',
+                        plan: 'trial',
+                        status: 'active',
+                        fechaCreacion: '2025-09-01',
+                        fechaExpiracion: '2025-10-01'
+                    }
+                ];
+                
+                if (knownUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay usuarios registrados</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                knownUsers.forEach(user => {
+                    const row = createUserRow(user);
+                    tbody.appendChild(row);
+                });
+                
+                currentUsers = knownUsers;
+                updateDashboardMetrics();
+                
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error cargando usuarios: ${error.message}</td></tr>`;
+            }
+        }
+
+        function createUserRow(user) {
+            const tr = document.createElement('tr');
+            
+            const statusClass = {
+                'active': 'status-active',
+                'trial': 'status-trial',
+                'expired': 'status-expired',
+                'paused': 'status-paused'
+            }[user.status] || 'status-active';
+            
+            tr.innerHTML = `
+                <td>
+                    <strong>${user.username}</strong><br>
+                    <small class="text-muted">${user.email || 'No email'}</small>
+                </td>
+                <td>${user.empresa}</td>
+                <td>
+                    <span class="badge bg-secondary">${user.plan}</span>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">${user.status}</span>
+                </td>
+                <td>${formatDate(user.fechaCreacion)}</td>
+                <td>${formatDate(user.fechaExpiracion)}</td>
+                <td class="action-buttons">
+                    <button class="btn btn-sm btn-outline-warning" onclick="pauseUser('${user.username}')" title="Pausar">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="extendUser('${user.username}')" title="Extender">
+                        <i class="fas fa-calendar-plus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editUser('${user.username}')" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.username}')" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            return tr;
+        }
+
+        // User actions
+        function pauseUser(username) {
+            if (confirm(`¿Pausar usuario ${username}?`)) {
+                alert(`Funcionalidad en desarrollo: Pausar ${username}`);
+            }
+        }
+
+        function extendUser(username) {
+            const days = prompt(`¿Cuántos días agregar a ${username}?`, '30');
+            if (days) {
+                alert(`Funcionalidad en desarrollo: Extender ${username} por ${days} días`);
+            }
+        }
+
+        function editUser(username) {
+            alert(`Funcionalidad en desarrollo: Editar ${username}`);
+        }
+
+        function deleteUser(username) {
+            if (confirm(`¿ELIMINAR permanentemente el usuario ${username}? Esta acción no se puede deshacer.`)) {
+                alert(`Funcionalidad en desarrollo: Eliminar ${username}`);
+            }
+        }
+
+        // Create user
+        document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('new-username').value,
+                password: document.getElementById('new-password').value,
+                email: document.getElementById('new-email').value,
+                telefono: document.getElementById('new-telefono').value,
+                empresa: document.getElementById('new-empresa').value,
+                tipo: document.getElementById('new-plan').value,
+                duracion: parseInt(document.getElementById('new-duracion').value)
+            };
+            
+            const statusDiv = document.getElementById('create-user-status');
+            statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Creando usuario...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle"></i> ¡Usuario creado exitosamente!</h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Credenciales:</strong><br>
+                                    • Usuario: <code>${data.username}</code><br>
+                                    • Password: <code>${data.password}</code><br>
+                                    • Tenant ID: <code>${data.tenantId}</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Detalles:</strong><br>
+                                    • Empresa: ${data.empresa}<br>
+                                    • Válido hasta: ${new Date(data.fechaExpiracion).toLocaleDateString('es-ES')}<br>
+                                    • Código: ${data.codigo}
+                                </div>
+                            </div>
+                            <hr>
+                            <strong>Acceso:</strong> <a href="https://app.fixlytaller.com/" target="_blank" class="btn btn-sm btn-primary">app.fixlytaller.com</a>
+                        </div>
+                    `;
+                    
+                    clearCreateForm();
+                    loadUsers(); // Refresh user list
+                } else {
+                    statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error: ${error.message}</div>`;
+            }
+        });
+
+        // Utility functions
+        function clearCreateForm() {
+            document.getElementById('create-user-form').reset();
+            document.getElementById('new-duracion').value = '15';
+            document.getElementById('new-plan').value = 'trial';
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('es-ES');
+        }
+
+        function logout() {
+            adminLoggedIn = false;
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('login-status').innerHTML = '';
+        }
+
+        // Auto-focus password field on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('admin-password').focus();
+        });
+    </script>
+</body>
+</html>
