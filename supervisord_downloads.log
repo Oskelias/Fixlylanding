@@ -1,0 +1,30 @@
+2025-09-01 07:06:09,830 INFO RPC interface 'supervisor' initialized
+2025-09-01 07:06:09,830 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2025-09-01 07:06:09,832 INFO daemonizing the supervisord process
+2025-09-01 07:06:09,833 INFO supervisord started with pid 104221
+2025-09-01 07:06:10,836 INFO spawned: 'downloads' with pid 104234
+2025-09-01 07:06:10,945 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:11,949 INFO spawned: 'downloads' with pid 104255
+2025-09-01 07:06:13,071 INFO success: downloads entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-09-01 07:06:13,071 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:13,777 INFO spawned: 'downloads' with pid 104278
+2025-09-01 07:06:13,901 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:14,904 INFO spawned: 'downloads' with pid 104279
+2025-09-01 07:06:15,008 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:17,012 INFO spawned: 'downloads' with pid 104317
+2025-09-01 07:06:18,149 INFO success: downloads entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-09-01 07:06:18,149 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:19,153 INFO spawned: 'downloads' with pid 104335
+2025-09-01 07:06:19,271 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:20,277 INFO spawned: 'downloads' with pid 104358
+2025-09-01 07:06:21,432 INFO success: downloads entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-09-01 07:06:21,432 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:21,565 INFO spawned: 'downloads' with pid 104378
+2025-09-01 07:06:21,678 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:22,684 INFO spawned: 'downloads' with pid 104385
+2025-09-01 07:06:22,796 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:24,803 INFO spawned: 'downloads' with pid 104392
+2025-09-01 07:06:24,930 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:27,938 INFO spawned: 'downloads' with pid 104396
+2025-09-01 07:06:28,091 WARN exited: downloads (exit status 1; not expected)
+2025-09-01 07:06:29,094 INFO gave up: downloads entered FATAL state, too many start retries too quickly

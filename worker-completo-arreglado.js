@@ -34,6 +34,9 @@ const allowedOrigins = [
   'https://www.fixlytaller.com', 
   'https://app.fixlytaller.com',
   'https://admin.fixlytaller.com',
+  // Cloudflare Pages domains
+  'https://app-fixly-taller.pages.dev',
+  'https://*.pages.dev',
   'https://genspark.ai',
   'https://claude.ai',
   // Testing domains
@@ -47,9 +50,30 @@ const allowedOrigins = [
 function handleCORS(request) {
   const origin = request.headers.get('Origin');
   
-  // CORS súper permisivo para solucionar el problema
+  // Función mejorada para manejar Cloudflare Pages y otros dominios
+  let allowedOrigin = '*';
+  
+  if (origin) {
+    // Verificar si es un dominio explícitamente permitido
+    if (allowedOrigins.includes(origin)) {
+      allowedOrigin = origin;
+    }
+    // Verificar si es un dominio de Cloudflare Pages
+    else if (origin.includes('.pages.dev') || 
+             origin.includes('fixly') || 
+             origin.includes('app.fixlytaller.com')) {
+      allowedOrigin = origin;
+    }
+    // Para development y testing
+    else if (origin.includes('localhost') || 
+             origin.includes('127.0.0.1') ||
+             origin.includes('.e2b.dev')) {
+      allowedOrigin = origin;
+    }
+  }
+  
   const corsHeaders = {
-    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Access-Control-Request-Method, Access-Control-Request-Headers',
     'Access-Control-Allow-Credentials': 'true',
