@@ -1,13 +1,12 @@
 /**
- * FIXLY BACKEND - VERSION 5.1.0 MERCADOPAGO COMPLETE
- * Sistema completo con gestión avanzada de pagos MercadoPago
+ * FIXLY BACKEND - VERSION 5.0.0 NO ACTIVATION CODES
+ * Sistema simplificado sin códigos de activación
  * 
- * NUEVAS CARACTERÍSTICAS:
- * - ✅ Dashboard de transacciones MercadoPago
- * - ✅ Gestión completa de pagos y reembolsos
- * - ✅ Reportes financieros detallados
- * - ✅ Log de webhooks con detalles
- * - ✅ Activación automática por pagos
+ * CAMBIOS PRINCIPALES:
+ * - ❌ Eliminados códigos de activación
+ * - ✅ Usuarios activos inmediatamente al crearlos
+ * - ✅ Login directo con username/password
+ * - ✅ Admin endpoints mejorados para gestión completa
  */
 
 // ==========================================
@@ -24,22 +23,6 @@ const EMAIL_CONFIG = {
   FROM_EMAIL: 'noreply@fixlytaller.com',
   FROM_NAME: 'Fixly Taller - Sistema Automático',
   MAILCHANNELS_API: 'https://api.mailchannels.net/tx/v1/send'
-};
-
-// ==========================================
-// MERCADOPAGO CONFIGURATION
-// ==========================================
-const MERCADOPAGO_CONFIG = {
-  // En producción, estos deberían ser variables de entorno
-  ACCESS_TOKEN: process.env.MERCADOPAGO_ACCESS_TOKEN || 'TEST-TOKEN',
-  API_URL: 'https://api.mercadopago.com',
-  WEBHOOK_SECRET: process.env.MERCADOPAGO_WEBHOOK_SECRET || 'webhook-secret',
-  
-  // Precios configurados
-  PLANS_PRICES: {
-    'pro': 14999,  // $14.999 ARS
-    'enterprise': 999999 // Precio a medida
-  }
 };
 
 // ==========================================
@@ -118,83 +101,6 @@ function generateTenantId() {
 }
 
 // ==========================================
-// MERCADOPAGO HELPER FUNCTIONS
-// ==========================================
-
-async function getMercadoPagoPayment(paymentId) {
-  try {
-    const response = await fetch(`${MERCADOPAGO_CONFIG.API_URL}/v1/payments/${paymentId}`, {
-      headers: {
-        'Authorization': `Bearer ${MERCADOPAGO_CONFIG.ACCESS_TOKEN}`
-      }
-    });
-    
-    if (response.ok) {
-      return await response.json();
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching MercadoPago payment:', error);
-    return null;
-  }
-}
-
-function identifyUserFromPayment(paymentData) {
-  // Diferentes estrategias para identificar al usuario
-  const email = paymentData.payer?.email;
-  const externalReference = paymentData.external_reference;
-  const description = paymentData.description;
-  
-  return {
-    email,
-    externalReference,
-    description,
-    amount: paymentData.transaction_amount,
-    currency: paymentData.currency_id,
-    status: paymentData.status,
-    paymentMethod: paymentData.payment_method_id
-  };
-}
-
-async function activateUserByPayment(env, paymentInfo) {
-  if (!paymentInfo.email) return false;
-  
-  try {
-    // Buscar usuario por email
-    const usersList = await env.FIXLY_USERS.list({ prefix: 'user_' });
-    
-    for (const key of usersList.keys) {
-      const userData = await env.FIXLY_USERS.get(key.name);
-      if (userData) {
-        const user = JSON.parse(userData);
-        if (user.email === paymentInfo.email) {
-          // Activar/extender suscripción
-          const planDuration = paymentInfo.amount === 14999 ? 30 : 15; // Pro = 30 días
-          const newExpiration = new Date(Date.now() + planDuration * 24 * 60 * 60 * 1000).toISOString();
-          
-          user.fechaExpiracion = newExpiration;
-          user.activo = true;
-          user.pausado = false;
-          user.tipo = paymentInfo.amount === 14999 ? 'pro' : user.tipo;
-          user.ultimoPago = {
-            fecha: new Date().toISOString(),
-            monto: paymentInfo.amount,
-            metodo: paymentInfo.paymentMethod
-          };
-          
-          await env.FIXLY_USERS.put(key.name, JSON.stringify(user));
-          return { success: true, user: user.username };
-        }
-      }
-    }
-    
-    return { success: false, reason: 'Usuario no encontrado' };
-  } catch (error) {
-    return { success: false, reason: error.message };
-  }
-}
-
-// ==========================================
 // NOTIFICATION FUNCTIONS
 // ==========================================
 
@@ -243,320 +149,7 @@ async function sendEmail(to, subject, htmlBody) {
 }
 
 // ==========================================
-// MERCADOPAGO ADMIN ENDPOINTS
-// ==========================================
-
-async function handleGetPayments(request, env) {
-  if (!isValidAdmin(request)) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'No autorizado'
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-
-  try {
-    // Obtener logs de webhooks
-    const webhooksList = await env.FIXLY_USERS.list({ prefix: 'webhook_' });
-    const payments = [];
-    
-    for (const key of webhooksList.keys) {
-      try {
-        const webhookData = await env.FIXLY_USERS.get(key.name);
-        if (webhookData) {
-          const webhook = JSON.parse(webhookData);
-          payments.push(webhook);
-        }
-      } catch (parseError) {
-        console.error('Error parsing webhook data:', parseError);
-      }
-    }
-    
-    // Ordenar por fecha (más recientes primero)
-    payments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    
-    // Calcular estadísticas
-    const totalPayments = payments.filter(p => p.paymentStatus === 'approved').length;
-    const totalAmount = payments
-      .filter(p => p.paymentStatus === 'approved')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
-    
-    const pendingPayments = payments.filter(p => p.paymentStatus === 'pending').length;
-    const rejectedPayments = payments.filter(p => p.paymentStatus === 'rejected').length;
-    
-    return new Response(JSON.stringify({
-      success: true,
-      payments: payments.slice(0, 100), // Últimos 100
-      statistics: {
-        totalPayments,
-        totalAmount,
-        pendingPayments,
-        rejectedPayments,
-        averageAmount: totalPayments > 0 ? Math.round(totalAmount / totalPayments) : 0
-      }
-    }), {
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Error obteniendo pagos: ' + error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-}
-
-async function handleGetPaymentDetails(request, env) {
-  if (!isValidAdmin(request)) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'No autorizado'
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-
-  try {
-    const url = new URL(request.url);
-    const paymentId = url.pathname.split('/')[4]; // /api/admin/payment/{id}
-
-    if (!paymentId) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Payment ID requerido'
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-      });
-    }
-
-    // Obtener detalles del pago desde MercadoPago
-    const paymentData = await getMercadoPagoPayment(paymentId);
-    
-    if (!paymentData) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Pago no encontrado'
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-      });
-    }
-
-    // Obtener webhook log si existe
-    const webhookLog = await env.FIXLY_USERS.get(`webhook_${paymentId}`);
-    
-    return new Response(JSON.stringify({
-      success: true,
-      payment: paymentData,
-      webhookLog: webhookLog ? JSON.parse(webhookLog) : null
-    }), {
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Error obteniendo detalles del pago: ' + error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-}
-
-async function handleProcessPayment(request, env) {
-  if (!isValidAdmin(request)) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'No autorizado'
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-
-  try {
-    const { paymentId, action } = await request.json();
-
-    if (!paymentId || !action) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Payment ID y acción requeridos'
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-      });
-    }
-
-    const paymentData = await getMercadoPagoPayment(paymentId);
-    
-    if (!paymentData) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Pago no encontrado'
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-      });
-    }
-
-    let result = { success: false };
-
-    switch (action) {
-      case 'activate_user':
-        const paymentInfo = identifyUserFromPayment(paymentData);
-        result = await activateUserByPayment(env, paymentInfo);
-        
-        if (result.success) {
-          await sendTelegramNotification(`
-💳 <b>Usuario Activado por Pago Manual</b>
-💰 Pago ID: ${paymentId}
-👤 Usuario: ${result.user}
-💵 Monto: $${paymentData.transaction_amount}
-⚡ Procesado manualmente por admin
-          `);
-        }
-        break;
-        
-      case 'refund':
-        // En un entorno real, aquí llamarías a la API de MercadoPago para hacer el refund
-        result = { success: true, message: 'Funcionalidad de reembolso en desarrollo' };
-        break;
-        
-      default:
-        result = { success: false, error: 'Acción no válida' };
-    }
-
-    return new Response(JSON.stringify(result), {
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Error procesando pago: ' + error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-}
-
-async function handleGetFinancialReports(request, env) {
-  if (!isValidAdmin(request)) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'No autorizado'
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-
-  try {
-    const url = new URL(request.url);
-    const period = url.searchParams.get('period') || 'month';
-    
-    // Obtener todos los webhooks de pagos
-    const webhooksList = await env.FIXLY_USERS.list({ prefix: 'webhook_' });
-    const payments = [];
-    
-    for (const key of webhooksList.keys) {
-      try {
-        const webhookData = await env.FIXLY_USERS.get(key.name);
-        if (webhookData) {
-          const webhook = JSON.parse(webhookData);
-          if (webhook.paymentStatus === 'approved') {
-            payments.push(webhook);
-          }
-        }
-      } catch (parseError) {
-        console.error('Error parsing webhook data:', parseError);
-      }
-    }
-
-    // Filtrar por período
-    const now = new Date();
-    let startDate;
-    
-    switch (period) {
-      case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case 'month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        break;
-      case 'quarter':
-        startDate = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-        break;
-      case 'year':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        break;
-      default:
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    }
-
-    const filteredPayments = payments.filter(p => new Date(p.timestamp) >= startDate);
-    
-    // Calcular métricas
-    const totalRevenue = filteredPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-    const totalTransactions = filteredPayments.length;
-    const averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
-    
-    // Agrupar por día para gráfico
-    const dailyRevenue = {};
-    filteredPayments.forEach(p => {
-      const date = new Date(p.timestamp).toISOString().split('T')[0];
-      dailyRevenue[date] = (dailyRevenue[date] || 0) + (p.amount || 0);
-    });
-
-    // Agrupar por plan
-    const revenueByPlan = {};
-    filteredPayments.forEach(p => {
-      const plan = p.amount === 14999 ? 'Pro' : 'Otro';
-      revenueByPlan[plan] = (revenueByPlan[plan] || 0) + (p.amount || 0);
-    });
-
-    return new Response(JSON.stringify({
-      success: true,
-      period,
-      summary: {
-        totalRevenue,
-        totalTransactions,
-        averageTransaction: Math.round(averageTransaction),
-        growthRate: 0 // Se calcularía comparando con período anterior
-      },
-      charts: {
-        dailyRevenue,
-        revenueByPlan
-      },
-      recentPayments: filteredPayments.slice(0, 10).map(p => ({
-        id: p.paymentId,
-        amount: p.amount,
-        date: p.timestamp,
-        email: p.userEmail,
-        status: p.paymentStatus
-      }))
-    }), {
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Error generando reportes: ' + error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
-}
-
-// ==========================================
-// ADMIN MANAGEMENT FUNCTIONS (EXISTING)
+// ADMIN MANAGEMENT FUNCTIONS MEJORADAS
 // ==========================================
 
 async function handleListUsers(request, env) {
@@ -605,8 +198,7 @@ async function handleListUsers(request, env) {
             activo: user.activo,
             pausado: user.pausado || false,
             tenantId: user.tenantId,
-            ultimoAcceso: user.ultimoAcceso || null,
-            ultimoPago: user.ultimoPago || null
+            ultimoAcceso: user.ultimoAcceso || null
           });
         }
       } catch (parseError) {
@@ -638,9 +230,6 @@ async function handleListUsers(request, env) {
     });
   }
 }
-
-// [Resto de funciones existentes: handlePauseUser, handleExtendUser, handleDeleteUser, etc.]
-// Por brevedad, mantengo solo las principales. Las demás siguen igual que en v5.0.0
 
 async function handlePauseUser(request, env) {
   if (!isValidAdmin(request)) {
@@ -705,6 +294,166 @@ async function handlePauseUser(request, env) {
     return new Response(JSON.stringify({
       success: false,
       error: 'Error procesando solicitud: ' + error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  }
+}
+
+async function handleExtendUser(request, env) {
+  if (!isValidAdmin(request)) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'No autorizado'
+    }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  }
+
+  try {
+    const url = new URL(request.url);
+    const username = url.pathname.split('/')[4];
+    const { days, newPlan } = await request.json();
+
+    if (!username || !days) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Username y días requeridos'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+      });
+    }
+
+    const userDataStr = await env.FIXLY_USERS.get(`user_${username}`);
+    if (!userDataStr) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Usuario no encontrado'
+      }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+      });
+    }
+
+    const userData = JSON.parse(userDataStr);
+    const currentExpiration = new Date(userData.fechaExpiracion);
+    const newExpiration = new Date(currentExpiration.getTime() + (days * 24 * 60 * 60 * 1000));
+    
+    userData.fechaExpiracion = newExpiration.toISOString();
+    if (newPlan && PLANS[newPlan]) {
+      userData.tipo = newPlan;
+    }
+    userData.modificadoPor = 'admin';
+    userData.fechaModificacion = new Date().toISOString();
+    userData.activo = true;
+    userData.pausado = false;
+
+    await env.FIXLY_USERS.put(`user_${username}`, JSON.stringify(userData));
+
+    const planInfo = PLANS[userData.tipo] || { name: userData.tipo, displayPrice: 'N/A' };
+
+    await sendTelegramNotification(`
+📅 <b>Suscripción Extendida</b>
+👤 Usuario: ${username}
+🏢 Empresa: ${userData.empresa}
+📈 Días agregados: ${days}
+📋 Plan: ${planInfo.name} (${planInfo.displayPrice})
+🗓️ Nueva expiración: ${newExpiration.toLocaleDateString('es-ES')}
+    `);
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `Suscripción extendida ${days} días`,
+      newExpiration: newExpiration.toISOString(),
+      newPlan: userData.tipo
+    }), {
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Error extendiendo suscripción: ' + error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  }
+}
+
+async function handleDeleteUser(request, env) {
+  if (!isValidAdmin(request)) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'No autorizado'
+    }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  }
+
+  try {
+    const url = new URL(request.url);
+    const username = url.pathname.split('/')[4];
+    const { softDelete = true } = await request.json() || {};
+
+    if (!username) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Username requerido'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+      });
+    }
+
+    const userDataStr = await env.FIXLY_USERS.get(`user_${username}`);
+    if (!userDataStr) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Usuario no encontrado'
+      }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+      });
+    }
+
+    const userData = JSON.parse(userDataStr);
+
+    if (softDelete) {
+      // Soft delete: marcar como eliminado pero mantener datos
+      userData.eliminado = true;
+      userData.eliminadoPor = 'admin';
+      userData.fechaEliminacion = new Date().toISOString();
+      userData.activo = false;
+      
+      await env.FIXLY_USERS.put(`user_deleted_${username}`, JSON.stringify(userData));
+      await env.FIXLY_USERS.delete(`user_${username}`);
+    } else {
+      // Hard delete: eliminar completamente
+      await env.FIXLY_USERS.delete(`user_${username}`);
+    }
+
+    await sendTelegramNotification(`
+🗑️ <b>Usuario ${softDelete ? 'Eliminado (Soft)' : 'Eliminado (Permanente)'}</b>
+👤 Usuario: ${username}
+🏢 Empresa: ${userData.empresa}
+⏰ Fecha: ${new Date().toLocaleString('es-ES')}
+    `);
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `Usuario eliminado exitosamente (${softDelete ? 'reversible' : 'permanente'})`,
+      deleteType: softDelete ? 'soft' : 'hard'
+    }), {
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Error eliminando usuario: ' + error.message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
@@ -832,6 +581,17 @@ async function handleGenerateCode(request, env) {
   }
 }
 
+// Mantener el endpoint de validación por compatibilidad, pero que siempre devuelva error
+async function handleValidateCode(request, env) {
+  return new Response(JSON.stringify({
+    success: false,
+    error: 'Los códigos de activación han sido eliminados. Los usuarios se activan automáticamente.'
+  }), {
+    status: 400,
+    headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+  });
+}
+
 async function handleLogin(request, env) {
   try {
     const { username, password } = await request.json();
@@ -940,86 +700,72 @@ async function handleLogin(request, env) {
   }
 }
 
+async function handleLeadRegistro(request, env) {
+  try {
+    const { nombre, email, telefono, empresa, mensaje } = await request.json();
+
+    const leadData = {
+      nombre,
+      email,
+      telefono,
+      empresa,
+      mensaje: mensaje || '',
+      fecha: new Date().toISOString(),
+      origen: 'landing-fixlytaller'
+    };
+
+    const leadId = 'lead_' + Date.now();
+    await env.FIXLY_USERS.put(leadId, JSON.stringify(leadData));
+
+    await sendTelegramNotification(`
+📝 <b>Nuevo Lead - Fixly Taller</b>
+👤 Nombre: ${nombre}
+🏢 Empresa: ${empresa}
+📧 Email: ${email}
+📱 Teléfono: ${telefono}
+💬 Mensaje: ${mensaje}
+⏰ Fecha: ${new Date().toLocaleString('es-ES')}
+    `);
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Información recibida correctamente. Nos contactaremos pronto.'
+    }), {
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Error registrando lead: ' + error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+    });
+  }
+}
+
 async function handleMercadoPagoWebhook(request, env) {
   try {
     const webhookData = await request.json();
-    const timestamp = new Date().toISOString();
     
-    // Log del webhook para dashboard
-    const webhookLog = {
-      id: webhookData.id || 'unknown',
-      type: webhookData.type,
-      action: webhookData.action,
-      timestamp,
-      data: webhookData.data,
-      processed: false
-    };
-
     if (webhookData.type === 'payment' && webhookData.action === 'payment.updated') {
       const paymentId = webhookData.data.id;
       
-      // Obtener detalles del pago
-      const paymentData = await getMercadoPagoPayment(paymentId);
-      
-      if (paymentData) {
-        const paymentInfo = identifyUserFromPayment(paymentData);
-        
-        // Actualizar log con detalles del pago
-        webhookLog.paymentId = paymentId;
-        webhookLog.amount = paymentData.transaction_amount;
-        webhookLog.currency = paymentData.currency_id;
-        webhookLog.paymentStatus = paymentData.status;
-        webhookLog.userEmail = paymentInfo.email;
-        webhookLog.paymentMethod = paymentInfo.paymentMethod;
-        
-        // Si el pago está aprobado, activar usuario
-        if (paymentData.status === 'approved') {
-          const activationResult = await activateUserByPayment(env, paymentInfo);
-          webhookLog.userActivated = activationResult.success;
-          webhookLog.activationDetails = activationResult;
-          webhookLog.processed = true;
-          
-          if (activationResult.success) {
-            // Enviar email de confirmación al usuario
-            const confirmationHtml = `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #10b981;">¡Pago Confirmado!</h2>
-                <p>Tu pago ha sido procesado exitosamente.</p>
-                <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <h3>Detalles del Pago</h3>
-                  <p><strong>Monto:</strong> $${paymentData.transaction_amount}</p>
-                  <p><strong>Método:</strong> ${paymentData.payment_method_id}</p>
-                  <p><strong>ID de transacción:</strong> ${paymentId}</p>
-                </div>
-                <p>Tu suscripción ha sido activada/extendida automáticamente.</p>
-                <p><a href="https://app.fixlytaller.com">Acceder al sistema</a></p>
-              </div>
-            `;
-            
-            await sendEmail(paymentInfo.email, '✅ Pago Confirmado - Fixly Taller', confirmationHtml);
-          }
-        }
-        
-        await sendTelegramNotification(`
-💰 <b>Webhook MercadoPago - ${paymentData.status.toUpperCase()}</b>
+      await sendTelegramNotification(`
+💰 <b>Webhook MercadoPago Recibido</b>
 🆔 Payment ID: ${paymentId}
-💵 Monto: $${paymentData.transaction_amount}
-📧 Email: ${paymentInfo.email}
-💳 Método: ${paymentInfo.paymentMethod}
-${activationResult?.success ? '✅ Usuario activado' : '❌ Usuario no encontrado'}
-⏰ ${new Date().toLocaleString('es-ES')}
-        `);
-      }
+📊 Tipo: ${webhookData.type}
+⚡ Acción: ${webhookData.action}
+⏰ Procesado: ${new Date().toLocaleString('es-ES')}
+
+🔍 <i>Verificando detalles del pago...</i>
+      `);
     }
-    
-    // Guardar log del webhook
-    await env.FIXLY_USERS.put(`webhook_${webhookLog.id}_${Date.now()}`, JSON.stringify(webhookLog));
 
     return new Response(JSON.stringify({
       success: true,
       message: 'Webhook procesado',
-      timestamp,
-      processed: webhookLog.processed
+      timestamp: new Date().toISOString()
     }), {
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
     });
@@ -1053,43 +799,47 @@ export default {
     if (path === '/health') {
       return new Response(JSON.stringify({
         status: 'ok',
-        version: '5.1.0-mercadopago-complete',
+        version: '5.0.0-no-activation',
         timestamp: new Date().toISOString(),
-        features: ['user_management', 'mercadopago_complete', 'plan_system', 'admin_panel', 'no_activation_codes', 'financial_reports'],
+        features: ['user_management', 'mercadopago_webhook', 'plan_system', 'admin_panel', 'no_activation_codes'],
         changes: [
-          'Dashboard completo de MercadoPago',
-          'Gestión de transacciones y reembolsos',
-          'Reportes financieros detallados',
-          'Activación automática por pagos',
-          'Log completo de webhooks'
+          'Eliminados códigos de activación',
+          'Usuarios activos inmediatamente',
+          'Login simplificado username/password',
+          'Admin endpoints mejorados'
         ],
         availableEndpoints: [
-          'POST /api/generate-code',
-          'POST /api/login',
-          'POST /webhook/mercadopago (mejorado)',
-          'GET /api/admin/users',
-          'GET /api/admin/payments (nuevo)',
-          'GET /api/admin/payment/{id} (nuevo)',
-          'POST /api/admin/payment/process (nuevo)',
-          'GET /api/admin/reports/financial (nuevo)',
+          'POST /api/generate-code (usuarios activos automáticamente)',
+          'POST /api/login (sin códigos requeridos)',
+          'POST /api/lead-registro',
+          'POST /webhook/mercadopago',
+          'GET /api/admin/users (mejorado)',
           'PUT /api/admin/user/{username}/pause',
+          'PUT /api/admin/user/{username}/extend',
           'DELETE /api/admin/user/{username}',
           'GET /health'
         ],
-        mercadopagoFeatures: 'complete-dashboard-and-management',
+        adminFeatures: 'complete-user-management-improved',
         plans: Object.keys(PLANS)
       }), {
         headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
       });
     }
 
-    // Existing endpoints
     if (path === '/api/generate-code' && request.method === 'POST') {
       return handleGenerateCode(request, env);
     }
     
+    if (path === '/api/validate-code' && request.method === 'POST') {
+      return handleValidateCode(request, env);
+    }
+    
     if (path === '/api/login' && request.method === 'POST') {
       return handleLogin(request, env);
+    }
+    
+    if (path === '/api/lead-registro' && request.method === 'POST') {
+      return handleLeadRegistro(request, env);
     }
 
     if (path === '/api/admin/users' && request.method === 'GET') {
@@ -1100,21 +850,12 @@ export default {
       return handlePauseUser(request, env);
     }
 
-    // NEW MERCADOPAGO ENDPOINTS
-    if (path === '/api/admin/payments' && request.method === 'GET') {
-      return handleGetPayments(request, env);
+    if (path.startsWith('/api/admin/user/') && path.endsWith('/extend') && request.method === 'PUT') {
+      return handleExtendUser(request, env);
     }
 
-    if (path.startsWith('/api/admin/payment/') && !path.includes('/process') && request.method === 'GET') {
-      return handleGetPaymentDetails(request, env);
-    }
-
-    if (path === '/api/admin/payment/process' && request.method === 'POST') {
-      return handleProcessPayment(request, env);
-    }
-
-    if (path === '/api/admin/reports/financial' && request.method === 'GET') {
-      return handleGetFinancialReports(request, env);
+    if (path.startsWith('/api/admin/user/') && request.method === 'DELETE') {
+      return handleDeleteUser(request, env);
     }
 
     if (path === '/webhook/mercadopago' && request.method === 'POST') {
@@ -1125,18 +866,7 @@ export default {
       error: 'Endpoint no encontrado',
       path: path,
       method: request.method,
-      version: '5.1.0-mercadopago-complete',
-      availableEndpoints: [
-        'GET /health',
-        'POST /api/generate-code',
-        'POST /api/login',
-        'POST /webhook/mercadopago',
-        'GET /api/admin/users',
-        'GET /api/admin/payments',
-        'GET /api/admin/payment/{id}',
-        'POST /api/admin/payment/process',
-        'GET /api/admin/reports/financial'
-      ]
+      version: '5.0.0-no-activation'
     }), {
       status: 404,
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }

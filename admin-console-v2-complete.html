@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏢 Fixly Admin Console - Enterprise</title>
+    <title>🏢 Fixly Admin Console - Completa</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #667eea;
@@ -153,6 +152,47 @@
             border-radius: 25px;
             border: 1px solid #dee2e6;
         }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .plan-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .plan-starter { background-color: #e0e7ff; color: #3730a3; }
+        .plan-pro { background-color: #dcfce7; color: #166534; }
+        .plan-enterprise { background-color: #fef3c7; color: #92400e; }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-details {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .last-access {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
@@ -164,7 +204,7 @@
                     <nav class="navbar navbar-custom">
                         <div class="container-fluid">
                             <span class="navbar-brand mb-0 h1">
-                                <i class="fas fa-cogs"></i> Fixly Admin Console Enterprise
+                                <i class="fas fa-cogs"></i> Fixly Admin Console v2.0
                             </span>
                             <div class="navbar-nav flex-row">
                                 <span class="nav-link text-white me-3" id="admin-info">
@@ -180,7 +220,7 @@
                     <!-- Login Section -->
                     <div id="login-section" class="p-5 text-center">
                         <h2><i class="fas fa-shield-alt"></i> Acceso Administrativo</h2>
-                        <p class="text-muted">Sistema de gestión empresarial</p>
+                        <p class="text-muted">Sistema de gestión empresarial v2.0</p>
                         <form id="login-form" class="row justify-content-center">
                             <div class="col-md-4">
                                 <div class="mb-3">
@@ -294,21 +334,21 @@
                                 <div id="users-section" class="content-section" style="display:none;">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <h3><i class="fas fa-users"></i> Gestión de Usuarios</h3>
-                                        <button class="btn btn-primary-custom btn-custom" onclick="loadUsers()">
+                                        <button class="btn btn-primary-custom btn-custom" onclick="loadUsers(true)">
                                             <i class="fas fa-sync"></i> Actualizar Lista
                                         </button>
                                     </div>
 
                                     <!-- Search and Filters -->
                                     <div class="row mb-3">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="search-box">
                                                 <i class="fas fa-search"></i>
-                                                <input type="text" class="form-control" id="user-search" placeholder="Buscar usuarios...">
+                                                <input type="text" class="form-control" id="user-search" placeholder="Buscar usuarios..." onkeyup="filterUsers()">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <select class="form-select" id="status-filter">
+                                            <select class="form-select" id="status-filter" onchange="filterUsers()">
                                                 <option value="">Todos los estados</option>
                                                 <option value="active">Activos</option>
                                                 <option value="trial">En Prueba</option>
@@ -317,13 +357,47 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <select class="form-select" id="plan-filter">
+                                            <select class="form-select" id="plan-filter" onchange="filterUsers()">
                                                 <option value="">Todos los planes</option>
-                                                <option value="starter">Starter (15 días gratis)</option>
-                                                <option value="trial">Starter (15 días gratis)</option>
-                                                <option value="pro">Pro ($14.999/mes)</option>
-                                                <option value="enterprise">Enterprise (A medida)</option>
+                                                <option value="starter">Starter</option>
+                                                <option value="pro">Pro</option>
+                                                <option value="enterprise">Enterprise</option>
                                             </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                                <i class="fas fa-times"></i> Limpiar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Users Stats -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <div class="stats-card">
+                                                <div class="row text-center">
+                                                    <div class="col">
+                                                        <strong id="stats-total">0</strong><br>
+                                                        <small class="text-muted">Total</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-active" class="text-success">0</strong><br>
+                                                        <small class="text-muted">Activos</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-trial" class="text-info">0</strong><br>
+                                                        <small class="text-muted">Prueba</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-expired" class="text-danger">0</strong><br>
+                                                        <small class="text-muted">Expirados</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-paused" class="text-warning">0</strong><br>
+                                                        <small class="text-muted">Pausados</small>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -333,11 +407,11 @@
                                             <thead>
                                                 <tr>
                                                     <th>Usuario</th>
-                                                    <th>Empresa</th>
                                                     <th>Plan</th>
                                                     <th>Estado</th>
                                                     <th>Creado</th>
                                                     <th>Expira</th>
+                                                    <th>Último Acceso</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -355,6 +429,9 @@
                                 <!-- Create User Section -->
                                 <div id="create-user-section" class="content-section" style="display:none;">
                                     <h3><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> <strong>Nuevo:</strong> Los usuarios se activan automáticamente, sin códigos de activación.
+                                    </div>
                                     
                                     <form id="create-user-form">
                                         <div class="row">
@@ -398,7 +475,6 @@
                                                     <label class="form-label">Plan</label>
                                                     <select class="form-select" id="new-plan">
                                                         <option value="starter">Starter (Gratis - 15 días)</option>
-                                                        <option value="trial">Starter (Gratis - 15 días)</option>
                                                         <option value="pro" selected>Pro ($14.999/mes)</option>
                                                         <option value="enterprise">Enterprise (A medida)</option>
                                                     </select>
@@ -407,12 +483,12 @@
                                             <div class="col-md-3">
                                                 <div class="mb-3">
                                                     <label class="form-label">Duración (días)</label>
-                                                    <input type="number" class="form-control" id="new-duracion" value="15">
+                                                    <input type="number" class="form-control" id="new-duracion" value="30">
                                                 </div>
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary-custom btn-custom">
-                                            <i class="fas fa-user-plus"></i> Crear Usuario
+                                            <i class="fas fa-user-plus"></i> Crear Usuario (Activo Inmediatamente)
                                         </button>
                                         <button type="button" class="btn btn-outline-secondary btn-custom" onclick="clearCreateForm()">
                                             <i class="fas fa-eraser"></i> Limpiar
@@ -421,7 +497,7 @@
                                     <div id="create-user-status" class="mt-3"></div>
                                 </div>
 
-                                <!-- Other sections will be added in next parts... -->
+                                <!-- Subscriptions, Payments, Analytics, System sections (básicos) -->
                                 <div id="subscriptions-section" class="content-section" style="display:none;">
                                     <h3><i class="fas fa-credit-card"></i> Gestión de Suscripciones</h3>
                                     <div class="alert alert-info">
@@ -432,9 +508,13 @@
 
                                 <div id="payments-section" class="content-section" style="display:none;">
                                     <h3><i class="fas fa-dollar-sign"></i> Integración MercadoPago</h3>
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        <strong>Webhook MercadoPago:</strong> Configurado y funcionando en <code>https://api.fixlytaller.com/webhook/mercadopago</code>
+                                    </div>
                                     <div class="alert alert-info">
                                         <i class="fas fa-info-circle"></i>
-                                        Webhook MercadoPago en desarrollo...
+                                        Dashboard visual de pagos en desarrollo...
                                     </div>
                                 </div>
 
@@ -468,10 +548,44 @@
         </div>
     </div>
 
+    <!-- Modales para acciones de usuario -->
+    <!-- Extend User Modal -->
+    <div class="modal fade" id="extendUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Extender Suscripción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Usuario: <strong id="extend-username"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label">Días a agregar</label>
+                        <input type="number" class="form-control" id="extend-days" value="30">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cambiar plan (opcional)</label>
+                        <select class="form-select" id="extend-plan">
+                            <option value="">Mantener plan actual</option>
+                            <option value="starter">Starter</option>
+                            <option value="pro">Pro</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="confirmExtendUser()">Extender</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE = 'https://api.fixlytaller.com';
         let currentUsers = [];
+        let filteredUsers = [];
         let adminLoggedIn = false;
 
         // Login functionality
@@ -514,18 +628,17 @@
         function initializeDashboard() {
             checkSystemHealth();
             refreshDashboard();
-            loadUsers();
+            loadUsers(true);
             
             // Setup plan change handler
             document.getElementById('new-plan').addEventListener('change', function() {
                 const duracionField = document.getElementById('new-duracion');
                 switch(this.value) {
                     case 'starter':
-                    case 'trial':
                         duracionField.value = 15;
                         break;
                     case 'pro':
-                        duracionField.value = 30; // Plan mensual
+                        duracionField.value = 30;
                         break;
                     case 'enterprise':
                         duracionField.value = 365;
@@ -551,6 +664,11 @@
             
             // Add active class to clicked nav link
             event.target.classList.add('active');
+
+            // Load users when showing users section
+            if (sectionName === 'users') {
+                loadUsers();
+            }
         }
 
         // System health check
@@ -565,7 +683,7 @@
                 statusDiv.innerHTML = `
                     <div class="success p-2 rounded">
                         <strong><i class="fas fa-check-circle"></i> Sistema Operativo</strong><br>
-                        <small>Versión: ${data.version} | CORS: ${data.corsStatus || 'OK'}</small>
+                        <small>v${data.version} | ${data.features?.includes('no_activation_codes') ? 'Sin códigos' : 'Códigos activos'}</small>
                     </div>
                 `;
             } catch (error) {
@@ -573,7 +691,7 @@
             }
         }
 
-        // Detailed system health for system section
+        // Detailed system health
         async function checkDetailedSystemHealth() {
             const statusDiv = document.getElementById('detailed-system-status');
             statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Ejecutando diagnóstico completo...</div>';
@@ -590,12 +708,12 @@
                             <div class="col-md-6">
                                 <strong>Backend:</strong><br>
                                 • Versión: ${data.version}<br>
-                                • CORS: ${data.corsStatus || 'Activo'}<br>
-                                • Email: ${data.emailStatus || 'Configurado'}
+                                • Características: ${data.features?.join(', ')}<br>
+                                • Estado: Funcional
                             </div>
                             <div class="col-md-6">
-                                <strong>Features:</strong><br>
-                                ${data.features.map(f => `• ${f}`).join('<br>')}
+                                <strong>Cambios recientes:</strong><br>
+                                ${data.changes?.map(c => `• ${c}`).join('<br>') || 'Ninguno'}
                             </div>
                         </div>
                     </div>
@@ -607,67 +725,90 @@
 
         // Dashboard refresh
         function refreshDashboard() {
-            // This would normally fetch real metrics from API
-            // For now, we'll use mock data
-            updateDashboardMetrics();
+            loadUsers().then(() => {
+                updateDashboardMetrics();
+            });
         }
 
         function updateDashboardMetrics() {
-            // These would be real API calls in production
-            document.getElementById('total-users').textContent = currentUsers.length || '0';
-            document.getElementById('active-users').textContent = '0';
-            document.getElementById('trial-users').textContent = '0';
-            document.getElementById('revenue').textContent = '$0';
+            const stats = getStatsFromUsers();
+            document.getElementById('total-users').textContent = stats.total;
+            document.getElementById('active-users').textContent = stats.active;
+            document.getElementById('trial-users').textContent = stats.trial;
+            
+            // Calcular ingresos aproximados (Pro users * $14.999)
+            const revenue = stats.pro * 14999;
+            document.getElementById('revenue').textContent = `$${revenue.toLocaleString()}`;
         }
 
-        // User management
-        async function loadUsers() {
+        function getStatsFromUsers() {
+            return {
+                total: currentUsers.length,
+                active: currentUsers.filter(u => u.status === 'active').length,
+                trial: currentUsers.filter(u => u.status === 'trial').length,
+                expired: currentUsers.filter(u => u.status === 'expired').length,
+                paused: currentUsers.filter(u => u.status === 'paused').length,
+                pro: currentUsers.filter(u => u.plan === 'pro').length
+            };
+        }
+
+        // User management - MEJORADO
+        async function loadUsers(force = false) {
+            if (!adminLoggedIn && !force) return;
+
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '<tr><td colspan="7" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</td></tr>';
             
             try {
-                // In a real implementation, this would be an API call to list users
-                // For now, we'll show the users we know exist
-                const knownUsers = [
-                    {
-                        username: 'test_debug',
-                        empresa: 'Debug Taller',
-                        plan: 'trial',
-                        status: 'active',
-                        fechaCreacion: '2025-09-01',
-                        fechaExpiracion: '2025-10-01'
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: {
+                        'Authorization': 'Bearer admin123'
                     }
-                ];
-                
-                if (knownUsers.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay usuarios registrados</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = '';
-                knownUsers.forEach(user => {
-                    const row = createUserRow(user);
-                    tbody.appendChild(row);
                 });
                 
-                currentUsers = knownUsers;
-                updateDashboardMetrics();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUsers = data.users || [];
+                    filteredUsers = [...currentUsers];
+                    
+                    displayUsers();
+                    updateStatsDisplay(data);
+                    updateDashboardMetrics();
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
                 
             } catch (error) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error cargando usuarios: ${error.message}</td></tr>`;
             }
         }
 
-        function getPlanBadge(plan) {
-            const planConfigs = {
-                'starter': { name: 'Starter', color: 'bg-info', icon: 'fas fa-gift' },
-                'trial': { name: 'Starter', color: 'bg-info', icon: 'fas fa-gift' },
-                'pro': { name: 'Pro', color: 'bg-success', icon: 'fas fa-star' },
-                'enterprise': { name: 'Enterprise', color: 'bg-warning text-dark', icon: 'fas fa-crown' }
-            };
+        function displayUsers() {
+            const tbody = document.getElementById('users-table-body');
             
-            const config = planConfigs[plan] || { name: plan, color: 'bg-secondary', icon: 'fas fa-user' };
-            return `<span class="badge ${config.color}"><i class="${config.icon} me-1"></i>${config.name}</span>`;
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay usuarios que mostrar</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            filteredUsers.forEach(user => {
+                const row = createUserRow(user);
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStatsDisplay(data) {
+            document.getElementById('stats-total').textContent = data.totalUsers || 0;
+            document.getElementById('stats-active').textContent = data.activeUsers || 0;
+            document.getElementById('stats-trial').textContent = data.trialUsers || 0;
+            document.getElementById('stats-expired').textContent = data.expiredUsers || 0;
+            document.getElementById('stats-paused').textContent = data.pausedUsers || 0;
         }
 
         function createUserRow(user) {
@@ -679,30 +820,55 @@
                 'expired': 'status-expired',
                 'paused': 'status-paused'
             }[user.status] || 'status-active';
+
+            const planClass = {
+                'starter': 'plan-starter',
+                'pro': 'plan-pro',
+                'enterprise': 'plan-enterprise'
+            }[user.plan] || 'plan-starter';
+
+            const avatar = user.empresa.charAt(0).toUpperCase();
+            const lastAccess = user.ultimoAcceso ? 
+                new Date(user.ultimoAcceso).toLocaleDateString('es-ES') : 
+                'Nunca';
             
             tr.innerHTML = `
                 <td>
-                    <strong>${user.username}</strong><br>
-                    <small class="text-muted">${user.email || 'No email'}</small>
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar">${avatar}</div>
+                        <div>
+                            <strong>${user.username}</strong><br>
+                            <div class="user-details">
+                                ${user.empresa}<br>
+                                <small>${user.email}</small>
+                            </div>
+                        </div>
+                    </div>
                 </td>
-                <td>${user.empresa}</td>
                 <td>
-                    ${getPlanBadge(user.plan)}
+                    <span class="plan-badge ${planClass}">
+                        ${user.plan.toUpperCase()}
+                    </span>
                 </td>
                 <td>
                     <span class="status-badge ${statusClass}">${user.status}</span>
                 </td>
                 <td>${formatDate(user.fechaCreacion)}</td>
                 <td>${formatDate(user.fechaExpiracion)}</td>
+                <td>
+                    <div class="last-access">${lastAccess}</div>
+                </td>
                 <td class="action-buttons">
-                    <button class="btn btn-sm btn-outline-warning" onclick="pauseUser('${user.username}')" title="Pausar">
-                        <i class="fas fa-pause"></i>
-                    </button>
+                    ${user.status === 'paused' ? 
+                        `<button class="btn btn-sm btn-outline-success" onclick="togglePauseUser('${user.username}', 'resume')" title="Reactivar">
+                            <i class="fas fa-play"></i>
+                        </button>` :
+                        `<button class="btn btn-sm btn-outline-warning" onclick="togglePauseUser('${user.username}', 'pause')" title="Pausar">
+                            <i class="fas fa-pause"></i>
+                        </button>`
+                    }
                     <button class="btn btn-sm btn-outline-success" onclick="extendUser('${user.username}')" title="Extender">
                         <i class="fas fa-calendar-plus"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary" onclick="editUser('${user.username}')" title="Editar">
-                        <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.username}')" title="Eliminar">
                         <i class="fas fa-trash"></i>
@@ -713,31 +879,137 @@
             return tr;
         }
 
-        // User actions
-        function pauseUser(username) {
-            if (confirm(`¿Pausar usuario ${username}?`)) {
-                alert(`Funcionalidad en desarrollo: Pausar ${username}`);
+        // User actions - IMPLEMENTADAS
+        async function togglePauseUser(username, action) {
+            const actionText = action === 'pause' ? 'pausar' : 'reactivar';
+            
+            if (!confirm(`¿${actionText.charAt(0).toUpperCase() + actionText.slice(1)} usuario ${username}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}/pause`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer admin123',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Usuario ${username} ${actionText}do exitosamente`, 'success');
+                    loadUsers(true); // Recargar lista
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error de conexión: ${error.message}`, 'error');
             }
         }
 
         function extendUser(username) {
-            const days = prompt(`¿Cuántos días agregar a ${username}?`, '30');
-            if (days) {
-                alert(`Funcionalidad en desarrollo: Extender ${username} por ${days} días`);
+            document.getElementById('extend-username').textContent = username;
+            document.getElementById('extend-days').value = 30;
+            document.getElementById('extend-plan').value = '';
+            
+            new bootstrap.Modal(document.getElementById('extendUserModal')).show();
+        }
+
+        async function confirmExtendUser() {
+            const username = document.getElementById('extend-username').textContent;
+            const days = parseInt(document.getElementById('extend-days').value);
+            const newPlan = document.getElementById('extend-plan').value;
+
+            if (!days || days < 1) {
+                showNotification('Ingresa un número válido de días', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}/extend`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer admin123',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ days, newPlan })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Suscripción de ${username} extendida ${days} días`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('extendUserModal')).hide();
+                    loadUsers(true);
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error de conexión: ${error.message}`, 'error');
             }
         }
 
-        function editUser(username) {
-            alert(`Funcionalidad en desarrollo: Editar ${username}`);
-        }
+        async function deleteUser(username) {
+            if (!confirm(`¿ELIMINAR permanentemente el usuario ${username}?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
 
-        function deleteUser(username) {
-            if (confirm(`¿ELIMINAR permanentemente el usuario ${username}? Esta acción no se puede deshacer.`)) {
-                alert(`Funcionalidad en desarrollo: Eliminar ${username}`);
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer admin123',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ softDelete: true })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Usuario ${username} eliminado exitosamente`, 'success');
+                    loadUsers(true);
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error de conexión: ${error.message}`, 'error');
             }
         }
 
-        // Create user
+        // Filtering functions
+        function filterUsers() {
+            const searchTerm = document.getElementById('user-search').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const planFilter = document.getElementById('plan-filter').value;
+
+            filteredUsers = currentUsers.filter(user => {
+                const matchesSearch = !searchTerm || 
+                    user.username.toLowerCase().includes(searchTerm) ||
+                    user.empresa.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = !statusFilter || user.status === statusFilter;
+                const matchesPlan = !planFilter || user.plan === planFilter;
+
+                return matchesSearch && matchesStatus && matchesPlan;
+            });
+
+            displayUsers();
+        }
+
+        function clearFilters() {
+            document.getElementById('user-search').value = '';
+            document.getElementById('status-filter').value = '';
+            document.getElementById('plan-filter').value = '';
+            filteredUsers = [...currentUsers];
+            displayUsers();
+        }
+
+        // Create user - ACTUALIZADO SIN CÓDIGOS
         document.getElementById('create-user-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -776,19 +1048,20 @@
                                     • Tenant ID: <code>${data.tenantId}</code>
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Detalles:</strong><br>
-                                    • Empresa: ${data.empresa}<br>
-                                    • Válido hasta: ${new Date(data.fechaExpiracion).toLocaleDateString('es-ES')}<br>
-                                    • Código: ${data.codigo}
+                                    <strong>Estado:</strong><br>
+                                    • ✅ Activo inmediatamente<br>
+                                    • 📧 Email enviado<br>
+                                    • 🗓️ Expira: ${new Date(data.fechaExpiracion).toLocaleDateString('es-ES')}
                                 </div>
                             </div>
                             <hr>
-                            <strong>Acceso:</strong> <a href="https://app.fixlytaller.com/" target="_blank" class="btn btn-sm btn-primary">app.fixlytaller.com</a>
+                            <strong>Ya puede hacer login en:</strong> 
+                            <a href="https://app.fixlytaller.com/" target="_blank" class="btn btn-sm btn-primary">app.fixlytaller.com</a>
                         </div>
                     `;
                     
                     clearCreateForm();
-                    loadUsers(); // Refresh user list
+                    loadUsers(true); // Refresh user list
                 } else {
                     statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error: ${data.error}</div>`;
                 }
@@ -800,12 +1073,32 @@
         // Utility functions
         function clearCreateForm() {
             document.getElementById('create-user-form').reset();
-            document.getElementById('new-duracion').value = '15';
-            document.getElementById('new-plan').value = 'trial';
+            document.getElementById('new-duracion').value = '30';
+            document.getElementById('new-plan').value = 'pro';
         }
 
         function formatDate(dateString) {
             return new Date(dateString).toLocaleDateString('es-ES');
+        }
+
+        function showNotification(message, type = 'info') {
+            // Crear notificación temporal
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
         }
 
         function logout() {
@@ -814,6 +1107,8 @@
             document.getElementById('login-section').style.display = 'block';
             document.getElementById('admin-password').value = '';
             document.getElementById('login-status').innerHTML = '';
+            currentUsers = [];
+            filteredUsers = [];
         }
 
         // Auto-focus password field on load

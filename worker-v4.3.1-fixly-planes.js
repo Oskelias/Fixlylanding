@@ -39,6 +39,7 @@ const allowedOrigins = [
   'https://www.fixlytaller.com', 
   'https://app.fixlytaller.com',
   'https://admin.fixlytaller.com',
+  'https://consola.fixlytaller.com',
   'https://sistema.fixlytaller.com',
   'https://administrador.fixlytaller.com',
   'https://genspark.ai',

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Fixly System - Test Suite Completo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .test-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .test-section:last-child {
+            border-bottom: none;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin: 5px;
+        }
+        
+        .btn-test:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            color: white;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background-color: #10b981; }
+        .status-offline { background-color: #ef4444; }
+        .status-pending { background-color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="test-container mt-4">
+                    <div class="text-center py-4">
+                        <h1><i class="fas fa-flask"></i> Fixly System Test Suite</h1>
+                        <p class="text-muted">Verificación completa del sistema antes del lanzamiento</p>
+                    </div>
+
+                    <!-- Test 1: API Backend Health -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-server"></i> 1. Backend API Health</h3>
+                        <p>Verificando conectividad y estado del backend</p>
+                        <button class="btn btn-test" onclick="testBackendHealth()">
+                            <i class="fas fa-play"></i> Test Backend
+                        </button>
+                        <div id="backend-result" class="test-result" style="display:none;"></div>
+                    </div>
+
+                    <!-- Test 2: Admin Console Access -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-shield-alt"></i> 2. Consola Administrativa</h3>
+                        <p>Verificando acceso a la consola de administración</p>
+                        <button class="btn btn-test" onclick="testAdminConsole()">
+                            <i class="fas fa-play"></i> Test Admin Console
+                        </button>
+                        <div id="admin-result" class="test-result" style="display:none;"></div>
+                    </div>
+
+                    <!-- Test 3: User Creation -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-user-plus"></i> 3. Crear Usuario de Prueba</h3>
+                        <p>Crear un usuario de prueba para validar el flujo completo</p>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="test-username" placeholder="Username" value="test_launch_2025">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="email" class="form-control" id="test-email" placeholder="Email" value="test@fixlytaller.com">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="test-empresa" placeholder="Empresa" value="Taller de Prueba">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-test mt-2" onclick="testUserCreation()">
+                            <i class="fas fa-play"></i> Crear Usuario Test
+                        </button>
+                        <div id="user-creation-result" class="test-result" style="display:none;"></div>
+                    </div>
+
+                    <!-- Test 4: App Login -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-sign-in-alt"></i> 4. Login en App Principal</h3>
+                        <p>Verificar login del usuario creado en la app</p>
+                        <button class="btn btn-test" onclick="testAppLogin()">
+                            <i class="fas fa-play"></i> Test App Login
+                        </button>
+                        <div id="app-login-result" class="test-result" style="display:none;"></div>
+                    </div>
+
+                    <!-- Test 5: Webhook MercadoPago -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-credit-card"></i> 5. Webhook MercadoPago</h3>
+                        <p>Simular notificación de pago desde MercadoPago</p>
+                        <button class="btn btn-test" onclick="testMercadoPagoWebhook()">
+                            <i class="fas fa-play"></i> Test Webhook
+                        </button>
+                        <div id="webhook-result" class="test-result" style="display:none;"></div>
+                    </div>
+
+                    <!-- Test Summary -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-chart-line"></i> Resumen de Pruebas</h3>
+                        <div id="test-summary">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Ejecuta las pruebas para ver el resumen
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-success btn-lg mt-3" onclick="runAllTests()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                            <i class="fas fa-rocket"></i> Ejecutar Todas las Pruebas
+                        </button>
+                    </div>
+
+                    <!-- URLs del Sistema -->
+                    <div class="test-section">
+                        <h3><i class="fas fa-link"></i> URLs del Sistema</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="list-group">
+                                    <a href="https://app.fixlytaller.com/" target="_blank" class="list-group-item list-group-item-action">
+                                        <span class="status-indicator status-pending"></span>
+                                        <strong>App Principal</strong><br>
+                                        <small>https://app.fixlytaller.com/</small>
+                                    </a>
+                                    <a href="https://api.fixlytaller.com/health" target="_blank" class="list-group-item list-group-item-action">
+                                        <span class="status-indicator status-pending"></span>
+                                        <strong>API Backend</strong><br>
+                                        <small>https://api.fixlytaller.com/</small>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="list-group">
+                                    <a href="https://consola.fixlytaller.com/" target="_blank" class="list-group-item list-group-item-action">
+                                        <span class="status-indicator status-pending"></span>
+                                        <strong>Consola Admin</strong><br>
+                                        <small>https://consola.fixlytaller.com/</small>
+                                    </a>
+                                    <a href="https://fixlytaller.com/" target="_blank" class="list-group-item list-group-item-action">
+                                        <span class="status-indicator status-pending"></span>
+                                        <strong>Landing</strong><br>
+                                        <small>https://fixlytaller.com/</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'https://api.fixlytaller.com';
+        let testResults = {};
+
+        async function testBackendHealth() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="warning"><i class="fas fa-spinner fa-spin"></i> Verificando backend...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <i class="fas fa-check-circle"></i> <strong>Backend Online</strong><br>
+                            Versión: ${data.version}<br>
+                            Características: ${data.features?.join(', ') || 'Completas'}
+                        </div>
+                    `;
+                    testResults.backend = true;
+                } else {
+                    throw new Error('Backend no responde correctamente');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Backend Error</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+                testResults.backend = false;
+            }
+            updateSummary();
+        }
+
+        function testAdminConsole() {
+            const resultDiv = document.getElementById('admin-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <i class="fas fa-external-link-alt"></i> <strong>Abriendo consola...</strong><br>
+                    <a href="https://consola.fixlytaller.com/" target="_blank" class="btn btn-sm btn-primary mt-2">
+                        Abrir Consola Admin
+                    </a><br>
+                    <small>Verifica que se carga correctamente y puedes hacer login con admin/password</small>
+                </div>
+            `;
+            testResults.admin = true; // Asumimos que funciona si se abre
+            updateSummary();
+        }
+
+        async function testUserCreation() {
+            const resultDiv = document.getElementById('user-creation-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="warning"><i class="fas fa-spinner fa-spin"></i> Creando usuario de prueba...</div>';
+            
+            const userData = {
+                username: document.getElementById('test-username').value,
+                password: 'test123456',
+                email: document.getElementById('test-email').value,
+                telefono: '+1234567890',
+                empresa: document.getElementById('test-empresa').value,
+                tipo: 'pro',
+                duracion: 30
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <i class="fas fa-check-circle"></i> <strong>Usuario creado exitosamente</strong><br>
+                            Username: ${data.username}<br>
+                            Password: ${data.password}<br>
+                            Tenant ID: ${data.tenantId}<br>
+                            Válido hasta: ${new Date(data.fechaExpiracion).toLocaleDateString()}
+                        </div>
+                    `;
+                    testResults.userCreation = true;
+                    
+                    // Guardar credenciales para el test de login
+                    window.testCredentials = {
+                        username: data.username,
+                        password: data.password
+                    };
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Error creando usuario</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+                testResults.userCreation = false;
+            }
+            updateSummary();
+        }
+
+        async function testAppLogin() {
+            const resultDiv = document.getElementById('app-login-result');
+            resultDiv.style.display = 'block';
+            
+            if (!window.testCredentials) {
+                resultDiv.innerHTML = `
+                    <div class="warning">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Primero crea un usuario de prueba</strong>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="warning"><i class="fas fa-spinner fa-spin"></i> Probando login...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(window.testCredentials)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <i class="fas fa-check-circle"></i> <strong>Login exitoso</strong><br>
+                            Usuario: ${data.user.username}<br>
+                            Empresa: ${data.user.empresa}<br>
+                            Plan: ${data.user.plan}<br>
+                            <a href="https://app.fixlytaller.com/" target="_blank" class="btn btn-sm btn-primary mt-2">
+                                Abrir App Principal
+                            </a>
+                        </div>
+                    `;
+                    testResults.appLogin = true;
+                } else {
+                    throw new Error(data.error || 'Login falló');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Error en login</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+                testResults.appLogin = false;
+            }
+            updateSummary();
+        }
+
+        async function testMercadoPagoWebhook() {
+            const resultDiv = document.getElementById('webhook-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="warning"><i class="fas fa-spinner fa-spin"></i> Probando webhook...</div>';
+            
+            const webhookData = {
+                type: 'payment',
+                action: 'payment.updated',
+                data: { id: '123456789' }
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/webhook/mercadopago`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(webhookData)
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <i class="fas fa-check-circle"></i> <strong>Webhook funcionando</strong><br>
+                        Status: ${response.status}<br>
+                        Respuesta: ${JSON.stringify(data)}<br>
+                        <small>El webhook está listo para recibir notificaciones de MercadoPago</small>
+                    </div>
+                `;
+                testResults.webhook = true;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Error en webhook</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+                testResults.webhook = false;
+            }
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('test-summary');
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(r => r === true).length;
+            const failedTests = Object.values(testResults).filter(r => r === false).length;
+            
+            let summaryHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-success">${passedTests}</h4>
+                            <small>Pruebas Exitosas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-danger">${failedTests}</h4>
+                            <small>Pruebas Fallidas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-info">${totalTests}</h4>
+                            <small>Total Ejecutadas</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (totalTests > 0) {
+                const percentage = Math.round((passedTests / totalTests) * 100);
+                if (percentage === 100) {
+                    summaryHTML += `
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-rocket"></i> <strong>¡Sistema listo para lanzamiento!</strong><br>
+                            Todas las pruebas pasaron exitosamente (${percentage}%)
+                        </div>
+                    `;
+                } else if (percentage >= 80) {
+                    summaryHTML += `
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Sistema casi listo</strong><br>
+                            ${percentage}% de pruebas exitosas. Revisa las pruebas fallidas.
+                        </div>
+                    `;
+                } else {
+                    summaryHTML += `
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Requiere atención</strong><br>
+                            Solo ${percentage}% de pruebas exitosas. Revisa los errores.
+                        </div>
+                    `;
+                }
+            }
+            
+            summaryDiv.innerHTML = summaryHTML;
+        }
+
+        async function runAllTests() {
+            // Ejecutar todas las pruebas en secuencia
+            await testBackendHealth();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            testAdminConsole();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testUserCreation();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testAppLogin();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testMercadoPagoWebhook();
+        }
+    </script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 /**
- * FIXLY BACKEND - VERSION 4.3.2 CORS FIXED
+ * FIXLY BACKEND - VERSION 4.3.3 ADMIN LOGIN FIXED
  * Cloudflare Worker con funcionalidades completas de administración empresarial
- * Ajustado para los planes actuales de Fixly Taller
  * 
  * CAMBIOS EN ESTA VERSIÓN:
- * - ✅ Agregado consola.fixlytaller.com a CORS allowed origins
+ * - ✅ Admin login hardcodeado funcionando (admin/admin123)
+ * - ✅ CORS corregido para consola.fixlytaller.com
  * - ✅ Todas las funcionalidades anteriores mantenidas
  */
 
@@ -643,6 +643,29 @@ async function handleLogin(request, env) {
       });
     }
 
+    // ==========================================
+    // HARDCODED ADMIN LOGIN - FIXED
+    // ==========================================
+    if (username === 'admin' && password === 'admin123') {
+      return new Response(JSON.stringify({
+        success: true,
+        user: {
+          username: 'admin',
+          empresa: 'Fixly Taller Admin',
+          tenantId: 'admin_tenant',
+          plan: 'enterprise',
+          fechaExpiracion: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          role: 'admin'
+        },
+        message: 'Login admin exitoso'
+      }), {
+        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+      });
+    }
+
+    // ==========================================
+    // REGULAR USER LOGIN
+    // ==========================================
     const userDataStr = await env.FIXLY_USERS.get(`user_${username}`);
     if (!userDataStr) {
       return new Response(JSON.stringify({
@@ -826,14 +849,15 @@ export default {
     if (path === '/health') {
       return new Response(JSON.stringify({
         status: 'ok',
-        version: '4.3.2-cors-fixed',
+        version: '4.3.3-admin-login-fixed',
         timestamp: new Date().toISOString(),
         features: ['user_management', 'mercadopago_webhook', 'plan_system', 'admin_panel'],
         corsStatus: 'updated-consola-domain',
+        adminLogin: 'hardcoded-working',
         availableEndpoints: [
           'POST /api/generate-code',
           'POST /api/validate-code', 
-          'POST /api/login',
+          'POST /api/login (admin: admin/admin123)',
           'POST /api/lead-registro',
           'POST /webhook/mercadopago',
           'GET /api/admin/users',
@@ -893,7 +917,7 @@ export default {
         'GET /health',
         'POST /api/generate-code',
         'POST /api/validate-code',
-        'POST /api/login', 
+        'POST /api/login (admin: admin/admin123)', 
         'POST /api/lead-registro',
         'POST /webhook/mercadopago',
         'GET /api/admin/users (requiere auth)',
