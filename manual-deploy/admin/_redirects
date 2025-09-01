@@ -1,0 +1,10 @@
+# Cloudflare Pages redirects for admin.fixlytaller.com
+
+# Admin panel redirects
+/admin              /index.html
+/admin/             /index.html  
+/panel              /index.html
+/                   /login.html
+
+# SPA fallback
+/*                  /login.html   200

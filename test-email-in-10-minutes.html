@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏰ Test Email - Post SPF Implementation</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 30px; 
+            background: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-card { 
+            background: white; 
+            border: 2px solid #28a745; 
+            padding: 25px; 
+            margin: 20px 0; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 1s ease;
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        button:hover { background: #0056b3; transform: translateY(-1px); }
+        button.success { background: #28a745; }
+        button.error { background: #dc3545; }
+        
+        .result { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+        .result.success { 
+            background: #d4edda; 
+            border-left-color: #28a745; 
+        }
+        .result.error { 
+            background: #f8d7da; 
+            border-left-color: #dc3545; 
+        }
+        
+        pre { 
+            background: #f1f3f4; 
+            padding: 15px; 
+            border-radius: 6px; 
+            overflow-x: auto; 
+            font-size: 13px;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⏰ Test Email - Post SPF Implementation</h1>
+        <p>DNS Propagation Timer & Email Testing</p>
+    </div>
+
+    <!-- Timer -->
+    <div class="status-card">
+        <h3>🕐 DNS Propagation Timer</h3>
+        <p>SPF record agregado. Esperando propagación DNS...</p>
+        
+        <div class="timer" id="timer">10:00</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        
+        <div id="timerStatus">
+            <p>⏱️ <strong>Tiempo restante para propagación óptima</strong></p>
+            <p>Los records SPF típicamente se propagan en 5-15 minutos.</p>
+        </div>
+    </div>
+
+    <!-- Manual Test -->
+    <div class="status-card">
+        <h3>🧪 Test Manual de Email</h3>
+        <p>Puedes probar en cualquier momento, pero es recomendable esperar al menos 10 minutos.</p>
+        
+        <button onclick="testEmailNow()" id="testBtn">📧 Probar Email Ahora</button>
+        <button onclick="testEmailWithLogging()" id="testLogBtn">🔍 Test con Logging Avanzado</button>
+        
+        <div id="testResult"></div>
+    </div>
+
+    <!-- Information -->
+    <div class="info-box">
+        <h4>📋 ¿Qué está pasando?</h4>
+        <ul>
+            <li>✅ <strong>SPF Record agregado</strong> en Cloudflare DNS</li>
+            <li>⏱️ <strong>DNS propagando</strong> - Puede tomar 5-15 minutos</li>
+            <li>📧 <strong>MailChannels esperando</strong> el record para autorizar envíos</li>
+            <li>🔧 <strong>Worker funcionando</strong> - Todo listo para cuando DNS propague</li>
+        </ul>
+        
+        <h4>🎯 Expectativa:</h4>
+        <p>Una vez que DNS propague, los emails cambiarán de "Error" a "Enviado" automáticamente.</p>
+    </div>
+
+    <script>
+        const WORKER_URL = 'https://api.fixlytaller.com';
+        let startTime = Date.now();
+        let targetDuration = 10 * 60 * 1000; // 10 minutes
+
+        function updateTimer() {
+            const elapsed = Date.now() - startTime;
+            const remaining = Math.max(0, targetDuration - elapsed);
+            
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            const progress = Math.min(100, (elapsed / targetDuration) * 100);
+            document.getElementById('progress').style.width = progress + '%';
+            
+            if (remaining === 0) {
+                document.getElementById('timerStatus').innerHTML = `
+                    <p style="color: #28a745; font-weight: bold;">✅ Tiempo de propagación completado</p>
+                    <p>El SPF record debería estar propagado. ¡Prueba el email ahora!</p>
+                `;
+                document.getElementById('testBtn').style.background = '#28a745';
+                document.getElementById('testBtn').textContent = '🚀 ¡Probar Email Ahora!';
+            }
+        }
+
+        // Update timer every second
+        setInterval(updateTimer, 1000);
+
+        async function testEmailNow() {
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = '🔄 Probando...';
+
+            const testData = {
+                empresa: 'Timer Test Company',
+                email: 'timer-test@fixlytaller.com',
+                telefono: '555123456',
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: 'timer_test_' + Date.now(),
+                passwordManual: 'timer_pass_' + Date.now()
+            };
+
+            try {
+                const response = await fetch(WORKER_URL + '/api/generate-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                
+                const emailSuccess = result.notificaciones?.email === 'Enviado';
+                const resultDiv = document.getElementById('testResult');
+                
+                resultDiv.className = emailSuccess ? 'result success' : 'result error';
+                resultDiv.innerHTML = `
+                    <h4>${emailSuccess ? '✅ ¡EMAIL FUNCIONANDO!' : '⚠️ Email aún fallando'}</h4>
+                    <p><strong>Status HTTP:</strong> ${response.status}</p>
+                    <p><strong>Usuario creado:</strong> ${result.username || 'No'}</p>
+                    <p><strong>Email status:</strong> ${result.notificaciones?.email || 'Unknown'}</p>
+                    <p><strong>Telegram status:</strong> ${result.notificaciones?.telegram || 'Unknown'}</p>
+                    
+                    ${emailSuccess ? 
+                        '<p style="color: #28a745; font-weight: bold;">🎉 ¡SPF record funcionando! Los emails ya se envían correctamente.</p>' : 
+                        '<p>⏱️ Si sigue fallando, espera unos minutos más. DNS puede tardar hasta 15 minutos.</p>'
+                    }
+                    
+                    <details>
+                        <summary>Ver respuesta completa</summary>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </details>
+                `;
+
+                btn.className = emailSuccess ? 'success' : 'error';
+                btn.textContent = emailSuccess ? '✅ Email OK' : '❌ Retry en 5min';
+                
+            } catch (error) {
+                document.getElementById('testResult').innerHTML = `
+                    <div class="result error">
+                        <h4>❌ Error de conexión</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                btn.className = 'error';
+                btn.textContent = '❌ Error';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testEmailWithLogging() {
+            const btn = document.getElementById('testLogBtn');
+            btn.disabled = true;
+            btn.textContent = '🔍 Analizando...';
+
+            // Este test también incluirá el health check para ver la versión
+            try {
+                const healthResponse = await fetch(WORKER_URL + '/health');
+                const healthData = await healthResponse.json();
+                
+                await testEmailNow(); // Ejecutar test normal
+                
+                // Agregar información adicional
+                const resultDiv = document.getElementById('testResult');
+                resultDiv.innerHTML += `
+                    <hr>
+                    <h4>🔧 Información del Worker:</h4>
+                    <p><strong>Versión:</strong> ${healthData.version || 'Unknown'}</p>
+                    <p><strong>Features:</strong> ${healthData.features?.join(', ') || 'Unknown'}</p>
+                    <p><strong>Email status:</strong> ${healthData.emailStatus || 'Basic'}</p>
+                `;
+                
+            } catch (error) {
+                console.error('Health check failed:', error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔍 Test con Logging Avanzado';
+            }
+        }
+
+        // Auto-test cuando el timer llegue a 0
+        setTimeout(() => {
+            if (document.getElementById('timer').textContent === '0:00') {
+                console.log('Auto-testing after 10 minutes...');
+                testEmailNow();
+            }
+        }, targetDuration + 1000);
+    </script>
+</body>
+</html>
