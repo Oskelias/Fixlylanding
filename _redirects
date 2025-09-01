@@ -1,0 +1,6 @@
+# Mundo Electrónico Multi-tenant Redirects
+/dashboard.html /dashboard.html 200
+/dashboard /dashboard.html 200
+/login /index.html 200
+/sistema /dashboard.html 200
+/* /index.html 200
