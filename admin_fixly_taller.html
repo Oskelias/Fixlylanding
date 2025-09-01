@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administrador Fixly Taller</title>
+    
+    <!-- Bootstrap Core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <style type="text/css">
+        .navbar-inverse .navbar-nav > li > a { color: white; }
+        .side-nav > li > ul > li > a { color: white;}
+        .navbar-inverse { background-color: #337ab7; border-color: #337ab7;}
+        .navbar-inverse .navbar-brand { color: white; }
+        .top-nav > li > a { color: white; }
+        .side-nav > li > a >i { text-align: center; width: 20px;}
+        
+        /* Sidebar */
+        .side-nav {
+            position: fixed;
+            top: 51px;
+            left: 225px;
+            width: 225px;
+            margin-left: -225px;
+            border: none;
+            border-radius: 0;
+            overflow-y: auto;
+            background-color: #222;
+            bottom: 0;
+            overflow-x: hidden;
+            padding-bottom: 40px;
+        }
+        
+        .side-nav > li > a {
+            width: 225px;
+        }
+        
+        #page-wrapper {
+            position: inherit;
+            margin: 0 0 0 225px;
+            padding: 0;
+            border-left: 1px solid #e7e7e7;
+        }
+        
+        .navbar-fixed-top {
+            top: 0;
+        }
+        
+        @media(max-width:767px) {
+            .side-nav {
+                position: relative;
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            #page-wrapper {
+                margin: 0;
+            }
+        }
+        
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .btn-login {
+            background-color: #5cb85c;
+            border-color: #4cae4c;
+            color: white;
+        }
+        
+        .btn-login:hover {
+            background-color: #449d44;
+            border-color: #398439;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="admin_fixly_taller.html">
+                    <i class="fa fa-wrench" style="margin-right: 8px;"></i>
+                    <b>Fixly Taller Admin</b>
+                </a>
+            </div>
+            
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-right top-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-user"></i> Admin Fixly <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#" onclick="logout()"><i class="fa fa-fw fa-power-off"></i> Salir</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <!-- Sidebar Menu Items -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="#dashboard" onclick="showSection('dashboard')">
+                            <i class="fa fa-fw fa-dashboard"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#clientes" onclick="showSection('clientes')" style="padding-left:15px; font-size:16px; font-weight:bold;">
+                            <i class="fa fa-users" aria-hidden="true"></i> CLIENTES
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#crear-cliente" onclick="showSection('crear-cliente')">
+                            <i class="fa fa-user-plus"></i> Crear Cliente
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#sistema" onclick="showSection('sistema')">
+                            <i class="fa fa-cogs"></i> Sistema
+                        </a>
+                    </li>
+                    
+                    <li style="padding: 17px;border-bottom: solid 1px darkgray;width: 100%;">
+                    </li>
+                    
+                    <li style="width: 90%;padding: 5%;color: white;text-align: center;">
+                        <p>Estado del Sistema</p>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                                Online
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="section">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="page-header">
+                                Dashboard Fixly Taller
+                                <small>Panel de Control</small>
+                            </h1>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-users fa-5x"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="huge" id="total-clientes">0</div>
+                                            <div>Clientes Totales</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="panel panel-green">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-check fa-5x"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="huge" id="clientes-activos">0</div>
+                                            <div>Clientes Activos</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="panel panel-yellow">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-wrench fa-5x"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="huge">API</div>
+                                            <div>Estado Sistema</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="panel panel-red">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-database fa-5x"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="huge">KV</div>
+                                            <div>Base de Datos</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Clientes Section -->
+                <div id="clientes-section" class="section" style="display: none;">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="page-header">
+                                Clientes
+                                <small>Listado Completo</small>
+                            </h1>
+                            <ol class="breadcrumb">
+                                <li><i class="fa fa-dashboard"></i> <a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                                <li class="active"><i class="fa fa-users"></i> Listado de Clientes</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-12">
+                        <br>
+                        <a href="#crear-cliente" onclick="showSection('crear-cliente')" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Nuevo Cliente
+                        </a>
+                        <br><br>
+                        
+                        <div id="mensajes-clientes"></div>
+                        
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Usuario</th>
+                                    <th>Password</th>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Login</th>
+                                    <th>Mod.</th>
+                                    <th>Eli.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-clientes">
+                                <!-- Aquí se cargarán los clientes dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Crear Cliente Section -->
+                <div id="crear-cliente-section" class="section" style="display: none;">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="page-header">
+                                Crear Cliente
+                                <small>Nuevo Usuario del Taller</small>
+                            </h1>
+                            <ol class="breadcrumb">
+                                <li><i class="fa fa-dashboard"></i> <a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                                <li><i class="fa fa-users"></i> <a href="#clientes" onclick="showSection('clientes')">Clientes</a></li>
+                                <li class="active"><i class="fa fa-user-plus"></i> Crear Cliente</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Información del Cliente</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form id="form-crear-cliente">
+                                    <div class="form-group">
+                                        <label for="usuario">Usuario (Username) *</label>
+                                        <input type="text" class="form-control" id="usuario" name="usuario" required>
+                                        <small class="help-block">Este será el nombre de usuario para ingresar al sistema</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="password">Contraseña *</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="password" name="password" required>
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" onclick="generarPassword()">
+                                                    <i class="fa fa-random"></i> Generar
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="nombre">Nombre Completo *</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="telefono">Teléfono</label>
+                                        <input type="tel" class="form-control" id="telefono" name="telefono">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="email">Email *</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fa fa-save"></i> Crear Cliente
+                                        </button>
+                                        <button type="button" class="btn btn-default" onclick="limpiarFormulario()">
+                                            <i class="fa fa-refresh"></i> Limpiar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Información</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p><strong>Paso 1:</strong> Complete los datos del cliente</p>
+                                <p><strong>Paso 2:</strong> El cliente podrá ingresar a <strong>app.fixlytaller.com</strong> con sus credenciales</p>
+                                <p><strong>Paso 3:</strong> No se requiere activación por email</p>
+                                <hr>
+                                <p><i class="fa fa-info-circle"></i> El cliente recibirá sus credenciales por email automáticamente</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sistema Section -->
+                <div id="sistema-section" class="section" style="display: none;">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="page-header">
+                                Sistema
+                                <small>Estado y Configuración</small>
+                            </h1>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Estado del API</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p><strong>Endpoint:</strong> https://api.fixlytaller.com</p>
+                                <p><strong>Estado:</strong> <span id="api-status" class="label label-success">Online</span></p>
+                                <p><strong>Última verificación:</strong> <span id="last-check">--</span></p>
+                                <button class="btn btn-info" onclick="verificarSistema()">
+                                    <i class="fa fa-refresh"></i> Verificar Sistema
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Base de Datos</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p><strong>Tipo:</strong> Cloudflare KV Store</p>
+                                <p><strong>Clientes registrados:</strong> <span id="db-clientes">0</span></p>
+                                <p><strong>Espacio utilizado:</strong> <span id="db-space">Calculando...</span></p>
+                                <button class="btn btn-warning" onclick="limpiarBaseDatos()">
+                                    <i class="fa fa-trash"></i> Limpiar BD (Cuidado!)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'https://api.fixlytaller.com';
+        
+        // Variables globales
+        let clientes = [];
+        
+        // Funciones de navegación
+        function showSection(sectionName) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Actualizar navegación activa
+            document.querySelectorAll('.side-nav li').forEach(li => {
+                li.classList.remove('active');
+            });
+            
+            // Cargar datos específicos de la sección
+            switch(sectionName) {
+                case 'dashboard':
+                    cargarDashboard();
+                    break;
+                case 'clientes':
+                    cargarClientes();
+                    break;
+                case 'sistema':
+                    verificarSistema();
+                    break;
+            }
+        }
+        
+        // Función para cargar dashboard
+        async function cargarDashboard() {
+            try {
+                await cargarClientes();
+                document.getElementById('total-clientes').textContent = clientes.length;
+                document.getElementById('clientes-activos').textContent = clientes.length;
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+            }
+        }
+        
+        // Función para cargar clientes
+        async function cargarClientes() {
+            try {
+                showLoading('Cargando clientes...');
+                
+                const response = await fetch(`${API_BASE}/api/admin/usuarios`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer admin-token'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    clientes = data.usuarios || [];
+                    mostrarTablaClientes();
+                } else {
+                    throw new Error('Error al cargar clientes');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarMensaje('Error al cargar clientes: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Función para mostrar tabla de clientes
+        function mostrarTablaClientes() {
+            const tbody = document.getElementById('tabla-clientes');
+            
+            if (clientes.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            <p>No hay clientes registrados</p>
+                            <a href="#crear-cliente" onclick="showSection('crear-cliente')" class="btn btn-primary">
+                                <i class="fa fa-plus"></i> Crear primer cliente
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = clientes.map((cliente, index) => `
+                <tr id="cliente-${cliente.id || index}">
+                    <td>${index + 1}</td>
+                    <td><strong>${cliente.usuario || cliente.username}</strong></td>
+                    <td><code>${cliente.password || '******'}</code></td>
+                    <td>${cliente.nombre || cliente.name}</td>
+                    <td>${cliente.telefono || cliente.phone || '-'}</td>
+                    <td>${cliente.email || '-'}</td>
+                    <td>${formatearFecha(cliente.fechaCreacion || cliente.createdAt)}</td>
+                    <td>
+                        <a href="https://app.fixlytaller.com?u=${cliente.usuario}&p=${cliente.password}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-login" 
+                           title="Conectarse como este usuario">
+                            <i class="fa fa-user"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editarCliente('${cliente.id || index}')" title="Modificar">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarCliente('${cliente.id || index}')" title="Eliminar">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Función para crear cliente
+        document.getElementById('form-crear-cliente').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const clienteData = {
+                username: formData.get('usuario'),
+                password: formData.get('password'),
+                name: formData.get('nombre'),
+                email: formData.get('email'),
+                phone: formData.get('telefono')
+            };
+            
+            try {
+                showLoading('Creando cliente...');
+                
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(clienteData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    mostrarMensaje('Cliente creado exitosamente. Se envió email con las credenciales.', 'success');
+                    this.reset();
+                    setTimeout(() => {
+                        showSection('clientes');
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Error al crear cliente');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarMensaje('Error al crear cliente: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        });
+        
+        // Función para generar password automática
+        function generarPassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let password = '';
+            for (let i = 0; i < 8; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('password').value = password;
+        }
+        
+        // Función para limpiar formulario
+        function limpiarFormulario() {
+            document.getElementById('form-crear-cliente').reset();
+        }
+        
+        // Función para eliminar cliente
+        async function eliminarCliente(clienteId) {
+            if (!confirm('¿Está seguro de que desea eliminar este cliente?')) {
+                return;
+            }
+            
+            try {
+                // Aquí implementarías la lógica de eliminación
+                mostrarMensaje('Funcionalidad de eliminación en desarrollo', 'info');
+            } catch (error) {
+                mostrarMensaje('Error al eliminar cliente: ' + error.message, 'danger');
+            }
+        }
+        
+        // Función para editar cliente
+        function editarCliente(clienteId) {
+            mostrarMensaje('Funcionalidad de edición en desarrollo', 'info');
+        }
+        
+        // Función para verificar sistema
+        async function verificarSistema() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const status = response.ok ? 'Online' : 'Offline';
+                const statusClass = response.ok ? 'label-success' : 'label-danger';
+                
+                document.getElementById('api-status').textContent = status;
+                document.getElementById('api-status').className = `label ${statusClass}`;
+                document.getElementById('last-check').textContent = new Date().toLocaleString();
+                
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'Error';
+                document.getElementById('api-status').className = 'label label-danger';
+            }
+        }
+        
+        // Función para mostrar mensajes
+        function mostrarMensaje(texto, tipo = 'info') {
+            const alertClass = `alert alert-${tipo}`;
+            const mensaje = `
+                <div class="${alertClass} alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    ${texto}
+                </div>
+            `;
+            
+            // Mostrar en la sección activa
+            const activeSection = document.querySelector('.section:not([style*="display: none"])');
+            if (activeSection) {
+                const mensajesContainer = activeSection.querySelector('[id*="mensajes"]') || 
+                                        activeSection.querySelector('.col-lg-12');
+                if (mensajesContainer) {
+                    mensajesContainer.insertAdjacentHTML('afterbegin', mensaje);
+                    
+                    // Auto-remove después de 5 segundos
+                    setTimeout(() => {
+                        const alert = mensajesContainer.querySelector('.alert');
+                        if (alert) alert.remove();
+                    }, 5000);
+                }
+            }
+        }
+        
+        // Funciones auxiliares
+        function showLoading(texto = 'Cargando...') {
+            // Implementar loading spinner si es necesario
+            console.log('Loading:', texto);
+        }
+        
+        function hideLoading() {
+            // Ocultar loading spinner
+            console.log('Loading hidden');
+        }
+        
+        function formatearFecha(fecha) {
+            if (!fecha) return '-';
+            return new Date(fecha).toLocaleDateString('es-ES');
+        }
+        
+        function logout() {
+            if (confirm('¿Está seguro de que desea salir?')) {
+                // Implementar logout
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function limpiarBaseDatos() {
+            if (confirm('¿CUIDADO! ¿Está seguro de que desea limpiar toda la base de datos? Esta acción no se puede deshacer.')) {
+                mostrarMensaje('Funcionalidad de limpieza en desarrollo', 'warning');
+            }
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar dashboard inicial
+            cargarDashboard();
+            
+            // Verificar sistema cada 5 minutos
+            setInterval(verificarSistema, 5 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>
