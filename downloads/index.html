@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Mundo Electrónico Multi-tenant - Archivos de Deployment</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #333; font-size: 2.5em; margin-bottom: 10px; }
+        .header p { color: #666; font-size: 1.2em; }
+        .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .file-card { background: #f8f9fa; border-radius: 15px; padding: 25px; border-left: 5px solid #007bff; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .file-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .file-card h3 { color: #333; margin-bottom: 10px; font-size: 1.3em; }
+        .file-card p { color: #666; margin-bottom: 15px; line-height: 1.5; }
+        .file-card .size { color: #999; font-size: 0.9em; margin-bottom: 15px; }
+        .download-btn { display: inline-block; background: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.3s ease; }
+        .download-btn:hover { background: #0056b3; }
+        .primary-file { border-left-color: #28a745; }
+        .primary-file .download-btn { background: #28a745; }
+        .primary-file .download-btn:hover { background: #1e7e34; }
+        .instructions { background: #e3f2fd; border-radius: 15px; padding: 30px; margin-top: 30px; }
+        .instructions h2 { color: #1976d2; margin-bottom: 20px; }
+        .instructions ol { margin-left: 20px; }
+        .instructions li { margin-bottom: 10px; color: #333; }
+        .badge { display: inline-block; background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Mundo Electrónico Multi-tenant</h1>
+            <p>Archivos listos para deployment a Cloudflare Pages</p>
+        </div>
+
+        <div class="files">
+            <div class="file-card primary-file">
+                <h3>🎯 DEPLOYMENT-PACKAGE.tar.gz <span class="badge">RECOMENDADO</span></h3>
+                <p>Paquete completo con todo el sistema multi-tenant. Subir este archivo directamente a Cloudflare Pages.</p>
+                <div class="size">Tamaño: 8KB</div>
+                <a href="DEPLOYMENT-PACKAGE.tar.gz" download class="download-btn">⬇️ Descargar Paquete Completo</a>
+            </div>
+
+            <div class="file-card">
+                <h3>📄 mundo-electronico-LOGIN.html</h3>
+                <p>Página de login multi-tenant. Renombrar a <code>index.html</code> al subir manualmente.</p>
+                <div class="size">Tamaño: 13KB</div>
+                <a href="mundo-electronico-LOGIN.html" download class="download-btn">⬇️ Descargar Login</a>
+            </div>
+
+            <div class="file-card">
+                <h3>📊 mundo-electronico-DASHBOARD.html</h3>
+                <p>Dashboard multi-tenant con separación de datos por usuario. Renombrar a <code>dashboard.html</code>.</p>
+                <div class="size">Tamaño: 25KB</div>
+                <a href="mundo-electronico-DASHBOARD.html" download class="download-btn">⬇️ Descargar Dashboard</a>
+            </div>
+
+            <div class="file-card">
+                <h3>🔄 mundo-electronico-REDIRECTS.txt</h3>
+                <p>Configuración de routing SPA. Renombrar a <code>_redirects</code> (sin extensión).</p>
+                <div class="size">Tamaño: 327 bytes</div>
+                <a href="mundo-electronico-REDIRECTS.txt" download class="download-btn">⬇️ Descargar Redirects</a>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2>📋 Instrucciones de Deployment</h2>
+            <ol>
+                <li><strong>Opción 1 (Recomendado):</strong> Descargar <code>DEPLOYMENT-PACKAGE.tar.gz</code> y subirlo directamente a Cloudflare Pages</li>
+                <li><strong>Opción 2 (Manual):</strong> Descargar los 3 archivos individuales, renombrarlos correctamente y subirlos uno por uno</li>
+                <li><strong>Ir a Cloudflare:</strong> <a href="https://dash.cloudflare.com/pages" target="_blank">https://dash.cloudflare.com/pages</a></li>
+                <li><strong>Buscar proyecto:</strong> "fixlytaller" o "app.fixlytaller.com"</li>
+                <li><strong>Deploy:</strong> Click "Create deployment" y subir el archivo</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.file-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.background = '#f0f8ff';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.background = '#f8f9fa';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
