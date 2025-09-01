@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Test Live - Fixly Worker Deploy</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 1000px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .worker-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-card { 
+            background: white; 
+            border: 1px solid #e9ecef; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 5px solid #28a745; background: #d4edda; }
+        .error { border-left: 5px solid #dc3545; background: #f8d7da; }
+        .warning { border-left: 5px solid #ffc107; background: #fff3cd; }
+        
+        button { 
+            background: #007bff; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        button.success { background: #28a745; }
+        button.error { background: #dc3545; }
+        
+        pre { 
+            background: #f8f9fa; 
+            padding: 12px; 
+            border-radius: 6px; 
+            overflow-x: auto; 
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .input-group { 
+            margin: 10px 0; 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        input { 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 14px;
+        }
+        
+        .url-select { width: 400px; }
+        .medium { width: 180px; }
+        .small { width: 120px; }
+        
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        .status-ok { background: #28a745; color: white; }
+        .status-error { background: #dc3545; color: white; }
+        .status-pending { background: #6c757d; color: white; }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Test Live - Fixly Worker</h1>
+        <p>Verificación en tiempo real del deploy v4.1.0-login-fixed</p>
+    </div>
+
+    <!-- Selector de Worker URL -->
+    <div class="worker-selector">
+        <h3>🌐 Configuración de Worker</h3>
+        <div class="input-group">
+            <label><strong>Selecciona tu Worker:</strong></label>
+            <select id="workerSelect" class="url-select" onchange="updateWorkerUrl()">
+                <option value="https://fixly-backend.oscarellas.workers.dev">Worker URL: fixly-backend.oscarellas.workers.dev</option>
+                <option value="https://api.fixlytaller.com">Dominio personalizado: api.fixlytaller.com</option>
+                <option value="custom">🔧 URL personalizada...</option>
+            </select>
+        </div>
+        <div class="input-group" id="customUrlGroup" style="display: none;">
+            <input type="url" id="customUrl" class="url-select" placeholder="https://tu-worker-url.com">
+            <button onclick="setCustomUrl()">✅ Usar URL</button>
+        </div>
+        <div class="quick-actions">
+            <button onclick="testAll()" id="testAllBtn">🚀 Probar Todo</button>
+            <button onclick="clearResults()">🧹 Limpiar</button>
+            <span id="currentWorker" style="margin-left: 15px; font-weight: bold;"></span>
+        </div>
+    </div>
+
+    <!-- Test 1: Health Check -->
+    <div class="test-card">
+        <h3>🩺 Health Check <span class="status status-pending" id="status1">PENDIENTE</span></h3>
+        <p>Verificar que el Worker muestre versión 4.1.0-login-fixed</p>
+        <button onclick="test1()" id="btn1">🔍 Check Health</button>
+        <div id="result1"></div>
+    </div>
+
+    <!-- Test 2: Admin Login -->
+    <div class="test-card">
+        <h3>🔐 Admin Login <span class="status status-pending" id="status2">PENDIENTE</span></h3>
+        <p>Login con credenciales de administrador: admin / fixly2024!</p>
+        <div class="input-group">
+            <input type="text" id="adminUser" value="admin" class="medium">
+            <input type="password" id="adminPass" value="fixly2024!" class="medium">
+            <button onclick="test2()" id="btn2">🚪 Login</button>
+        </div>
+        <div id="result2"></div>
+    </div>
+
+    <!-- Test 3: Crear Usuario Manual -->
+    <div class="test-card">
+        <h3>👤 Crear Usuario Manual <span class="status status-pending" id="status3">PENDIENTE</span></h3>
+        <p>Probar creación con credenciales manuales (nueva funcionalidad)</p>
+        <div class="input-group">
+            <input type="text" id="empresa" value="Taller Live Test" class="medium">
+            <input type="email" id="email" value="test@fixlytaller.com" class="medium">
+            <input type="text" id="telefono" value="987654321" class="small">
+        </div>
+        <div class="input-group">
+            <input type="text" id="usuarioManual" value="live_test_user" class="medium" placeholder="Usuario manual">
+            <input type="password" id="passwordManual" value="fix_2025_LIVE" class="medium" placeholder="Password manual">
+            <button onclick="test3()" id="btn3">👥 Crear</button>
+        </div>
+        <div id="result3"></div>
+    </div>
+
+    <!-- Test 4: Login Usuario Creado -->
+    <div class="test-card">
+        <h3>🔑 Login Usuario <span class="status status-pending" id="status4">PENDIENTE</span></h3>
+        <p>Login con usuario creado manualmente</p>
+        <div class="input-group">
+            <input type="text" id="testUser" class="medium" readonly placeholder="Usuario creado">
+            <input type="password" id="testPass" class="medium" readonly placeholder="Password creado">
+            <button onclick="test4()" id="btn4" disabled>🔐 Login</button>
+        </div>
+        <div id="result4"></div>
+    </div>
+
+    <!-- Test 5: Email & Telegram -->
+    <div class="test-card">
+        <h3>📧 Notificaciones <span class="status status-pending" id="status5">PENDIENTE</span></h3>
+        <p>Verificar envío de email y notificación Telegram</p>
+        <button onclick="test5()" id="btn5">📬 Test Notificaciones</button>
+        <div id="result5"></div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="test-card" id="summary" style="display: none;">
+        <h3>📊 Resumen de Pruebas</h3>
+        <div id="summaryContent"></div>
+    </div>
+
+    <script>
+        let WORKER_URL = 'https://fixly-backend.oscarellas.workers.dev';
+        let testResults = {};
+
+        function updateWorkerUrl() {
+            const select = document.getElementById('workerSelect');
+            const customGroup = document.getElementById('customUrlGroup');
+            
+            if (select.value === 'custom') {
+                customGroup.style.display = 'flex';
+            } else {
+                customGroup.style.display = 'none';
+                WORKER_URL = select.value;
+                updateCurrentWorkerDisplay();
+            }
+        }
+
+        function setCustomUrl() {
+            WORKER_URL = document.getElementById('customUrl').value.trim();
+            document.getElementById('customUrlGroup').style.display = 'none';
+            updateCurrentWorkerDisplay();
+        }
+
+        function updateCurrentWorkerDisplay() {
+            document.getElementById('currentWorker').textContent = `Usando: ${WORKER_URL}`;
+        }
+
+        async function makeRequest(endpoint, method = 'GET', body = null) {
+            try {
+                const config = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    }
+                };
+
+                if (body) {
+                    config.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(WORKER_URL + endpoint, config);
+                const data = await response.json();
+                
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    ok: false,
+                    error: error.message,
+                    data: { error: 'Network error: ' + error.message }
+                };
+            }
+        }
+
+        function showResult(testNum, success, data) {
+            const resultDiv = document.getElementById(`result${testNum}`);
+            const statusSpan = document.getElementById(`status${testNum}`);
+            const button = document.getElementById(`btn${testNum}`);
+            
+            resultDiv.className = success ? 'success' : 'error';
+            resultDiv.innerHTML = `
+                <h4>${success ? '✅ Éxito' : '❌ Error'}</h4>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+
+            statusSpan.className = success ? 'status status-ok' : 'status status-error';
+            statusSpan.textContent = success ? 'OK' : 'ERROR';
+            
+            button.className = success ? 'success' : 'error';
+            button.disabled = false;
+
+            testResults[testNum] = success;
+            checkAllComplete();
+        }
+
+        // Test 1: Health Check
+        async function test1() {
+            document.getElementById('btn1').disabled = true;
+            const result = await makeRequest('/health');
+            
+            const success = result.ok && result.data.version === '4.1.0-login-fixed';
+            showResult(1, success, result.data);
+        }
+
+        // Test 2: Admin Login
+        async function test2() {
+            document.getElementById('btn2').disabled = true;
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPass').value;
+            
+            const result = await makeRequest('/api/login', 'POST', {
+                username: username,
+                password: password
+            });
+            
+            showResult(2, result.ok, result.data);
+        }
+
+        // Test 3: Crear Usuario Manual
+        async function test3() {
+            document.getElementById('btn3').disabled = true;
+            const empresa = document.getElementById('empresa').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const usuarioManual = document.getElementById('usuarioManual').value;
+            const passwordManual = document.getElementById('passwordManual').value;
+
+            const result = await makeRequest('/api/generate-code', 'POST', {
+                empresa: empresa,
+                email: email,
+                telefono: telefono,
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: usuarioManual,
+                passwordManual: passwordManual
+            });
+
+            if (result.ok && result.data.username && result.data.password) {
+                document.getElementById('testUser').value = result.data.username;
+                document.getElementById('testPass').value = result.data.password;
+                document.getElementById('btn4').disabled = false;
+            }
+
+            showResult(3, result.ok, result.data);
+        }
+
+        // Test 4: Login Usuario
+        async function test4() {
+            document.getElementById('btn4').disabled = true;
+            const username = document.getElementById('testUser').value;
+            const password = document.getElementById('testPass').value;
+
+            const result = await makeRequest('/api/login', 'POST', {
+                username: username,
+                password: password
+            });
+
+            showResult(4, result.ok, result.data);
+        }
+
+        // Test 5: Notificaciones
+        async function test5() {
+            document.getElementById('btn5').disabled = true;
+            
+            const result = await makeRequest('/api/generate-code', 'POST', {
+                empresa: 'Test Notificaciones Live',
+                email: 'notifications@fixlytaller.com',
+                telefono: '111222333',
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: 'notif_test_' + Date.now(),
+                passwordManual: 'notif_test_pass'
+            });
+
+            const success = result.ok && result.data.notificaciones && 
+                           (result.data.notificaciones.email === 'Enviado' || 
+                            result.data.notificaciones.telegram === 'Enviado');
+
+            showResult(5, success, result.data);
+        }
+
+        // Probar todo automáticamente
+        async function testAll() {
+            document.getElementById('testAllBtn').disabled = true;
+            
+            await test1();
+            await new Promise(r => setTimeout(r, 1000));
+            
+            await test2();
+            await new Promise(r => setTimeout(r, 1000));
+            
+            await test3();
+            await new Promise(r => setTimeout(r, 2000));
+            
+            if (!document.getElementById('btn4').disabled) {
+                await test4();
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            await test5();
+            
+            document.getElementById('testAllBtn').disabled = false;
+        }
+
+        function clearResults() {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`result${i}`).innerHTML = '';
+                document.getElementById(`status${i}`).className = 'status status-pending';
+                document.getElementById(`status${i}`).textContent = 'PENDIENTE';
+                document.getElementById(`btn${i}`).className = '';
+                document.getElementById(`btn${i}`).disabled = false;
+            }
+            document.getElementById('btn4').disabled = true;
+            document.getElementById('summary').style.display = 'none';
+            testResults = {};
+        }
+
+        function checkAllComplete() {
+            const completedTests = Object.keys(testResults).length;
+            if (completedTests >= 4) {
+                showSummary();
+            }
+        }
+
+        function showSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const summaryContent = document.getElementById('summaryContent');
+            
+            const totalTests = Object.keys(testResults).length;
+            const successfulTests = Object.values(testResults).filter(r => r).length;
+            
+            let html = `<p><strong>Resultados:</strong> ${successfulTests}/${totalTests} pruebas exitosas</p>`;
+            
+            if (successfulTests === totalTests) {
+                html += '<p style="color: #28a745; font-weight: bold;">🎉 ¡Deploy completamente exitoso! Todas las funcionalidades están operativas.</p>';
+            } else if (successfulTests >= 3) {
+                html += '<p style="color: #ffc107; font-weight: bold;">⚠️ Deploy mayormente exitoso. Algunas funciones necesitan atención.</p>';
+            } else {
+                html += '<p style="color: #dc3545; font-weight: bold;">❌ Deploy con problemas significativos. Revisar configuración.</p>';
+            }
+
+            html += `<p><strong>Worker URL:</strong> ${WORKER_URL}</p>`;
+            html += `<p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>`;
+
+            summaryContent.innerHTML = html;
+            summaryDiv.style.display = 'block';
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentWorkerDisplay();
+        });
+    </script>
+</body>
+</html>

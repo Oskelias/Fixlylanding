@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Verificación Rápida - Deploy Worker v4.1.0</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 900px; 
+            margin: 50px auto; 
+            padding: 20px; 
+            background: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-card { 
+            background: white; 
+            border: 1px solid #e9ecef; 
+            padding: 25px; 
+            margin: 20px 0; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 5px solid #28a745; background: #d4edda; }
+        .error { border-left: 5px solid #dc3545; background: #f8d7da; }
+        .warning { border-left: 5px solid #ffc107; background: #fff3cd; }
+        
+        button { 
+            background: #007bff; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600;
+            margin: 8px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #0056b3; transform: translateY(-1px); }
+        button:disabled { background: #6c757d; cursor: not-allowed; transform: none; }
+        
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            border: 1px solid #e9ecef;
+            font-size: 13px;
+        }
+        
+        .input-group { 
+            margin: 15px 0; 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        input[type="text"], input[type="email"], input[type="password"], input[type="url"] { 
+            padding: 12px; 
+            border: 2px solid #e9ecef; 
+            border-radius: 8px; 
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: #007bff; outline: none; }
+        
+        .url-input { width: 500px; }
+        .medium-input { width: 200px; }
+        .small-input { width: 150px; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-success { background: #28a745; color: white; }
+        .status-error { background: #dc3545; color: white; }
+        .status-pending { background: #6c757d; color: white; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Verificación de Deploy</h1>
+        <p>Worker v4.1.0 - Login Fixed & Manual Credentials</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- Configuración -->
+    <div class="test-card">
+        <h3>⚙️ Configuración del Worker</h3>
+        <div class="input-group">
+            <label><strong>URL del Worker:</strong></label>
+            <input type="url" id="workerUrl" class="url-input" 
+                   value="https://fixly-backend.tu-subdominio.workers.dev" 
+                   placeholder="https://tu-worker.workers.dev">
+            <button onclick="updateWorkerUrl()">✅ Actualizar</button>
+        </div>
+        <p><small>💡 Actualiza la URL con la dirección real de tu Cloudflare Worker</small></p>
+    </div>
+
+    <!-- Test 1: Health Check -->
+    <div class="test-card">
+        <h3>🩺 Test 1: Health Check 
+            <span class="status-badge status-pending" id="healthStatus">PENDIENTE</span>
+        </h3>
+        <p>Verifica que el Worker esté desplegado y mostrando la versión correcta (4.1.0-login-fixed).</p>
+        <button onclick="testHealth()" id="healthBtn">🔍 Verificar Deploy</button>
+        <div id="healthResult"></div>
+    </div>
+
+    <!-- Test 2: Admin Login -->
+    <div class="test-card">
+        <h3>🔐 Test 2: Login Admin 
+            <span class="status-badge status-pending" id="adminStatus">PENDIENTE</span>
+        </h3>
+        <p>Prueba las credenciales de administrador fijas: <code>admin / fixly2024!</code></p>
+        <div class="input-group">
+            <input type="text" id="adminUser" value="admin" placeholder="Usuario" class="medium-input">
+            <input type="password" id="adminPass" value="fixly2024!" placeholder="Contraseña" class="medium-input">
+            <button onclick="testAdminLogin()" id="adminBtn">🚪 Login Admin</button>
+        </div>
+        <div id="adminResult"></div>
+    </div>
+
+    <!-- Test 3: Crear Usuario Manual -->
+    <div class="test-card">
+        <h3>👤 Test 3: Crear Usuario Manual 
+            <span class="status-badge status-pending" id="userCreateStatus">PENDIENTE</span>
+        </h3>
+        <p>Prueba la creación de usuario con credenciales manuales (nueva funcionalidad).</p>
+        <div class="input-group">
+            <input type="text" id="empresa" value="Taller Test Deploy" placeholder="Empresa" class="medium-input">
+            <input type="email" id="email" value="test@fixlytaller.com" placeholder="Email" class="medium-input">
+            <input type="text" id="telefono" value="123456789" placeholder="Teléfono" class="small-input">
+        </div>
+        <div class="input-group">
+            <input type="text" id="usuarioManual" value="test_deploy_user" placeholder="Usuario Manual" class="medium-input">
+            <input type="password" id="passwordManual" value="fix_2025_TEST" placeholder="Password Manual" class="medium-input">
+            <button onclick="testUserCreation()" id="userCreateBtn">👥 Crear Usuario</button>
+        </div>
+        <div id="userCreateResult"></div>
+    </div>
+
+    <!-- Test 4: Login Usuario -->
+    <div class="test-card">
+        <h3>🔑 Test 4: Login Usuario Creado 
+            <span class="status-badge status-pending" id="userLoginStatus">PENDIENTE</span>
+        </h3>
+        <p>Prueba el login con el usuario recién creado (se auto-completa después del Test 3).</p>
+        <div class="input-group">
+            <input type="text" id="testUser" placeholder="Usuario (auto-llenado)" class="medium-input" readonly>
+            <input type="password" id="testPass" placeholder="Password (auto-llenado)" class="medium-input" readonly>
+            <button onclick="testUserLogin()" id="userLoginBtn" disabled>🔐 Login Usuario</button>
+        </div>
+        <div id="userLoginResult"></div>
+    </div>
+
+    <!-- Test 5: Verificación Email -->
+    <div class="test-card">
+        <h3>📧 Test 5: Verificación de Email 
+            <span class="status-badge status-pending" id="emailStatus">PENDIENTE</span>
+        </h3>
+        <p>Verifica si los emails se están enviando correctamente con MailChannels.</p>
+        <button onclick="testEmailFunctionality()" id="emailBtn">📬 Verificar Email</button>
+        <div id="emailResult"></div>
+    </div>
+
+    <!-- Resumen Final -->
+    <div class="test-card" id="summaryCard" style="display: none;">
+        <h3>📋 Resumen de Pruebas</h3>
+        <div id="summaryContent"></div>
+    </div>
+
+    <script>
+        let WORKER_URL = 'https://fixly-backend.tu-subdominio.workers.dev';
+        let completedTests = 0;
+        let totalTests = 5;
+
+        function updateWorkerUrl() {
+            WORKER_URL = document.getElementById('workerUrl').value.trim();
+            if (!WORKER_URL.startsWith('http')) {
+                WORKER_URL = 'https://' + WORKER_URL;
+            }
+            alert('✅ URL actualizada: ' + WORKER_URL);
+        }
+
+        function updateProgress() {
+            const progress = (completedTests / totalTests) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResult(elementId, statusId, btnId, success, data) {
+            const element = document.getElementById(elementId);
+            const statusElement = document.getElementById(statusId);
+            const btnElement = document.getElementById(btnId);
+            
+            element.className = success ? 'success' : 'error';
+            element.innerHTML = `
+                <h4>${success ? '✅ Éxito' : '❌ Error'}</h4>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+
+            statusElement.className = success ? 'status-badge status-success' : 'status-badge status-error';
+            statusElement.textContent = success ? 'ÉXITO' : 'ERROR';
+            
+            if (success) {
+                completedTests++;
+                updateProgress();
+            }
+
+            btnElement.disabled = false;
+        }
+
+        async function makeRequest(endpoint, method = 'GET', body = null) {
+            try {
+                const config = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    }
+                };
+
+                if (body) {
+                    config.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(WORKER_URL + endpoint, config);
+                const data = await response.json();
+                
+                return {
+                    success: response.ok,
+                    status: response.status,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message,
+                    data: { error: 'Network error: ' + error.message }
+                };
+            }
+        }
+
+        async function testHealth() {
+            document.getElementById('healthBtn').disabled = true;
+            const result = await makeRequest('/health');
+            
+            // Verificar específicamente la versión
+            if (result.success && result.data.version === '4.1.0-login-fixed') {
+                showResult('healthResult', 'healthStatus', 'healthBtn', true, result.data);
+            } else {
+                showResult('healthResult', 'healthStatus', 'healthBtn', false, {
+                    error: 'Versión incorrecta o Worker no actualizado',
+                    expected: '4.1.0-login-fixed',
+                    received: result.data?.version || 'No disponible',
+                    fullResponse: result.data
+                });
+            }
+        }
+
+        async function testAdminLogin() {
+            document.getElementById('adminBtn').disabled = true;
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPass').value;
+            
+            const result = await makeRequest('/api/login', 'POST', {
+                username: username,
+                password: password
+            });
+            
+            showResult('adminResult', 'adminStatus', 'adminBtn', result.success, result.data);
+        }
+
+        async function testUserCreation() {
+            document.getElementById('userCreateBtn').disabled = true;
+            const empresa = document.getElementById('empresa').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const usuarioManual = document.getElementById('usuarioManual').value;
+            const passwordManual = document.getElementById('passwordManual').value;
+
+            const result = await makeRequest('/api/generate-code', 'POST', {
+                empresa: empresa,
+                email: email,
+                telefono: telefono,
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: usuarioManual,
+                passwordManual: passwordManual
+            });
+
+            if (result.success && result.data.username && result.data.password) {
+                // Auto-llenar para el test de login
+                document.getElementById('testUser').value = result.data.username;
+                document.getElementById('testPass').value = result.data.password;
+                document.getElementById('userLoginBtn').disabled = false;
+            }
+
+            showResult('userCreateResult', 'userCreateStatus', 'userCreateBtn', result.success, result.data);
+        }
+
+        async function testUserLogin() {
+            document.getElementById('userLoginBtn').disabled = true;
+            const username = document.getElementById('testUser').value;
+            const password = document.getElementById('testPass').value;
+
+            if (!username || !password) {
+                showResult('userLoginResult', 'userLoginStatus', 'userLoginBtn', false, 
+                    { error: 'Primero crea un usuario en el Test 3' });
+                return;
+            }
+
+            const result = await makeRequest('/api/login', 'POST', {
+                username: username,
+                password: password
+            });
+
+            showResult('userLoginResult', 'userLoginStatus', 'userLoginBtn', result.success, result.data);
+        }
+
+        async function testEmailFunctionality() {
+            document.getElementById('emailBtn').disabled = true;
+            
+            // Este test verifica si el endpoint de creación de usuario incluye información sobre el email
+            const result = await makeRequest('/api/generate-code', 'POST', {
+                empresa: 'Test Email Verification',
+                email: 'email-test@fixlytaller.com',
+                telefono: '123456789',
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: 'email_test_user_' + Date.now(),
+                passwordManual: 'email_test_pass'
+            });
+
+            // Verificar si la respuesta incluye información sobre notificaciones
+            let emailSuccess = false;
+            if (result.success && result.data.notificaciones) {
+                emailSuccess = result.data.notificaciones.email === 'Enviado';
+            }
+
+            showResult('emailResult', 'emailStatus', 'emailBtn', emailSuccess, {
+                emailSent: emailSuccess,
+                telegramSent: result.data?.notificaciones?.telegram === 'Enviado',
+                fullResponse: result.data
+            });
+
+            // Mostrar resumen después del último test
+            setTimeout(showSummary, 1000);
+        }
+
+        function showSummary() {
+            const summaryCard = document.getElementById('summaryCard');
+            const summaryContent = document.getElementById('summaryContent');
+            
+            const tests = [
+                { name: 'Health Check', id: 'healthStatus' },
+                { name: 'Admin Login', id: 'adminStatus' },
+                { name: 'User Creation', id: 'userCreateStatus' },
+                { name: 'User Login', id: 'userLoginStatus' },
+                { name: 'Email Verification', id: 'emailStatus' }
+            ];
+
+            let summary = '<ul>';
+            let successCount = 0;
+
+            tests.forEach(test => {
+                const status = document.getElementById(test.id).textContent;
+                const success = status === 'ÉXITO';
+                if (success) successCount++;
+                
+                summary += `<li><strong>${test.name}:</strong> ${success ? '✅' : '❌'} ${status}</li>`;
+            });
+
+            summary += '</ul>';
+            summary += `<p><strong>Resultado:</strong> ${successCount}/${tests.length} pruebas exitosas</p>`;
+
+            if (successCount === tests.length) {
+                summary += '<p style="color: #28a745; font-weight: bold;">🎉 ¡Deploy completamente exitoso! Tu Worker está funcionando perfectamente.</p>';
+            } else if (successCount >= 3) {
+                summary += '<p style="color: #ffc107; font-weight: bold;">⚠️ Deploy mayormente exitoso, pero algunas funciones necesitan atención.</p>';
+            } else {
+                summary += '<p style="color: #dc3545; font-weight: bold;">❌ Deploy con problemas. Revisa la configuración del Worker.</p>';
+            }
+
+            summaryContent.innerHTML = summary;
+            summaryCard.style.display = 'block';
+        }
+
+        // Auto-focus en URL al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('workerUrl').focus();
+        });
+    </script>
+</body>
+</html>

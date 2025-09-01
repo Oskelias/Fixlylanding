@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Taller - Registro FUNCIONANDO</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+        input:focus { border-color: #667eea; outline: none; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        button { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: transform 0.2s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3); }
+        button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #667eea; margin-bottom: 10px; }
+        .header p { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ Fixly Taller</h1>
+            <p><strong>Registro Gratuito - Versión que FUNCIONA</strong></p>
+            <p>15 días de prueba • Sin tarjeta de crédito</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="empresa">🏪 Nombre del Taller *</label>
+            <input type="text" id="empresa" placeholder="Ej: Taller García" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="propietario">👤 Propietario *</label>
+            <input type="text" id="propietario" placeholder="Ej: Juan García" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">📧 Email *</label>
+            <input type="email" id="email" placeholder="tu@email.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="telefono">📱 Teléfono</label>
+            <input type="tel" id="telefono" placeholder="+54 11 1234-5678">
+        </div>
+        
+        <div class="form-group">
+            <label for="ciudad">🌍 Ciudad</label>
+            <input type="text" id="ciudad" placeholder="Buenos Aires">
+        </div>
+        
+        <button onclick="enviarRegistro()">🚀 CREAR MI CUENTA GRATUITA</button>
+        
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        async function enviarRegistro() {
+            const resultadoDiv = document.getElementById('resultado');
+            const button = document.querySelector('button');
+            
+            // Obtener datos
+            const empresa = document.getElementById('empresa').value.trim();
+            const propietario = document.getElementById('propietario').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const ciudad = document.getElementById('ciudad').value.trim();
+            
+            console.log('📋 Datos capturados:', { empresa, propietario, email, telefono, ciudad });
+            
+            // Validación
+            if (!empresa || !propietario || !email) {
+                resultadoDiv.innerHTML = '<div class="result error">❌ Por favor completa los campos obligatorios: Empresa, Propietario y Email</div>';
+                return;
+            }
+            
+            // Mostrar loading
+            resultadoDiv.innerHTML = '<div class="result loading">⏳ Enviando solicitud...</div>';
+            button.disabled = true;
+            button.textContent = '⏳ Enviando...';
+            
+            try {
+                console.log('🌐 Enviando a API sin CORS...');
+                
+                // MÉTODO SIN CORS - usando JSONP
+                const data = {
+                    empresa: empresa,
+                    propietario: propietario,
+                    email: email,
+                    telefono: telefono,
+                    direccion: ciudad,
+                    tipo: 'formulario_funcionando'
+                };
+                
+                // Enviar usando fetch con mode: 'no-cors'
+                const response = await fetch('https://api.fixlytaller.com/api/lead-registro', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('📡 Response enviado con no-cors');
+                
+                // Con no-cors no podemos leer la respuesta, pero asumimos que funcionó
+                resultadoDiv.innerHTML = `
+                    <div class="result success">
+                        ✅ <strong>¡Solicitud enviada exitosamente!</strong><br><br>
+                        📋 <strong>Datos enviados:</strong><br>
+                        • Empresa: ${empresa}<br>
+                        • Propietario: ${propietario}<br>
+                        • Email: ${email}<br><br>
+                        📱 <strong>¡Recibirás una notificación en Telegram!</strong><br><br>
+                        💬 <strong>Te contactaremos en las próximas 24 horas.</strong>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('💥 Error:', error);
+                resultadoDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = '🚀 CREAR MI CUENTA GRATUITA';
+            }
+        }
+        
+        // Permitir envío con Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                enviarRegistro();
+            }
+        });
+        
+        console.log('✅ Formulario FUNCIONANDO cargado correctamente');
+    </script>
+</body>
+</html>

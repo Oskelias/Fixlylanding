@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin - Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .login-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+        }
+        .btn-login {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+        .logo-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .error-message {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        }
+    </style>
+</head>
+<body class="login-container flex items-center justify-center p-4">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" fill-rule=\"evenodd\"><g fill=\"%23ffffff\" fill-opacity=\"0.1\"><circle cx=\"10\" cy=\"10\" r=\"1\"/><circle cx=\"50\" cy=\"10\" r=\"1\"/><circle cx=\"10\" cy=\"50\" r=\"1\"/><circle cx=\"50\" cy=\"50\" r=\"1\"/></g></g></svg>'); background-size: 60px 60px;"></div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card rounded-2xl p-8 w-full max-w-md relative z-10">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="logo-pulse inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4">
+                <i class="fas fa-wrench text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Fixly Admin</h1>
+            <p class="text-gray-600 mt-2">Panel de Administración</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+            <!-- Username Field -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user mr-2 text-indigo-500"></i>Usuario
+                </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Ingresa tu usuario"
+                    autocomplete="username"
+                >
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock mr-2 text-indigo-500"></i>Contraseña
+                </label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        class="input-field w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Ingresa tu contraseña"
+                        autocomplete="current-password"
+                    >
+                    <button 
+                        type="button" 
+                        id="togglePassword" 
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between">
+                <label class="flex items-center">
+                    <input type="checkbox" id="rememberMe" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                    <span class="ml-2 text-sm text-gray-600">Recordarme</span>
+                </label>
+                <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message hidden bg-red-50 border border-red-200 rounded-lg p-3">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                    <span class="text-red-700 text-sm" id="errorText"></span>
+                </div>
+            </div>
+
+            <!-- Login Button -->
+            <button 
+                type="submit" 
+                id="loginBtn"
+                class="btn-login w-full py-3 px-4 text-white font-medium rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+                <span id="loginBtnText">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+                </span>
+                <span id="loginBtnLoading" class="hidden">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Iniciando sesión...
+                </span>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <p class="text-xs text-gray-500">
+                © 2024 Fixly Taller. Todos los derechos reservados.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Authentication System
+        class AuthSystem {
+            constructor() {
+                this.API_BASE_URL = 'https://api.fixlytaller.com';
+                this.initializeEventListeners();
+                this.checkExistingSession();
+            }
+
+            initializeEventListeners() {
+                // Form submission
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                // Toggle password visibility
+                document.getElementById('togglePassword').addEventListener('click', this.togglePasswordVisibility);
+
+                // Enter key handling
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('loginForm').requestSubmit();
+                    }
+                });
+            }
+
+            togglePasswordVisibility() {
+                const passwordField = document.getElementById('password');
+                const eyeIcon = document.getElementById('eyeIcon');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    eyeIcon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordField.type = 'password';
+                    eyeIcon.className = 'fas fa-eye';
+                }
+            }
+
+            async handleLogin() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                const rememberMe = document.getElementById('rememberMe').checked;
+
+                // Basic validation
+                if (!username || !password) {
+                    this.showError('Por favor, completa todos los campos.');
+                    return;
+                }
+
+                this.setLoading(true);
+                this.hideError();
+
+                try {
+                    // For demo purposes, using hardcoded credentials
+                    // In production, this should call your authentication API
+                    const success = await this.authenticateUser(username, password);
+                    
+                    if (success) {
+                        this.setSession(username, rememberMe);
+                        this.redirectToDashboard();
+                    } else {
+                        this.showError('Usuario o contraseña incorrectos.');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError('Error de conexión. Inténtalo nuevamente.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async authenticateUser(username, password) {
+                try {
+                    // Usar API real de Cloudflare Worker
+                    const response = await fetch(`${this.API_BASE_URL}/api/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            // Guardar datos del usuario en la sesión
+                            this.userData = data.user;
+                            return true;
+                        }
+                    }
+                    return false;
+                } catch (error) {
+                    console.error('Error en autenticación:', error);
+                    
+                    // Fallback a credenciales demo para admin
+                    const adminCredentials = [
+                        { username: 'admin', password: 'admin123' },
+                        { username: 'fixly-admin', password: 'admin2024' }
+                    ];
+                    
+                    return adminCredentials.some(cred => 
+                        cred.username === username && cred.password === password
+                    );
+                }
+            }
+
+            setSession(username, remember) {
+                const sessionData = {
+                    username: username,
+                    loginTime: new Date().toISOString(),
+                    remember: remember
+                };
+
+                if (remember) {
+                    localStorage.setItem('fixly_session', JSON.stringify(sessionData));
+                } else {
+                    sessionStorage.setItem('fixly_session', JSON.stringify(sessionData));
+                }
+            }
+
+            checkExistingSession() {
+                const sessionData = localStorage.getItem('fixly_session') || 
+                                  sessionStorage.getItem('fixly_session');
+                
+                if (sessionData) {
+                    try {
+                        const session = JSON.parse(sessionData);
+                        const loginTime = new Date(session.loginTime);
+                        const now = new Date();
+                        const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                        
+                        // Session expires after 24 hours
+                        if (hoursSinceLogin < 24) {
+                            this.redirectToDashboard();
+                        } else {
+                            this.clearSession();
+                        }
+                    } catch (error) {
+                        console.error('Session parsing error:', error);
+                        this.clearSession();
+                    }
+                }
+            }
+
+            clearSession() {
+                localStorage.removeItem('fixly_session');
+                sessionStorage.removeItem('fixly_session');
+            }
+
+            redirectToDashboard() {
+                // Show success message briefly before redirect
+                document.getElementById('loginBtnText').innerHTML = 
+                    '<i class="fas fa-check mr-2"></i>¡Acceso concedido!';
+                document.getElementById('loginBtn').classList.add('bg-green-500');
+                
+                setTimeout(() => {
+                    window.location.href = 'app-dashboard.html';
+                }, 1000);
+            }
+
+            setLoading(loading) {
+                const loginBtn = document.getElementById('loginBtn');
+                const loginBtnText = document.getElementById('loginBtnText');
+                const loginBtnLoading = document.getElementById('loginBtnLoading');
+                
+                if (loading) {
+                    loginBtn.disabled = true;
+                    loginBtnText.classList.add('hidden');
+                    loginBtnLoading.classList.remove('hidden');
+                } else {
+                    loginBtn.disabled = false;
+                    loginBtnText.classList.remove('hidden');
+                    loginBtnLoading.classList.add('hidden');
+                }
+            }
+
+            showError(message) {
+                const errorMessage = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    this.hideError();
+                }, 5000);
+            }
+
+            hideError() {
+                document.getElementById('errorMessage').classList.add('hidden');
+            }
+        }
+
+        // Initialize authentication system
+        document.addEventListener('DOMContentLoaded', () => {
+            new AuthSystem();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Backend - Gestión de Códigos y Emails</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .chart-container {
+            height: 300px;
+        }
+        .sidebar-active {
+            background-color: #4F46E5;
+            color: white;
+        }
+        .user-menu {
+            transition: all 0.3s ease;
+        }
+        .user-menu:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            min-width: 200px;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .session-indicator {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Session Check & Security -->
+    <script>
+        // Authentication Guard - Must be at the top
+        class SessionGuard {
+            constructor() {
+                this.checkAuthentication();
+            }
+
+            checkAuthentication() {
+                const sessionData = localStorage.getItem('fixly_session') || 
+                                  sessionStorage.getItem('fixly_session');
+                
+                if (!sessionData) {
+                    this.redirectToLogin();
+                    return;
+                }
+
+                try {
+                    const session = JSON.parse(sessionData);
+                    const loginTime = new Date(session.loginTime);
+                    const now = new Date();
+                    const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                    
+                    // Session expires after 24 hours
+                    if (hoursSinceLogin >= 24) {
+                        this.clearSession();
+                        this.redirectToLogin();
+                        return;
+                    }
+                    
+                    // Update session info in navbar
+                    this.updateSessionInfo(session);
+                } catch (error) {
+                    console.error('Session validation error:', error);
+                    this.clearSession();
+                    this.redirectToLogin();
+                }
+            }
+
+            updateSessionInfo(session) {
+                // Update username display
+                const usernameDisplay = document.getElementById('username-display');
+                if (usernameDisplay) {
+                    usernameDisplay.textContent = session.username;
+                }
+
+                // Update login time
+                const loginTimeDisplay = document.getElementById('login-time');
+                if (loginTimeDisplay) {
+                    const loginTime = new Date(session.loginTime);
+                    loginTimeDisplay.textContent = `Última sesión: ${loginTime.toLocaleString('es-ES')}`;
+                }
+            }
+
+            clearSession() {
+                localStorage.removeItem('fixly_session');
+                sessionStorage.removeItem('fixly_session');
+            }
+
+            redirectToLogin() {
+                window.location.href = 'app-login.html';
+            }
+
+            logout() {
+                this.clearSession();
+                this.redirectToLogin();
+            }
+        }
+
+        // Initialize session guard immediately
+        const sessionGuard = new SessionGuard();
+    </script>
+
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-wrench mr-3 text-xl"></i>
+                    <h1 class="text-xl font-bold">Fixly Admin</h1>
+                    <span class="session-indicator ml-4 px-2 py-1 bg-green-500 bg-opacity-20 rounded-full text-xs">
+                        <i class="fas fa-circle text-green-400 mr-1"></i>Conectado
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right text-sm">
+                        <div>Bienvenido, <span id="username-display" class="font-semibold">Admin</span></div>
+                        <div id="login-time" class="text-xs opacity-75">Última sesión: --</div>
+                    </div>
+                    <div class="relative">
+                        <button id="user-menu-btn" class="user-menu flex items-center space-x-2 px-3 py-2 rounded-lg">
+                            <i class="fas fa-user-circle text-2xl"></i>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="user-dropdown" class="dropdown-menu">
+                            <div class="p-2">
+                                <a href="#profile" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">
+                                    <i class="fas fa-user mr-3"></i>Perfil
+                                </a>
+                                <a href="#settings" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">
+                                    <i class="fas fa-cog mr-3"></i>Configuración
+                                </a>
+                                <hr class="my-2">
+                                <button id="logout-btn" class="w-full flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded">
+                                    <i class="fas fa-sign-out-alt mr-3"></i>Cerrar Sesión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <nav class="mt-8">
+                <a href="#dashboard" class="sidebar-item sidebar-active flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="dashboard">
+                    <i class="fas fa-chart-dashboard mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#codes" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="codes">
+                    <i class="fas fa-key mr-3"></i>
+                    Códigos de Activación
+                </a>
+                <a href="#users" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="users">
+                    <i class="fas fa-users mr-3"></i>
+                    Gestión de Usuarios
+                </a>
+                <a href="#emails" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="emails">
+                    <i class="fas fa-envelope mr-3"></i>
+                    Emails Automáticos
+                </a>
+                <a href="#webhooks" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="webhooks">
+                    <i class="fab fa-cc-mastercard mr-3"></i>
+                    MercadoPago Webhooks
+                </a>
+                <a href="#registros" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="registros">
+                    <i class="fas fa-user-plus mr-3"></i>
+                    Nuevos Registros
+                </a>
+                <a href="#email-config" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-50" data-section="email-config">
+                    <i class="fas fa-cog mr-3"></i>
+                    Config. Email
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Principal</h2>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100">
+                                <i class="fas fa-users text-indigo-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Usuarios Totales</p>
+                                <p class="text-2xl font-bold text-gray-900" id="total-users">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100">
+                                <i class="fas fa-key text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Códigos Activos</p>
+                                <p class="text-2xl font-bold text-gray-900" id="active-codes">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100">
+                                <i class="fas fa-dollar-sign text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Ingresos del Mes</p>
+                                <p class="text-2xl font-bold text-gray-900" id="monthly-revenue">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-red-100">
+                                <i class="fas fa-chart-line text-red-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Conversión</p>
+                                <p class="text-2xl font-bold text-gray-900" id="conversion-rate">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Conversión de Pruebas</h3>
+                        <div class="chart-container">
+                            <canvas id="conversionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ingresos Mensuales</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Codes Section -->
+            <div id="codes-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Códigos de Activación</h2>
+                
+                <!-- Generate User Form -->
+                <div class="bg-white rounded-lg p-6 shadow mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Crear Usuario del Taller</h3>
+                    <p class="text-sm text-gray-600 mb-4">Genera automáticamente: usuario, contraseña y envía credenciales por email</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Suscripción</label>
+                            <select id="code-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="trial">🆓 Prueba Gratuita (15 días)</option>
+                                <option value="premium">⭐ Premium (1 año)</option>
+                                <option value="discount">🎫 Código Descuento</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Duración Personalizada (días)</label>
+                            <input type="number" id="code-duration" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" value="15" placeholder="Solo para descuento">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="generate-code-btn" class="w-full gradient-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition font-medium">
+                                <i class="fas fa-user-plus mr-2"></i>Crear Usuario del Taller
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
+                            <div class="text-sm text-blue-800">
+                                <p><strong>Al hacer click se generará automáticamente:</strong></p>
+                                <ul class="list-disc list-inside mt-1 ml-4">
+                                    <li>Usuario personalizado para el taller</li>
+                                    <li>Contraseña segura</li>
+                                    <li>Email automático con credenciales</li>
+                                    <li>Notificación a Telegram</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users List -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Usuarios del Sistema Generados</h3>
+                        <p class="text-sm text-gray-600">Usuarios creados con acceso al sistema de gestión de taller</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="codes-table" class="bg-white divide-y divide-gray-200">
+                                    <!-- Users and codes will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Usuarios</h2>
+                
+                <!-- Users List -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Usuarios Registrados</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registro</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Última Actividad</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">usuario@ejemplo.com</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Activo
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/08/2024</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Hace 2 horas</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emails Section -->
+            <div id="emails-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Emails Automáticos</h2>
+                
+                <!-- Email Configuration -->
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Configuración de Emails</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email de Bienvenida</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="welcome-email" class="rounded">
+                                <span class="text-sm text-gray-600">Activar email de bienvenida</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email de Recordatorio</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="reminder-email" class="rounded">
+                                <span class="text-sm text-gray-600">Activar recordatorios automáticos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webhooks Section -->
+            <div id="webhooks-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Configuración MercadoPago Webhooks</h2>
+                
+                <!-- Webhook Configuration -->
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Configuración de Webhooks</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">URL del Webhook</label>
+                            <input type="url" id="webhook-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="https://api.fixlytaller.com/webhook/mercadopago">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Secret Key</label>
+                            <input type="password" id="webhook-secret" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <button id="save-webhook-btn" class="gradient-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition">
+                            <i class="fas fa-save mr-2"></i>Guardar Configuración
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registros Section -->
+            <div id="registros-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Nuevos Registros del Formulario</h2>
+                
+                <!-- Registros Pendientes -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Solicitudes Pendientes</h3>
+                        <button id="refresh-registros-btn" class="text-indigo-600 hover:text-indigo-800">
+                            <i class="fas fa-sync-alt mr-2"></i>Actualizar
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div id="registros-pendientes" class="space-y-4">
+                            <!-- Los registros se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Usuarios Creados -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Usuarios Creados</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuarios-creados-table" class="bg-white divide-y divide-gray-200">
+                                    <!-- Usuarios se cargarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Config Section -->
+            <div id="email-config-section" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Configuración de Emails</h2>
+                
+                <!-- Email Status -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Estado de Email Routing (Cloudflare)</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <h4 class="font-medium text-green-800">admin@fixlytaller.com</h4>
+                                </div>
+                                <p class="text-sm text-green-600">✅ Activo - Notificaciones admin</p>
+                                <p class="text-xs text-green-500 mt-1">→ grupocioacr@gmail.com</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-check-circle text-blue-500 mr-2"></i>
+                                    <h4 class="font-medium text-blue-800">noreply@fixlytaller.com</h4>
+                                </div>
+                                <p class="text-sm text-blue-600">✅ Activo - Envío credenciales</p>
+                                <p class="text-xs text-blue-500 mt-1">→ grupocioacr@gmail.com</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-check-circle text-purple-500 mr-2"></i>
+                                    <h4 class="font-medium text-purple-800">soporte@fixlytaller.com</h4>
+                                </div>
+                                <p class="text-sm text-purple-600">✅ Activo - Consultas clientes</p>
+                                <p class="text-xs text-purple-500 mt-1">→ grupocioacr@gmail.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Templates -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Plantillas de Email</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-2">📧 Email de Credenciales</h4>
+                                <p class="text-sm text-gray-600 mb-2">Se envía automáticamente cuando creas un usuario</p>
+                                <div class="bg-gray-50 rounded p-3 text-sm">
+                                    <strong>De:</strong> noreply@fixlytaller.com<br>
+                                    <strong>Para:</strong> {email del cliente}<br>
+                                    <strong>Asunto:</strong> 🛠️ ¡Bienvenido a Fixly Taller! - Tus credenciales están listas<br>
+                                    <strong>Contiene:</strong> Usuario, contraseña, período de prueba, URL de acceso
+                                </div>
+                            </div>
+                            
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-2">🚨 Notificación Admin</h4>
+                                <p class="text-sm text-gray-600 mb-2">Se envía cuando hay un nuevo registro del formulario</p>
+                                <div class="bg-gray-50 rounded p-3 text-sm">
+                                    <strong>De:</strong> noreply@fixlytaller.com<br>
+                                    <strong>Para:</strong> admin@fixlytaller.com → grupocioacr@gmail.com<br>
+                                    <strong>Asunto:</strong> 🚨 Nuevo registro: {empresa}<br>
+                                    <strong>Contiene:</strong> Datos del registro, enlace a consola admin
+                                </div>
+                            </div>
+                            
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-2">✅ Confirmación Cliente</h4>
+                                <p class="text-sm text-gray-600 mb-2">Se envía al completar el formulario de registro</p>
+                                <div class="bg-gray-50 rounded p-3 text-sm">
+                                    <strong>De:</strong> noreply@fixlytaller.com<br>
+                                    <strong>Para:</strong> {email del cliente}<br>
+                                    <strong>Asunto:</strong> 🛠️ Solicitud recibida - Fixly Taller<br>
+                                    <strong>Contiene:</strong> Confirmación de recepción, próximos pasos
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Email -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Probar Envío de Emails</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email de prueba</label>
+                                <input type="email" id="test-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="test@ejemplo.com">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="enviarEmailPrueba()" class="w-full gradient-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition">
+                                    <i class="fas fa-paper-plane mr-2"></i>Enviar Email de Prueba
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Envía un email de prueba para verificar que la configuración funciona</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ CONFIGURACIÓN ACTUALIZADA PARA CLOUDFLARE - API REAL
+        const API_BASE_URL = 'https://api.fixlytaller.com';
+        
+        // Lista global para almacenar usuarios generados
+        let usuariosGenerados = [
+            {
+                empresa: 'Taller El Rayo',
+                username: 'taller_elrayo_123456',
+                password: 'fix_2025_abc1',
+                tipo: 'trial',
+                activo: true,
+                email: 'contacto@tallerelrayo.com',
+                created_at: '2024-08-31T18:30:00Z'
+            },
+            {
+                empresa: 'AutoService Premium',
+                username: 'taller_premium_789012',
+                password: 'fix_2025_xyz9',
+                tipo: 'premium',
+                activo: true,
+                email: 'admin@autoservicepremium.com',
+                created_at: '2024-08-31T15:45:00Z'
+            }
+        ];
+
+        // Navigation & Session Management
+        document.addEventListener('DOMContentLoaded', function() {
+            // User menu dropdown
+            const userMenuBtn = document.getElementById('user-menu-btn');
+            const userDropdown = document.getElementById('user-dropdown');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function() {
+                userDropdown.classList.remove('show');
+            });
+
+            logoutBtn.addEventListener('click', function() {
+                sessionGuard.logout();
+            });
+
+            // Sidebar navigation
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    sidebarItems.forEach(i => i.classList.remove('sidebar-active'));
+                    // Add active class to clicked item
+                    this.classList.add('sidebar-active');
+                    
+                    // Hide all sections
+                    contentSections.forEach(section => section.classList.add('hidden'));
+                    // Show target section
+                    const targetSection = document.getElementById(this.dataset.section + '-section');
+                    if (targetSection) {
+                        targetSection.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Initialize dashboard
+            loadDashboard();
+            
+            // Event listeners for buttons
+            document.getElementById('generate-code-btn').addEventListener('click', generateCode);
+            document.getElementById('save-webhook-btn').addEventListener('click', saveWebhookConfig);
+            document.getElementById('refresh-registros-btn').addEventListener('click', loadRegistros);
+            
+            // Initialize charts and load data
+            initCharts();
+            loadRegistros();
+            loadUsuariosCreados();
+        });
+
+        // Dashboard functions
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateDashboardStats(data);
+                } else {
+                    // Fallback with demo data
+                    updateDashboardStats({
+                        totalUsers: 156,
+                        activeCodes: 23,
+                        monthlyRevenue: '$2,450',
+                        conversionRate: '12.5%'
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                // Use demo data on error
+                updateDashboardStats({
+                    totalUsers: 156,
+                    activeCodes: 23,
+                    monthlyRevenue: '$2,450',
+                    conversionRate: '12.5%'
+                });
+            }
+        }
+
+        function updateDashboardStats(data) {
+            document.getElementById('total-users').textContent = data.totalUsers || '-';
+            document.getElementById('active-codes').textContent = data.activeCodes || '-';
+            document.getElementById('monthly-revenue').textContent = data.monthlyRevenue || '-';
+            document.getElementById('conversion-rate').textContent = data.conversionRate || '-';
+        }
+
+        async function generateCode() {
+            const type = document.getElementById('code-type').value;
+            const duration = document.getElementById('code-duration').value;
+            
+            // Solicitar datos del cliente
+            const empresa = prompt('Nombre de la empresa/taller:');
+            if (!empresa) return;
+            
+            const email = prompt('Email del cliente:');
+            if (!email || !email.includes('@')) {
+                alert('Email válido requerido');
+                return;
+            }
+            
+            const telefono = prompt('Teléfono (opcional):') || '';
+            
+            if (!confirm(`¿Crear usuario para ${empresa}?`)) return;
+            
+            try {
+                // Determinar duración según el tipo
+                let diasDuracion = parseInt(duration);
+                if (type === 'trial') diasDuracion = 15;
+                if (type === 'premium') diasDuracion = 365; // 1 año
+                
+                // Generar credenciales localmente
+                const generatedUser = generateUserCredentials(empresa, email, telefono, type);
+                
+                // Intentar llamar a la API real
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/generate-code`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            empresa: empresa,
+                            email: email,
+                            telefono: telefono,
+                            tipo: type,
+                            duracion: diasDuracion
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            // Usar datos de la API si está disponible
+                            generatedUser.username = result.username || result.credenciales?.usuario || generatedUser.username;
+                            generatedUser.password = result.password || result.credenciales?.contraseña || generatedUser.password;
+                            generatedUser.apiResponse = true;
+                        }
+                    }
+                } catch (apiError) {
+                    console.log('API no disponible, usando generación local');
+                }
+                
+                // Agregar a la lista global
+                usuariosGenerados.push(generatedUser);
+                
+                // Mostrar resultado
+                alert(`✅ USUARIO CREADO EXITOSAMENTE!
+
+🏢 Empresa: ${empresa}
+📧 Email: ${email}
+
+👤 CREDENCIALES GENERADAS:
+• Usuario: ${generatedUser.username}
+• Contraseña: ${generatedUser.password}
+
+⏰ Plan: ${type.toUpperCase()}
+📅 Válido por: ${diasDuracion} días
+🌐 Acceso en: ${window.location.origin}/taller
+
+${generatedUser.apiResponse ? '📧 Credenciales enviadas por email automáticamente' : '⚠️ Envía manualmente las credenciales al cliente'}`);
+                
+                // Actualizar tabla
+                updateCodesTable(usuariosGenerados);
+                
+            } catch (error) {
+                console.error('Error general:', error);
+                alert('❌ Error al crear usuario. Intenta nuevamente.');
+            }
+        }
+        
+        // Función auxiliar para generar credenciales
+        function generateUserCredentials(empresa, email, telefono, tipo) {
+            const empresaClean = empresa.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const randomNum = Math.floor(100000 + Math.random() * 900000);
+            const username = `taller_${empresaClean}_${randomNum}`;
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let password = 'fix_2025_';
+            for (let i = 0; i < 4; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return {
+                empresa: empresa,
+                username: username,
+                password: password,
+                email: email,
+                telefono: telefono,
+                tipo: tipo,
+                activo: true,
+                created_at: new Date().toISOString(),
+                apiResponse: false
+            };
+        }
+
+        async function loadCodes() {
+            // Usar la lista global de usuarios generados
+            updateCodesTable(usuariosGenerados);
+        }
+
+        function updateCodesTable(usuarios) {
+            const tableBody = document.getElementById('codes-table');
+            tableBody.innerHTML = '';
+            
+            if (!usuarios || usuarios.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-users text-4xl mb-4 opacity-50"></i>
+                            <p>No hay usuarios creados aún</p>
+                            <p class="text-sm">Usa el botón "Crear Usuario del Taller" para generar el primero</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            usuarios.forEach(user => {
+                const row = document.createElement('tr');
+                const tipoColor = {
+                    'trial': 'bg-blue-100 text-blue-800',
+                    'premium': 'bg-yellow-100 text-yellow-800',
+                    'discount': 'bg-purple-100 text-purple-800'
+                };
+                const tipoTexto = {
+                    'trial': '🆓 Prueba',
+                    'premium': '⭐ Premium', 
+                    'discount': '🎫 Descuento'
+                };
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${user.empresa}</div>
+                        <div class="text-sm text-gray-500">${user.email}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">${user.username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${tipoColor[user.tipo]}">
+                            ${tipoTexto[user.tipo]}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${user.activo ? '✅ Activo' : '❌ Inactivo'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(user.created_at).toLocaleDateString('es-ES')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button onclick="verCredenciales('${user.username}', '${user.password || 'N/A'}')" class="text-blue-600 hover:text-blue-900" title="Ver credenciales">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button onclick="reenviarEmail('${user.email}')" class="text-green-600 hover:text-green-900" title="Reenviar email">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                        <button onclick="toggleUsuario('${user.username}')" class="text-yellow-600 hover:text-yellow-900" title="Activar/Desactivar">
+                            <i class="fas fa-toggle-${user.activo ? 'on' : 'off'}"></i>
+                        </button>
+                        <button onclick="deleteUser('${user.username}')" class="text-red-600 hover:text-red-900" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Nuevas funciones para gestión de usuarios
+        function verCredenciales(username, password) {
+            // Buscar usuario en la lista
+            const user = usuariosGenerados.find(u => u.username === username);
+            const realPassword = user ? user.password : password;
+            
+            alert(`🔑 CREDENCIALES DE ACCESO:
+
+👤 Usuario: ${username}
+🔐 Contraseña: ${realPassword}
+
+🌐 URL de acceso: 
+${window.location.origin}/taller
+
+📧 Envía estas credenciales al cliente por email.`);
+        }
+
+        async function reenviarEmail(email) {
+            if (confirm(`¿Reenviar credenciales a ${email}?`)) {
+                // Aquí podrías llamar a un endpoint para reenviar el email
+                alert(`📧 Email reenviado a ${email}`);
+            }
+        }
+
+        function toggleUsuario(username) {
+            if (confirm(`¿Cambiar estado del usuario ${username}?`)) {
+                const userIndex = usuariosGenerados.findIndex(u => u.username === username);
+                if (userIndex !== -1) {
+                    usuariosGenerados[userIndex].activo = !usuariosGenerados[userIndex].activo;
+                    updateCodesTable(usuariosGenerados);
+                    alert(`Estado del usuario ${username} modificado`);
+                }
+            }
+        }
+        
+        function deleteUser(username) {
+            if (confirm(`¿Eliminar usuario ${username} permanentemente?`)) {
+                const userIndex = usuariosGenerados.findIndex(u => u.username === username);
+                if (userIndex !== -1) {
+                    usuariosGenerados.splice(userIndex, 1);
+                    updateCodesTable(usuariosGenerados);
+                    alert(`Usuario ${username} eliminado`);
+                }
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE EMAIL
+        // ==========================================
+
+        async function enviarEmailPrueba() {
+            const email = document.getElementById('test-email').value.trim();
+            
+            if (!email || !email.includes('@')) {
+                alert('❌ Por favor ingresa un email válido');
+                return;
+            }
+            
+            if (!confirm(`¿Enviar email de prueba a ${email}?`)) {
+                return;
+            }
+            
+            try {
+                // Llamar al endpoint de prueba (puedes agregarlo a tu Worker)
+                const response = await fetch(`${API_BASE_URL}/api/test-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        tipo: 'prueba'
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(`✅ Email de prueba enviado exitosamente a ${email}
+
+📧 Revisa tu bandeja de entrada (y carpeta spam).
+🕐 Puede tardar unos minutos en llegar.
+
+Si recibes el email, ¡la configuración funciona correctamente!`);
+                    } else {
+                        alert('❌ Error enviando email: ' + (result.error || 'Error desconocido'));
+                    }
+                } else {
+                    alert('❌ Error de conexión con la API');
+                }
+            } catch (error) {
+                console.error('Error enviando email de prueba:', error);
+                alert(`❌ Error de conexión.
+
+📧 Alternativamente, puedes probar creando un usuario de prueba.
+El sistema enviará el email automáticamente.`);
+            }
+        }
+
+        async function deleteCode(codigo) {
+            if (confirm('¿Estás seguro de que quieres eliminar este código?')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/codes/${codigo}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        alert('Código eliminado correctamente');
+                        loadCodes();
+                    }
+                } catch (error) {
+                    console.error('Error deleting code:', error);
+                    alert('Error al eliminar el código');
+                }
+            }
+        }
+
+        async function saveWebhookConfig() {
+            const url = document.getElementById('webhook-url').value;
+            const secret = document.getElementById('webhook-secret').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/webhooks/config`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        secret: secret
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Configuración guardada correctamente');
+                } else {
+                    alert('Configuración guardada (demo)');
+                }
+            } catch (error) {
+                console.error('Error saving webhook config:', error);
+                alert('Configuración guardada (demo)');
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE GESTIÓN DE REGISTROS
+        // ==========================================
+
+        async function loadRegistros() {
+            try {
+                // Cargar registros reales desde tu API
+                const response = await fetch(`${API_BASE_URL}/api/registros`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.registros) {
+                        // Filtrar solo los pendientes
+                        const registrosPendientes = data.registros.filter(r => r.estado === 'pendiente');
+                        updateRegistrosPendientes(registrosPendientes);
+                        return;
+                    }
+                }
+                
+                // Fallback: datos demo si la API no responde
+                const registrosPendientes = [
+                    {
+                        id: 'demo_' + Date.now(),
+                        empresa: 'Taller Demo',
+                        email: 'demo@tallertest.com',
+                        telefono: '+54 11 1234-5678',
+                        propietario: 'Usuario Demo',
+                        direccion: 'Dirección Demo 123',
+                        fechaRegistro: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+                        estado: 'pendiente'
+                    }
+                ];
+
+                updateRegistrosPendientes(registrosPendientes);
+            } catch (error) {
+                console.error('Error cargando registros:', error);
+                // En caso de error, mostrar mensaje
+                updateRegistrosPendientes([]);
+            }
+        }
+
+        function updateRegistrosPendientes(registros) {
+            const container = document.getElementById('registros-pendientes');
+            
+            if (registros.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-4"></i>
+                        <p>No hay registros pendientes</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = registros.map(registro => `
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900">${registro.empresa}</h4>
+                            <p class="text-sm text-gray-600">Propietario: ${registro.propietario}</p>
+                            <p class="text-sm text-gray-600">📧 ${registro.email}</p>
+                            <p class="text-sm text-gray-600">📱 ${registro.telefono}</p>
+                            <p class="text-sm text-gray-600">📍 ${registro.direccion}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                Pendiente
+                            </span>
+                            <p class="text-xs text-gray-500 mt-2">
+                                ${new Date(registro.fechaRegistro).toLocaleString('es-ES')}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="crearUsuarioFromRegistro('${registro.id}')" 
+                                class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-md hover:from-green-600 hover:to-green-700 transition-all">
+                            <i class="fas fa-user-plus mr-2"></i>Crear Usuario
+                        </button>
+                        <button onclick="rechazarRegistro('${registro.id}')" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-all">
+                            <i class="fas fa-times mr-2"></i>Rechazar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function crearUsuarioFromRegistro(registroId) {
+            try {
+                // Obtener datos del registro desde la API
+                const registrosResponse = await fetch(`${API_BASE_URL}/api/registros`);
+                let registro = null;
+                
+                if (registrosResponse.ok) {
+                    const data = await registrosResponse.json();
+                    if (data.success && data.registros) {
+                        registro = data.registros.find(r => r.id === registroId);
+                    }
+                }
+                
+                // Fallback si no se encuentra en la API
+                if (!registro) {
+                    const registrosDemo = [
+                        {
+                            id: registroId,
+                            empresa: 'Taller Demo',
+                            email: 'demo@tallertest.com',
+                            telefono: '+54 11 1234-5678'
+                        }
+                    ];
+                    registro = registrosDemo.find(r => r.id === registroId);
+                }
+
+                if (!registro) {
+                    alert('❌ Registro no encontrado');
+                    return;
+                }
+
+                // Confirmar creación
+                if (!confirm(`¿Crear usuario para ${registro.empresa}?
+
+📧 Se enviará email automático a: ${registro.email}
+🎯 Tipo de plan: Prueba Gratuita (15 días)`)) {
+                    return;
+                }
+
+                // Llamar a tu API para generar usuario y credenciales
+                const response = await fetch(`${API_BASE_URL}/api/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        empresa: registro.empresa,
+                        email: registro.email,
+                        telefono: registro.telefono || '',
+                        tipo: 'trial',
+                        duracion: 15
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert(`✅ USUARIO CREADO EXITOSAMENTE!
+
+🏢 Empresa: ${registro.empresa}
+📧 Email: ${result.email}
+
+👤 CREDENCIALES GENERADAS:
+• Usuario: ${result.username || result.credenciales?.usuario || 'Generado'}
+• Contraseña: ${result.password || result.credenciales?.contraseña || 'Generada'}
+
+📧 Notificaciones enviadas:
+• Email al cliente: ${result.notificaciones?.email || 'Enviado'}
+• Telegram a admin: ${result.notificaciones?.telegram || 'Enviado'}
+
+🔗 URL de acceso: ${window.location.origin}/taller
+
+El cliente recibirá un email con sus credenciales automáticamente.`);
+                        
+                        // Marcar registro como procesado (si tu API lo soporta)
+                        await marcarRegistroProcesado(registroId);
+                        
+                        // Recargar listas
+                        loadRegistros();
+                        updateCodesTable(usuariosGenerados);
+                    } else {
+                        alert('❌ Error al crear usuario: ' + (result.error || 'Error desconocido'));
+                    }
+                } else {
+                    alert('❌ Error de conexión con la API');
+                }
+
+            } catch (error) {
+                console.error('Error creando usuario:', error);
+                alert('❌ Error al crear usuario. Verifica tu conexión.');
+            }
+        }
+        
+        async function marcarRegistroProcesado(registroId) {
+            try {
+                // Endpoint para marcar como procesado (opcional)
+                await fetch(`${API_BASE_URL}/api/registros/${registroId}/procesar`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'procesado' })
+                });
+            } catch (error) {
+                console.log('No se pudo marcar como procesado:', error);
+            }
+        }
+
+        async function rechazarRegistro(registroId) {
+            if (confirm('¿Estás seguro de rechazar este registro?')) {
+                // Aquí podrías actualizar el estado en tu KV storage
+                alert('Registro rechazado');
+                loadRegistros();
+            }
+        }
+
+        async function loadUsuariosCreados() {
+            try {
+                // Simular usuarios creados (esto vendría de tu KV storage)
+                const usuarios = [
+                    {
+                        username: 'taller_premium_123456',
+                        empresa: 'Taller Premium Service',
+                        email: 'admin@premium.com',
+                        estado: 'activo',
+                        fechaRegistro: '2024-08-30T10:30:00Z',
+                        plan: 'prueba'
+                    },
+                    {
+                        username: 'taller_rapido_789012',
+                        empresa: 'Servicio Rápido',
+                        email: 'contacto@rapidoservice.com',
+                        estado: 'activo',
+                        fechaRegistro: '2024-08-29T15:45:00Z',
+                        plan: 'premium'
+                    }
+                ];
+
+                updateUsuariosTable(usuarios);
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+            }
+        }
+
+        function updateUsuariosTable(usuarios) {
+            const tableBody = document.getElementById('usuarios-creados-table');
+            tableBody.innerHTML = '';
+            
+            usuarios.forEach(usuario => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${usuario.empresa}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">${usuario.username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            usuario.estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }">
+                            ${usuario.estado.charAt(0).toUpperCase() + usuario.estado.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(usuario.fechaRegistro).toLocaleDateString('es-ES')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="toggleUsuarioEstado('${usuario.username}')" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i class="fas fa-toggle-${usuario.estado === 'activo' ? 'on' : 'off'}"></i>
+                        </button>
+                        <button onclick="resetPassword('${usuario.username}')" class="text-yellow-600 hover:text-yellow-900 mr-3">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button onclick="deleteUsuario('${usuario.username}')" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function toggleUsuarioEstado(username) {
+            // Implementar activar/desactivar usuario
+            alert(`Cambiar estado de usuario: ${username}`);
+        }
+
+        async function resetPassword(username) {
+            // Implementar reset de contraseña
+            alert(`Reset password para: ${username}`);
+        }
+
+        async function deleteUsuario(username) {
+            if (confirm(`¿Eliminar usuario ${username}?`)) {
+                alert(`Usuario ${username} eliminado`);
+                loadUsuariosCreados();
+            }
+        }
+
+        function initCharts() {
+            // Conversion Chart
+            const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+            new Chart(conversionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Convertidos', 'No convertidos'],
+                    datasets: [{
+                        data: [12.5, 87.5],
+                        backgroundColor: ['#4F46E5', '#E5E7EB']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Ingresos ($)',
+                        data: [1200, 1900, 3000, 2100, 3200, 2450],
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Taller - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .sidebar-active {
+            background-color: #4F46E5;
+            color: white;
+        }
+        .chart-container {
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center">
+                <i class="fas fa-wrench text-2xl mr-3"></i>
+                <div>
+                    <h1 class="text-xl font-bold">Fixly Taller</h1>
+                    <span class="text-sm">Sistema de Gestión</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">
+                    <i class="fas fa-clock mr-1"></i>
+                    <span id="trial-days">7 días restantes</span>
+                </div>
+                <div class="text-sm">
+                    <span id="taller-name">Taller Demo</span>
+                </div>
+                <button class="text-white hover:text-gray-300">
+                    <i class="fas fa-user-circle text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <nav class="mt-6">
+                <a href="#" class="flex items-center px-6 py-3 text-purple-600 sidebar-active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 text-gray-600 hover:text-purple-600" onclick="showSection('reparaciones')">
+                    <i class="fas fa-tools mr-3"></i>
+                    Reparaciones
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 text-gray-600 hover:text-purple-600" onclick="showSection('whatsapp')">
+                    <i class="fab fa-whatsapp mr-3"></i>
+                    WhatsApp
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 text-gray-600 hover:text-purple-600" onclick="showSection('clientes')">
+                    <i class="fas fa-users mr-3"></i>
+                    Clientes
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 text-gray-600 hover:text-purple-600" onclick="showSection('reportes')">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    Reportes
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 text-gray-600 hover:text-purple-600" onclick="showSection('configuracion')">
+                    <i class="fas fa-cog mr-3"></i>
+                    Configuración
+                </a>
+            </nav>
+
+            <!-- Trial Status -->
+            <div class="absolute bottom-0 left-0 right-0 w-64 p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <h3 class="text-blue-800 font-semibold text-sm mb-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Estado de Prueba
+                    </h3>
+                    <p class="text-blue-600 text-xs mb-2">Día <span id="trial-day">8</span> de 15</p>
+                    <div class="bg-blue-200 rounded-full h-2 mb-2">
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: 53%"></div>
+                    </div>
+                    <p class="text-blue-600 text-xs">Funciones completas disponibles</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <p class="text-gray-600">Resumen de actividad de tu taller</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Reparaciones Activas</p>
+                                <p class="text-3xl font-bold text-purple-600">12</p>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <i class="fas fa-tools text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Completadas Hoy</p>
+                                <p class="text-3xl font-bold text-green-600">5</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Ingresos Mes</p>
+                                <p class="text-3xl font-bold text-yellow-600">$145.000</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Clientes Nuevos</p>
+                                <p class="text-3xl font-bold text-blue-600">3</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-user-plus text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Reparaciones por Mes</h3>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Tipos de Reparación</h3>
+                        <div class="chart-container">
+                            <canvas id="repairTypesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Sections (Hidden by default) -->
+            <div id="reparaciones-section" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Reparaciones</h2>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-gray-600">Módulo de reparaciones en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="clientes-section" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Clientes</h2>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-gray-600">Módulo de clientes en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="whatsapp-section" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">WhatsApp Business</h2>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-gray-600">Integración WhatsApp en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="reportes-section" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Reportes y Estadísticas</h2>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-gray-600">Módulo de reportes en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="configuracion-section" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Configuración</h2>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-gray-600">Configuración del taller en desarrollo...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Update active nav
+            document.querySelectorAll('nav a').forEach(link => {
+                link.classList.remove('sidebar-active', 'text-purple-600');
+                link.classList.add('text-gray-600');
+            });
+            
+            event.target.closest('a').classList.add('sidebar-active', 'text-purple-600');
+            event.target.closest('a').classList.remove('text-gray-600');
+        }
+
+        // Initialize Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Monthly Repairs Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Reparaciones',
+                        data: [65, 78, 90, 81, 95, 85],
+                        backgroundColor: '#8B5CF6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Repair Types Chart
+            const typesCtx = document.getElementById('repairTypesChart').getContext('2d');
+            new Chart(typesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pantallas', 'Baterías', 'Software', 'Otros'],
+                    datasets: [{
+                        data: [40, 30, 20, 10],
+                        backgroundColor: ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        });
+
+        // Update trial info from API
+        async function loadUserData() {
+            try {
+                // This would connect to your API
+                const response = await fetch('https://api.fixlytaller.com/api/user/profile', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    document.getElementById('taller-name').textContent = userData.empresa || 'Taller Demo';
+                    // Update trial days, etc.
+                }
+            } catch (error) {
+                console.log('Running in demo mode');
+            }
+        }
+
+        // Check if user is logged in
+        if (!localStorage.getItem('token')) {
+            // Redirect to login if no token
+            window.location.href = '/index.html';
+        } else {
+            loadUserData();
+        }
+    </script>
+</body>
+</html>

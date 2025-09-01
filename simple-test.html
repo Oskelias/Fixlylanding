@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly - Test Simple</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; width: 100%; }
+        button:hover { background: #218838; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fixly Taller - Registro</h1>
+    <p><strong>Test Súper Simple</strong></p>
+    
+    <div class="form-group">
+        <label for="empresa">Nombre del Taller:</label>
+        <input type="text" id="empresa" placeholder="Ej: Taller García">
+    </div>
+    
+    <div class="form-group">
+        <label for="propietario">Propietario:</label>
+        <input type="text" id="propietario" placeholder="Ej: Juan García">
+    </div>
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="tu@email.com">
+    </div>
+    
+    <div class="form-group">
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" placeholder="+54 11 1234-5678">
+    </div>
+    
+    <div class="form-group">
+        <label for="ciudad">Ciudad:</label>
+        <input type="text" id="ciudad" placeholder="Buenos Aires">
+    </div>
+    
+    <button onclick="enviarFormulario()">🚀 CREAR MI CUENTA GRATUITA</button>
+    
+    <div id="resultado"></div>
+
+    <script>
+        console.log('🧪 Script cargado correctamente');
+        
+        async function enviarFormulario() {
+            console.log('🚀 Función enviarFormulario ejecutada');
+            
+            const resultadoDiv = document.getElementById('resultado');
+            const empresa = document.getElementById('empresa').value;
+            const propietario = document.getElementById('propietario').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const ciudad = document.getElementById('ciudad').value;
+            
+            console.log('📋 Datos capturados:', { empresa, propietario, email, telefono, ciudad });
+            
+            // Validación básica
+            if (!empresa || !propietario || !email) {
+                resultadoDiv.innerHTML = '<div class="result error">❌ Por favor completa los campos obligatorios: Empresa, Propietario y Email</div>';
+                return;
+            }
+            
+            // Mostrar loading
+            resultadoDiv.innerHTML = '<div class="result loading">⏳ Enviando solicitud...</div>';
+            
+            try {
+                console.log('🌐 Enviando request a API...');
+                
+                const response = await fetch('https://api.fixlytaller.com/api/lead-registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        empresa: empresa,
+                        propietario: propietario,
+                        email: email,
+                        telefono: telefono,
+                        direccion: ciudad,
+                        tipo: 'simple_test_form'
+                    })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                const resultado = await response.json();
+                console.log('📋 Response data:', resultado);
+                
+                if (resultado.success) {
+                    resultadoDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ <strong>¡Solicitud enviada exitosamente!</strong><br>
+                            📋 Lead ID: ${resultado.leadId}<br>
+                            📱 Telegram: ${resultado.notificaciones?.telegram || 'N/A'}<br>
+                            💬 Te contactaremos en las próximas 24 horas.
+                        </div>
+                    `;
+                } else {
+                    resultadoDiv.innerHTML = `<div class="result error">❌ Error: ${resultado.error}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('💥 Error:', error);
+                resultadoDiv.innerHTML = `<div class="result error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+        
+        // Test que el JavaScript funcione
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM cargado correctamente');
+        });
+    </script>
+</body>
+</html>

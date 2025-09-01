@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Email Debug - Fixly</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold mb-6">🔧 Diagnóstico de Email - Fixly Taller</h1>
+        
+        <div class="space-y-6">
+            <!-- Test directo MailChannels -->
+            <div class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">📧 Test Directo MailChannels</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input type="email" id="testEmail" placeholder="tu-email@gmail.com" 
+                           class="px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+                    <button onclick="testDirectMailChannels()" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Enviar Test Directo
+                    </button>
+                </div>
+                <div id="mailchannelsResult" class="hidden mt-4 p-3 rounded"></div>
+            </div>
+
+            <!-- Test API Fixly -->
+            <div class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">🚀 Test API Fixly</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input type="email" id="apiTestEmail" placeholder="tu-email@gmail.com" 
+                           class="px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+                    <button onclick="testFixlyAPI()" 
+                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Test API Generate-Code
+                    </button>
+                </div>
+                <div id="apiResult" class="hidden mt-4 p-3 rounded"></div>
+            </div>
+
+            <!-- Verificación Cloudflare -->
+            <div class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">☁️ Verificación Cloudflare</h3>
+                <button onclick="checkCloudflareConfig()" 
+                        class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Verificar Configuración
+                </button>
+                <div id="cloudflareResult" class="hidden mt-4 p-3 rounded"></div>
+            </div>
+
+            <!-- Logs y Debug -->
+            <div class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">📝 Logs de Debug</h3>
+                <div id="debugLogs" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm h-64 overflow-y-auto">
+                    [INIT] Sistema de diagnóstico iniciado...\n
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://api.fixlytaller.com';
+        
+        function log(message) {
+            const debugLogs = document.getElementById('debugLogs');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLogs.innerHTML += `[${timestamp}] ${message}\n`;
+            debugLogs.scrollTop = debugLogs.scrollHeight;
+        }
+
+        async function testDirectMailChannels() {
+            const email = document.getElementById('testEmail').value;
+            const resultDiv = document.getElementById('mailchannelsResult');
+            
+            if (!email.includes('@')) {
+                alert('Email válido requerido');
+                return;
+            }
+            
+            log(`Iniciando test directo MailChannels a ${email}`);
+            
+            try {
+                // Test directo a MailChannels API
+                const mailData = {
+                    personalizations: [{
+                        to: [{ email: email }]
+                    }],
+                    from: {
+                        email: 'noreply@fixlytaller.com',
+                        name: 'Fixly Taller Test'
+                    },
+                    subject: '🧪 Test Directo MailChannels',
+                    content: [{
+                        type: 'text/html',
+                        value: `
+                            <h1>✅ Test Directo Exitoso!</h1>
+                            <p>Este email fue enviado directamente a MailChannels API.</p>
+                            <p>Si recibes este email, la configuración de MailChannels funciona.</p>
+                            <p>Timestamp: ${new Date().toISOString()}</p>
+                        `
+                    }]
+                };
+
+                log('Enviando request a MailChannels...');
+                
+                const response = await fetch('https://api.mailchannels.net/tx/v1/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mailData)
+                });
+
+                log(`Respuesta MailChannels: ${response.status}`);
+                
+                if (response.ok) {
+                    resultDiv.className = 'mt-4 p-3 rounded bg-green-100 text-green-800';
+                    resultDiv.innerHTML = '✅ Email enviado exitosamente via MailChannels!';
+                    log('✅ Email enviado exitosamente');
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Error MailChannels: ${errorText}`);
+                    resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Error: ${response.status} - ${errorText}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`);
+                resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error de conexión: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        async function testFixlyAPI() {
+            const email = document.getElementById('apiTestEmail').value;
+            const resultDiv = document.getElementById('apiResult');
+            
+            if (!email.includes('@')) {
+                alert('Email válido requerido');
+                return;
+            }
+            
+            log(`Iniciando test API Fixly a ${email}`);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        empresa: 'Test Debug',
+                        email: email,
+                        telefono: '+54 11 1234-5678',
+                        tipo: 'trial',
+                        duracion: 15
+                    })
+                });
+
+                log(`Respuesta API Fixly: ${response.status}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ API respuesta: ${JSON.stringify(result)}`);
+                    
+                    resultDiv.className = 'mt-4 p-3 rounded bg-green-100 text-green-800';
+                    resultDiv.innerHTML = `
+                        ✅ API funcionando correctamente!<br>
+                        Usuario: ${result.username || 'N/A'}<br>
+                        Email: ${result.notificaciones?.email || 'N/A'}<br>
+                        Telegram: ${result.notificaciones?.telegram || 'N/A'}
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Error API: ${errorText}`);
+                    resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Error API: ${response.status} - ${errorText}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                log(`❌ Error conexión API: ${error.message}`);
+                resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error de conexión API: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        async function checkCloudflareConfig() {
+            const resultDiv = document.getElementById('cloudflareResult');
+            log('Verificando configuración Cloudflare...');
+            
+            try {
+                // Test health endpoint
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                log(`Health check: ${JSON.stringify(data)}`);
+                
+                resultDiv.className = 'mt-4 p-3 rounded bg-blue-100 text-blue-800';
+                resultDiv.innerHTML = `
+                    ☁️ Cloudflare Worker Status:<br>
+                    Status: ${data.status}<br>
+                    Version: ${data.version}<br>
+                    Features: ${data.features?.join(', ') || 'N/A'}<br>
+                    Timestamp: ${data.timestamp}
+                `;
+                
+            } catch (error) {
+                log(`❌ Error verificación: ${error.message}`);
+                resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error verificando Cloudflare: ${error.message}`;
+            }
+            
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Auto-verificación al cargar
+        window.addEventListener('load', () => {
+            log('Página de diagnóstico cargada');
+            log('API Base URL: ' + API_BASE_URL);
+            setTimeout(checkCloudflareConfig, 1000);
+        });
+    </script>
+</body>
+</html>
