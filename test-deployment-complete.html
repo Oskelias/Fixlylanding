@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Deployment - Worker Completo</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .input-group { margin: 10px 0; }
+        input[type="text"], input[type="email"], input[type="password"] { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Test Deployment - Worker Completo v4.1.0</h1>
+    <p><strong>Instrucciones:</strong> Actualiza la URL del Worker abajo y ejecuta las pruebas para verificar el deployment.</p>
+
+    <div class="test-section">
+        <h3>⚙️ Configuración</h3>
+        <label>Worker URL:</label>
+        <input type="text" id="workerUrl" value="https://fixly-backend.tu-subdominio.workers.dev" style="width: 400px;">
+        <button onclick="updateWorkerUrl()">Actualizar URL</button>
+    </div>
+
+    <!-- Test 1: Health Check -->
+    <div class="test-section">
+        <h3>🩺 Test 1: Health Check</h3>
+        <p>Verifica que el Worker esté desplegado y funcionando correctamente.</p>
+        <button onclick="testHealth()">Probar Health Check</button>
+        <div id="healthResult"></div>
+    </div>
+
+    <!-- Test 2: Admin Login -->
+    <div class="test-section">
+        <h3>🔐 Test 2: Admin Login</h3>
+        <p>Prueba el login de administrador con credenciales fijas.</p>
+        <div class="input-group">
+            <input type="text" id="adminUser" value="admin" placeholder="Usuario">
+            <input type="password" id="adminPass" value="fixly2024!" placeholder="Contraseña">
+        </div>
+        <button onclick="testAdminLogin()">Probar Login Admin</button>
+        <div id="adminLoginResult"></div>
+    </div>
+
+    <!-- Test 3: Manual User Creation -->
+    <div class="test-section">
+        <h3>👤 Test 3: Crear Usuario Manual</h3>
+        <p>Prueba la creación de usuario con credenciales manuales desde el admin.</p>
+        <div class="input-group">
+            <input type="text" id="empresa" value="Taller Test" placeholder="Empresa">
+            <input type="email" id="email" value="test@ejemplo.com" placeholder="Email">
+            <input type="text" id="telefono" value="123456789" placeholder="Teléfono">
+        </div>
+        <div class="input-group">
+            <input type="text" id="usuarioManual" value="taller_test_123" placeholder="Usuario Manual">
+            <input type="password" id="passwordManual" value="fix_2025_test" placeholder="Password Manual">
+        </div>
+        <button onclick="testUserCreation()">Crear Usuario</button>
+        <div id="userCreationResult"></div>
+    </div>
+
+    <!-- Test 4: User Login -->
+    <div class="test-section">
+        <h3>🔑 Test 4: Login Usuario Creado</h3>
+        <p>Prueba el login con el usuario recién creado.</p>
+        <div class="input-group">
+            <input type="text" id="testUser" value="" placeholder="Usuario (se llena automáticamente)">
+            <input type="password" id="testPass" value="" placeholder="Contraseña (se llena automáticamente)">
+        </div>
+        <button onclick="testUserLogin()">Probar Login Usuario</button>
+        <div id="userLoginResult"></div>
+    </div>
+
+    <!-- Test 5: Email Test -->
+    <div class="test-section">
+        <h3>📧 Test 5: Test Email MailChannels</h3>
+        <p>Prueba el envío directo de email con MailChannels (requiere dominio configurado).</p>
+        <button onclick="testEmailDirect()">Probar Email Directo</button>
+        <div id="emailResult"></div>
+    </div>
+
+    <script>
+        let WORKER_URL = 'https://fixly-backend.tu-subdominio.workers.dev';
+
+        function updateWorkerUrl() {
+            WORKER_URL = document.getElementById('workerUrl').value.trim();
+            if (!WORKER_URL.startsWith('http')) {
+                WORKER_URL = 'https://' + WORKER_URL;
+            }
+            alert('URL actualizada a: ' + WORKER_URL);
+        }
+
+        function showResult(elementId, success, data) {
+            const element = document.getElementById(elementId);
+            element.className = success ? 'success' : 'error';
+            element.innerHTML = `
+                <h4>${success ? '✅ Éxito' : '❌ Error'}</h4>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function makeRequest(endpoint, method = 'GET', body = null) {
+            try {
+                const config = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Request-Method': method,
+                        'Origin': window.location.origin
+                    }
+                };
+
+                if (body) {
+                    config.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(WORKER_URL + endpoint, config);
+                const data = await response.json();
+                
+                return {
+                    success: response.ok,
+                    status: response.status,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message,
+                    data: { error: 'Network error: ' + error.message }
+                };
+            }
+        }
+
+        async function testHealth() {
+            const result = await makeRequest('/health');
+            showResult('healthResult', result.success, result.data);
+        }
+
+        async function testAdminLogin() {
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPass').value;
+            
+            const result = await makeRequest('/api/login', 'POST', {
+                username: username,
+                password: password
+            });
+            
+            showResult('adminLoginResult', result.success, result.data);
+        }
+
+        async function testUserCreation() {
+            const empresa = document.getElementById('empresa').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const usuarioManual = document.getElementById('usuarioManual').value;
+            const passwordManual = document.getElementById('passwordManual').value;
+
+            const result = await makeRequest('/api/generate-code', 'POST', {
+                empresa: empresa,
+                email: email,
+                telefono: telefono,
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: usuarioManual,
+                passwordManual: passwordManual
+            });
+
+            if (result.success && result.data.username && result.data.password) {
+                // Auto-llenar campos para el test de login
+                document.getElementById('testUser').value = result.data.username;
+                document.getElementById('testPass').value = result.data.password;
+            }
+
+            showResult('userCreationResult', result.success, result.data);
+        }
+
+        async function testUserLogin() {
+            const username = document.getElementById('testUser').value;
+            const password = document.getElementById('testPass').value;
+
+            if (!username || !password) {
+                showResult('userLoginResult', false, { error: 'Primero crea un usuario en el Test 3' });
+                return;
+            }
+
+            const result = await makeRequest('/api/login', 'POST', {
+                username: username,
+                password: password
+            });
+
+            showResult('userLoginResult', result.success, result.data);
+        }
+
+        async function testEmailDirect() {
+            // Este test requiere que MailChannels esté configurado correctamente
+            const result = await makeRequest('/api/generate-code', 'POST', {
+                empresa: 'Test Email Company',
+                email: 'test@fixlytaller.com', // Cambiar por un email real para prueba
+                telefono: '123456789',
+                tipo: 'manual',
+                duracion: 30,
+                usuarioManual: 'email_test_user',
+                passwordManual: 'email_test_pass'
+            });
+
+            showResult('emailResult', result.success, result.data);
+        }
+
+        // Auto-test al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded. Worker URL:', WORKER_URL);
+        });
+    </script>
+</body>
+</html>

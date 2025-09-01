@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Worker Actual - Sin Modificar</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold mb-6">🧪 Test Worker Actual (Sin Modificaciones)</h1>
+        
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6">
+            <h3 class="font-semibold">🔍 Probando tu Worker tal como está ahora</h3>
+            <p class="text-sm mt-1">Sin modificar nada, vamos a ver qué funciona y qué necesita arreglo</p>
+        </div>
+
+        <!-- Test 1: Health Check -->
+        <div class="border rounded-lg p-4 mb-6">
+            <h3 class="font-semibold mb-3">1. ☁️ Health Check</h3>
+            <button onclick="testHealth()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                🔍 Verificar Worker
+            </button>
+            <div id="healthResult" class="hidden mt-3 p-3 rounded"></div>
+        </div>
+
+        <!-- Test 2: Crear Usuario -->
+        <div class="border rounded-lg p-4 mb-6">
+            <h3 class="font-semibold mb-3">2. 🚀 Crear Usuario (Generate Code)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input type="text" id="testEmpresa" placeholder="Mi Taller Test" 
+                       class="px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+                <input type="email" id="testEmail" placeholder="test@gmail.com" 
+                       class="px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="testCreateUser()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                👤 Crear Usuario
+            </button>
+            <div id="createResult" class="hidden mt-3 p-3 rounded"></div>
+        </div>
+
+        <!-- Test 3: Login -->
+        <div class="border rounded-lg p-4 mb-6">
+            <h3 class="font-semibold mb-3">3. 🔐 Test Login</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input type="text" id="loginUser" placeholder="Usuario generado" 
+                       class="px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="loginPass" placeholder="Password generado" 
+                       class="px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="testLogin()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    🔓 Probar Login
+                </button>
+                <button onclick="testAdminLogin()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+                    👨‍💼 Login Admin
+                </button>
+            </div>
+            <div id="loginResult" class="hidden mt-3 p-3 rounded"></div>
+        </div>
+
+        <!-- Logs -->
+        <div class="border rounded-lg p-4">
+            <h3 class="font-semibold mb-3">📝 Logs de Prueba</h3>
+            <div id="logs" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm h-40 overflow-y-auto">
+                [INIT] Iniciando tests del Worker actual...\n
+            </div>
+            <button onclick="clearLogs()" class="mt-2 bg-gray-500 text-white px-3 py-1 rounded text-sm">
+                🗑️ Limpiar
+            </button>
+        </div>
+
+        <!-- Diagnóstico -->
+        <div class="mt-6 bg-blue-50 p-4 rounded-lg">
+            <h3 class="font-semibold mb-2">💡 Diagnóstico</h3>
+            <div id="diagnostico" class="text-sm">
+                <p>Ejecuta las pruebas para ver qué funciona y qué necesita arreglo</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.fixlytaller.com';
+        let ultimasCredenciales = null;
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logs.innerHTML += `[${timestamp}] ${icon} ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '[CLEAR] Logs limpiados...\n';
+        }
+
+        async function testHealth() {
+            log('🔍 Verificando Worker...');
+            const resultDiv = document.getElementById('healthResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Worker respondió: ${data.status} v${data.version}`, 'success');
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-green-100 text-green-800';
+                    resultDiv.innerHTML = `
+                        <div class="text-sm">
+                            <p><strong>Estado:</strong> ${data.status}</p>
+                            <p><strong>Versión:</strong> ${data.version}</p>
+                            <p><strong>Características:</strong> ${data.features?.join(', ') || 'N/A'}</p>
+                        </div>
+                    `;
+                } else {
+                    log(`❌ Worker error: ${response.status}`, 'error');
+                    resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Error: ${response.status}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                log(`❌ Error conexión: ${error.message}`, 'error');
+                resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error de conexión: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        async function testCreateUser() {
+            const empresa = document.getElementById('testEmpresa').value || 'Taller Test';
+            const email = document.getElementById('testEmail').value || 'test@gmail.com';
+            
+            log(`🚀 Creando usuario para ${empresa}...`);
+            const resultDiv = document.getElementById('createResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        empresa: empresa,
+                        email: email,
+                        telefono: '+54 11 1234-5678'
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Usuario creado: ${result.username}`, 'success');
+                    
+                    // Guardar credenciales para test de login
+                    ultimasCredenciales = {
+                        username: result.username,
+                        password: result.password
+                    };
+                    
+                    // Auto-llenar login
+                    document.getElementById('loginUser').value = result.username;
+                    document.getElementById('loginPass').value = result.password || 'password_no_devuelto';
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-green-100 text-green-800';
+                    resultDiv.innerHTML = `
+                        <div class="text-sm">
+                            <p><strong>✅ Usuario creado:</strong> ${result.username}</p>
+                            <p><strong>📧 Email:</strong> ${result.notificaciones?.email || 'N/A'}</p>
+                            <p><strong>📱 Telegram:</strong> ${result.notificaciones?.telegram || 'N/A'}</p>
+                            <p><strong>🔒 Password devuelto:</strong> ${result.password ? 'Sí' : 'No'}</p>
+                        </div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Error crear usuario: ${errorText}`, 'error');
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Error: ${errorText}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                log(`❌ Error crear usuario: ${error.message}`, 'error');
+                resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error de conexión: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+            
+            if (!username || !password) {
+                alert('Ingresa usuario y contraseña (crear usuario primero)');
+                return;
+            }
+            
+            log(`🔐 Probando login: ${username}...`);
+            const resultDiv = document.getElementById('loginResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Login exitoso: ${result.user.username}`, 'success');
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-green-100 text-green-800';
+                    resultDiv.innerHTML = `
+                        <div class="text-sm">
+                            <p><strong>✅ Login exitoso</strong></p>
+                            <p><strong>Usuario:</strong> ${result.user.username}</p>
+                            <p><strong>Empresa:</strong> ${result.user.empresa}</p>
+                            <p><strong>Email:</strong> ${result.user.email}</p>
+                        </div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Login falló: ${errorText}`, 'error');
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Login falló: ${errorText}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                log(`❌ Error login: ${error.message}`, 'error');
+                resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error de conexión: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        async function testAdminLogin() {
+            log('👨‍💼 Probando login admin...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: 'admin', 
+                        password: 'fixly2024!' 
+                    })
+                });
+
+                const resultDiv = document.getElementById('loginResult');
+
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`✅ Admin login OK`, 'success');
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-green-100 text-green-800';
+                    resultDiv.innerHTML = `✅ Admin login exitoso`;
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Admin login falló: ${errorText}`, 'error');
+                    
+                    resultDiv.className = 'mt-3 p-3 rounded bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Admin login falló: ${errorText}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                log(`❌ Error admin login: ${error.message}`, 'error');
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Test iniciado - Worker sin modificar');
+            
+            // Valores por defecto
+            document.getElementById('testEmpresa').value = 'Taller Test SA';
+            document.getElementById('testEmail').value = 'grupocioacr@gmail.com';
+            
+            // Auto-ejecutar health check
+            setTimeout(testHealth, 500);
+        });
+    </script>
+</body>
+</html>

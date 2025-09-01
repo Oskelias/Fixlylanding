@@ -44,3 +44,13 @@
 2025-09-01T00:17:54:    - fixly-admin / admin2024
 2025-09-01T00:17:54: 🛠️ Credenciales Taller: Usar las generadas por API
 2025-09-01T00:17:54: 📡 API Backend: https://api.fixlytaller.com
+2025-09-01T00:29:37: 🚀 Fixly Complete System running on http://0.0.0.0:8080
+2025-09-01T00:29:37: 📱 URLs disponibles:
+2025-09-01T00:29:37:    🏠 Inicio: http://localhost:8080/
+2025-09-01T00:29:37:    🔐 Admin: http://localhost:8080/admin
+2025-09-01T00:29:37:    🔧 Taller: http://localhost:8080/taller
+2025-09-01T00:29:37: 🔐 Credenciales Admin:
+2025-09-01T00:29:37:    - admin / admin123
+2025-09-01T00:29:37:    - fixly-admin / admin2024
+2025-09-01T00:29:37: 🛠️ Credenciales Taller: Usar las generadas por API
+2025-09-01T00:29:37: 📡 API Backend: https://api.fixlytaller.com

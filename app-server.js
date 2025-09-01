@@ -26,7 +26,8 @@ class FixlyAuthServer {
             '/taller': 'taller-login.html',
             '/taller-login': 'taller-login.html',
             '/taller-sistema': 'taller-sistema.html',
-            '/sistema': 'taller-sistema.html'
+            '/sistema': 'taller-sistema.html',
+            '/debug-email': 'email-debug-test.html'
         };
     }
 

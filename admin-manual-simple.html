@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Manual - Fixly Taller</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-8 text-center">🛠️ Admin Manual - Fixly Taller</h1>
+        
+        <!-- Panel de Creación Manual -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">👨‍💼 Crear Usuario Manual</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Datos del Taller -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium border-b pb-2">📋 Datos del Taller</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">🏢 Nombre del Taller:</label>
+                        <input type="text" id="empresaNombre" placeholder="Ej: Taller Mecánico López" 
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">📧 Email:</label>
+                        <input type="email" id="empresaEmail" placeholder="contacto@tallermecanicolopez.com" 
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">📱 Teléfono (opcional):</label>
+                        <input type="tel" id="empresaTelefono" placeholder="+54 11 1234-5678" 
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <!-- Credenciales -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium border-b pb-2">🔐 Credenciales de Acceso</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">👤 Usuario:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="usuario" placeholder="lopez_taller" 
+                                   class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <button onclick="generarUsuario()" 
+                                    class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 text-sm">
+                                🎲 Auto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">🔒 Contraseña:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="contraseña" placeholder="fixly123" 
+                                   class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <button onclick="generarContraseña()" 
+                                    class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                🎲 Auto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">📅 Duración:</label>
+                        <select id="duracion" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="15">15 días (Prueba)</option>
+                            <option value="30">30 días (Mensual)</option>
+                            <option value="90">90 días (Trimestral)</option>
+                            <option value="365">365 días (Anual)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de Acción -->
+            <div class="mt-8 flex gap-4 justify-center">
+                <button onclick="crearUsuario()" 
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 font-semibold">
+                    🚀 Crear Usuario + Enviar Email
+                </button>
+                
+                <button onclick="soloCrearUsuario()" 
+                        class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-semibold">
+                    👤 Solo Crear Usuario (Sin Email)
+                </button>
+            </div>
+            
+            <!-- Resultado -->
+            <div id="resultado" class="hidden mt-6 p-4 rounded-lg"></div>
+        </div>
+        
+        <!-- Lista de Usuarios Creados -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">👥 Usuarios Creados</h2>
+                <button onclick="cargarUsuarios()" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    🔄 Actualizar
+                </button>
+            </div>
+            
+            <div id="listaUsuarios" class="space-y-3">
+                <p class="text-gray-500">Cargando usuarios...</p>
+            </div>
+        </div>
+        
+        <!-- Login Test -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+            <h2 class="text-2xl font-semibold mb-6">🧪 Test de Login</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Usuario:</label>
+                    <input type="text" id="testUsuario" placeholder="usuario_creado" 
+                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Contraseña:</label>
+                    <input type="password" id="testContraseña" placeholder="contraseña" 
+                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex items-end">
+                    <button onclick="probarLogin()" 
+                            class="w-full bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+                        🔓 Probar Login
+                    </button>
+                </div>
+            </div>
+            
+            <div id="resultadoLogin" class="hidden mt-4 p-4 rounded-lg"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.fixlytaller.com';
+
+        // Generar usuario automático basado en empresa
+        function generarUsuario() {
+            const empresa = document.getElementById('empresaNombre').value;
+            if (!empresa) {
+                alert('Ingresa el nombre del taller primero');
+                return;
+            }
+            
+            const empresaLimpia = empresa
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, '') // Solo letras, números y espacios
+                .replace(/\s+/g, '_') // Espacios por guiones bajos
+                .substring(0, 15); // Máximo 15 caracteres
+                
+            const numeroAleatorio = Math.floor(10 + Math.random() * 90); // 10-99
+            const usuario = `${empresaLimpia}_${numeroAleatorio}`;
+            
+            document.getElementById('usuario').value = usuario;
+        }
+
+        // Generar contraseña simple
+        function generarContraseña() {
+            const palabras = ['fixly', 'taller', 'mecanico', 'auto', 'motor'];
+            const palabra = palabras[Math.floor(Math.random() * palabras.length)];
+            const numero = Math.floor(100 + Math.random() * 900); // 100-999
+            
+            document.getElementById('contraseña').value = `${palabra}${numero}`;
+        }
+
+        // Crear usuario CON email
+        async function crearUsuario() {
+            const datos = obtenerDatos();
+            if (!datos) return;
+            
+            mostrarResultado('🔄 Creando usuario y enviando email...', 'blue');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        empresa: datos.empresa,
+                        email: datos.email,
+                        telefono: datos.telefono,
+                        tipo: 'manual',
+                        duracion: parseInt(datos.duracion),
+                        // Credenciales manuales
+                        usuarioManual: datos.usuario,
+                        passwordManual: datos.contraseña
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    mostrarResultado(`
+                        🎉 ¡Usuario creado y email enviado!<br>
+                        <strong>👤 Usuario:</strong> ${result.username}<br>
+                        <strong>📧 Email enviado:</strong> ${result.notificaciones?.email || 'Sí'}<br>
+                        <strong>📱 Telegram:</strong> ${result.notificaciones?.telegram || 'Sí'}<br>
+                        <strong>⏰ Expira:</strong> ${new Date(result.fechaExpiracion).toLocaleDateString('es-ES')}
+                    `, 'green');
+                    
+                    // Auto-llenar test de login
+                    document.getElementById('testUsuario').value = result.username;
+                    document.getElementById('testContraseña').value = datos.contraseña;
+                    
+                    // Limpiar formulario
+                    limpiarFormulario();
+                    
+                    // Actualizar lista
+                    setTimeout(cargarUsuarios, 1000);
+                } else {
+                    const error = await response.text();
+                    mostrarResultado(`❌ Error: ${error}`, 'red');
+                }
+            } catch (error) {
+                mostrarResultado(`❌ Error de conexión: ${error.message}`, 'red');
+            }
+        }
+
+        // Crear usuario SIN email (solo guardar)
+        async function soloCrearUsuario() {
+            const datos = obtenerDatos();
+            if (!datos) return;
+            
+            mostrarResultado('👤 Creando usuario solamente...', 'blue');
+            
+            // Simular creación sin email (puedes usar un endpoint diferente)
+            const usuarioData = {
+                username: datos.usuario,
+                password: datos.contraseña,
+                empresa: datos.empresa,
+                email: datos.email,
+                telefono: datos.telefono,
+                fechaCreacion: new Date().toISOString(),
+                fechaExpiracion: new Date(Date.now() + (datos.duracion * 24 * 60 * 60 * 1000)).toISOString(),
+                activo: true,
+                creadoManualmente: true
+            };
+            
+            mostrarResultado(`
+                👤 Usuario creado localmente:<br>
+                <strong>👤 Usuario:</strong> ${datos.usuario}<br>
+                <strong>🔒 Contraseña:</strong> ${datos.contraseña}<br>
+                <strong>📧 Email NO enviado</strong> (crear manualmente)<br>
+                <em>Usa "Crear Usuario + Enviar Email" para envío automático</em>
+            `, 'yellow');
+            
+            // Auto-llenar test
+            document.getElementById('testUsuario').value = datos.usuario;
+            document.getElementById('testContraseña').value = datos.contraseña;
+        }
+
+        // Probar login
+        async function probarLogin() {
+            const usuario = document.getElementById('testUsuario').value;
+            const contraseña = document.getElementById('testContraseña').value;
+            
+            if (!usuario || !contraseña) {
+                alert('Ingresa usuario y contraseña');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('resultadoLogin');
+            resultDiv.className = 'mt-4 p-4 rounded-lg bg-blue-100 text-blue-800';
+            resultDiv.innerHTML = '🔄 Probando login...';
+            resultDiv.classList.remove('hidden');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usuario, password: contraseña })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                    resultDiv.innerHTML = `
+                        ✅ ¡Login exitoso!<br>
+                        <strong>Usuario:</strong> ${result.user.username}<br>
+                        <strong>Empresa:</strong> ${result.user.empresa}<br>
+                        <strong>Email:</strong> ${result.user.email}<br>
+                        <strong>Rol:</strong> ${result.user.role}
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                    resultDiv.innerHTML = `❌ Login falló: ${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        // Funciones auxiliares
+        function obtenerDatos() {
+            const empresa = document.getElementById('empresaNombre').value.trim();
+            const email = document.getElementById('empresaEmail').value.trim();
+            const usuario = document.getElementById('usuario').value.trim();
+            const contraseña = document.getElementById('contraseña').value.trim();
+            
+            if (!empresa || !email || !usuario || !contraseña) {
+                alert('Completa todos los campos obligatorios');
+                return null;
+            }
+            
+            if (!email.includes('@')) {
+                alert('Email inválido');
+                return null;
+            }
+            
+            return {
+                empresa,
+                email,
+                telefono: document.getElementById('empresaTelefono').value.trim(),
+                usuario,
+                contraseña,
+                duracion: document.getElementById('duracion').value
+            };
+        }
+
+        function mostrarResultado(mensaje, tipo) {
+            const div = document.getElementById('resultado');
+            const colores = {
+                blue: 'bg-blue-100 text-blue-800',
+                green: 'bg-green-100 text-green-800',
+                yellow: 'bg-yellow-100 text-yellow-800',
+                red: 'bg-red-100 text-red-800'
+            };
+            
+            div.className = `mt-6 p-4 rounded-lg ${colores[tipo]}`;
+            div.innerHTML = mensaje;
+            div.classList.remove('hidden');
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('empresaNombre').value = '';
+            document.getElementById('empresaEmail').value = '';
+            document.getElementById('empresaTelefono').value = '';
+            document.getElementById('usuario').value = '';
+            document.getElementById('contraseña').value = '';
+        }
+
+        async function cargarUsuarios() {
+            const div = document.getElementById('listaUsuarios');
+            div.innerHTML = '<p class="text-gray-500">Cargando usuarios...</p>';
+            
+            // Aquí podrías cargar usuarios reales desde tu API
+            // Por ahora, mostrar mensaje
+            setTimeout(() => {
+                div.innerHTML = `
+                    <div class="text-center p-8 text-gray-500">
+                        <p>👥 Lista de usuarios se cargará aquí</p>
+                        <p class="text-sm mt-2">Los usuarios creados aparecerán en esta sección</p>
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarUsuarios();
+            
+            // Auto-generar ejemplos
+            document.getElementById('empresaNombre').addEventListener('blur', () => {
+                if (document.getElementById('usuario').value === '') {
+                    generarUsuario();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
