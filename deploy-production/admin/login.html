@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Login - Fixly Taller</title>
+    
+    <!-- Bootstrap Core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h2 {
+            color: #333;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .login-header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo-container i {
+            font-size: 4rem;
+            color: #337ab7;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            height: 45px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #337ab7;
+            box-shadow: 0 0 10px rgba(51, 122, 183, 0.2);
+        }
+        
+        .btn-login {
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(45deg, #337ab7, #5bc0de);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(45deg, #2e6da4, #46b8da);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .footer-info {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .input-group-addon {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .input-group .form-control {
+            border-radius: 8px 0 0 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
+                <div class="login-container">
+                    
+                    <div class="logo-container">
+                        <i class="fa fa-wrench"></i>
+                        <h3 style="color: #337ab7; margin: 0;">Fixly Taller</h3>
+                    </div>
+                    
+                    <div class="login-header">
+                        <h2>Panel de Administración</h2>
+                        <p class="subtitle">Ingrese sus credenciales para continuar</p>
+                    </div>
+                    
+                    <form id="loginForm" novalidate>
+                        <div class="form-group">
+                            <label for="username" class="sr-only">Usuario</label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       name="username" 
+                                       placeholder="Usuario administrador" 
+                                       required
+                                       autocomplete="username">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-user"></i>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="sr-only">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="Contraseña" 
+                                       required
+                                       autocomplete="current-password">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-lock"></i>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-login" id="loginBtn">
+                            <span class="login-text">
+                                <i class="fa fa-sign-in"></i> Ingresar al Admin
+                            </span>
+                            <span class="loading-spinner">
+                                <i class="fa fa-spinner fa-spin"></i> Verificando...
+                            </span>
+                        </button>
+                        
+                        <div id="messageContainer"></div>
+                    </form>
+                    
+                    <div class="footer-info">
+                        <p>
+                            <i class="fa fa-shield"></i> 
+                            Acceso seguro al sistema de administración
+                        </p>
+                        <p>
+                            <strong>API:</strong> 
+                            <span id="api-status">
+                                <i class="fa fa-circle text-success"></i> api.fixlytaller.com
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        // Configuración
+        const API_BASE = 'https://api.fixlytaller.com';
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'fixly2024!'
+        };
+        
+        // Referencias DOM
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const messageContainer = document.getElementById('messageContainer');
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si ya está logueado
+            checkExistingSession();
+            
+            // Verificar estado del API
+            checkAPIStatus();
+            
+            // Auto-focus en el campo usuario
+            document.getElementById('username').focus();
+        });
+        
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await handleLogin();
+        });
+        
+        // Función principal de login
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validación básica
+            if (!username || !password) {
+                showMessage('Por favor complete todos los campos', 'danger');
+                return;
+            }
+            
+            // Mostrar loading
+            setLoading(true);
+            clearMessages();
+            
+            try {
+                // Verificar credenciales admin locales
+                if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                    // Login exitoso
+                    showMessage('Acceso autorizado. Redirigiendo...', 'success');
+                    
+                    // Guardar sesión
+                    sessionStorage.setItem('fixly_admin_session', JSON.stringify({
+                        username: username,
+                        loginTime: new Date().toISOString(),
+                        isAdmin: true
+                    }));
+                    
+                    // Redireccionar después de 1.5 segundos
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1500);
+                    
+                } else {
+                    // Intentar validar contra API como fallback
+                    await validateWithAPI(username, password);
+                }
+                
+            } catch (error) {
+                console.error('Error en login:', error);
+                showMessage('Error de conexión. Verifique su usuario y contraseña.', 'danger');
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Validación alternativa con API (si fuera necesaria)
+        async function validateWithAPI(username, password) {
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        isAdmin: true
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showMessage('Acceso autorizado via API. Redirigiendo...', 'success');
+                    
+                    sessionStorage.setItem('fixly_admin_session', JSON.stringify({
+                        username: username,
+                        loginTime: new Date().toISOString(),
+                        token: result.token,
+                        isAdmin: true
+                    }));
+                    
+                    setTimeout(() => {
+                        window.location.href = 'admin_fixly_taller.html';
+                    }, 1500);
+                    
+                } else {
+                    throw new Error(result.error || 'Credenciales incorrectas');
+                }
+                
+            } catch (error) {
+                throw new Error('Usuario o contraseña incorrectos');
+            }
+        }
+        
+        // Verificar sesión existente
+        function checkExistingSession() {
+            const session = sessionStorage.getItem('fixly_admin_session');
+            if (session) {
+                try {
+                    const sessionData = JSON.parse(session);
+                    const loginTime = new Date(sessionData.loginTime);
+                    const now = new Date();
+                    const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+                    
+                    // Si la sesión es menor a 24 horas, redireccionar
+                    if (hoursDiff < 24 && sessionData.isAdmin) {
+                        showMessage('Sesión activa detectada. Redirigiendo...', 'info');
+                        setTimeout(() => {
+                            window.location.href = 'admin_fixly_taller.html';
+                        }, 1000);
+                    } else {
+                        // Sesión expirada
+                        sessionStorage.removeItem('fixly_admin_session');
+                    }
+                } catch (error) {
+                    console.error('Error verificando sesión:', error);
+                    sessionStorage.removeItem('fixly_admin_session');
+                }
+            }
+        }
+        
+        // Verificar estado del API
+        async function checkAPIStatus() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(`${API_BASE}/health`, {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                const statusElement = document.getElementById('api-status');
+                if (response.ok) {
+                    statusElement.innerHTML = '<i class="fa fa-circle text-success"></i> api.fixlytaller.com';
+                } else {
+                    statusElement.innerHTML = '<i class="fa fa-circle text-warning"></i> api.fixlytaller.com (Lento)';
+                }
+                
+            } catch (error) {
+                const statusElement = document.getElementById('api-status');
+                statusElement.innerHTML = '<i class="fa fa-circle text-danger"></i> api.fixlytaller.com (Error)';
+                console.error('Error verificando API:', error);
+            }
+        }
+        
+        // Funciones auxiliares
+        function setLoading(isLoading) {
+            const loginText = document.querySelector('.login-text');
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            
+            if (isLoading) {
+                loginText.style.display = 'none';
+                loadingSpinner.style.display = 'inline';
+                loginBtn.disabled = true;
+            } else {
+                loginText.style.display = 'inline';
+                loadingSpinner.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        }
+        
+        function showMessage(message, type = 'info') {
+            const alertClass = `alert alert-${type}`;
+            messageContainer.innerHTML = `
+                <div class="${alertClass}" role="alert">
+                    <i class="fa fa-${getIconForType(type)}"></i>
+                    ${message}
+                </div>
+            `;
+        }
+        
+        function clearMessages() {
+            messageContainer.innerHTML = '';
+        }
+        
+        function getIconForType(type) {
+            const icons = {
+                'success': 'check-circle',
+                'danger': 'exclamation-triangle',
+                'warning': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+        
+        // Permitir Enter para submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !loginBtn.disabled) {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        // Auto-limpiar mensajes después de 5 segundos
+        function autoRemoveMessage() {
+            setTimeout(() => {
+                const alerts = messageContainer.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 300);
+                });
+            }, 5000);
+        }
+        
+        // Interceptar el mostrar mensaje para auto-limpiar
+        const originalShowMessage = showMessage;
+        showMessage = function(message, type = 'info') {
+            originalShowMessage(message, type);
+            if (type !== 'success') { // No auto-remover mensajes de éxito
+                autoRemoveMessage();
+            }
+        };
+    </script>
+</body>
+</html>
