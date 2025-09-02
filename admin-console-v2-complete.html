@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 Fixly Admin Console - Completa</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+        
+        body { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-container { 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            overflow: hidden;
+        }
+        
+        .navbar-custom { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); 
+            color: white; 
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            min-height: 600px;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .nav-pills .nav-link {
+            color: #495057;
+            border-radius: 10px;
+            margin: 5px 0;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: #e9ecef;
+            color: var(--primary-color);
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background-color: var(--success-color); color: white; }
+        .status-trial { background-color: var(--info-color); color: white; }
+        .status-expired { background-color: var(--danger-color); color: white; }
+        .status-paused { background-color: var(--warning-color); color: white; }
+        
+        .btn-custom {
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .loading { background: #fff3cd; color: #856404; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .action-buttons .btn {
+            margin: 0 2px;
+            padding: 5px 10px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+        }
+        
+        .search-box input {
+            padding-left: 45px;
+            border-radius: 25px;
+            border: 1px solid #dee2e6;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .plan-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .plan-starter { background-color: #e0e7ff; color: #3730a3; }
+        .plan-pro { background-color: #dcfce7; color: #166534; }
+        .plan-enterprise { background-color: #fef3c7; color: #92400e; }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-details {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .last-access {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-11">
+                <div class="admin-container">
+                    <!-- Header -->
+                    <nav class="navbar navbar-custom">
+                        <div class="container-fluid">
+                            <span class="navbar-brand mb-0 h1">
+                                <i class="fas fa-cogs"></i> Fixly Admin Console v2.0
+                            </span>
+                            <div class="navbar-nav flex-row">
+                                <span class="nav-link text-white me-3" id="admin-info">
+                                    <i class="fas fa-user-shield"></i> Admin
+                                </span>
+                                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i> Salir
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Login Section -->
+                    <div id="login-section" class="p-5 text-center">
+                        <h2><i class="fas fa-shield-alt"></i> Acceso Administrativo</h2>
+                        <p class="text-muted">Sistema de gestión empresarial v2.0</p>
+                        <form id="login-form" class="row justify-content-center">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" id="admin-username" placeholder="Usuario" value="admin" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="password" class="form-control" id="admin-password" placeholder="Contraseña" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom btn-custom">
+                                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                                </button>
+                            </div>
+                        </form>
+                        <div id="login-status" class="mt-3"></div>
+                    </div>
+
+                    <!-- Admin Dashboard -->
+                    <div id="admin-dashboard" style="display:none;">
+                        <div class="row">
+                            <!-- Sidebar -->
+                            <div class="col-md-3 sidebar p-4">
+                                <nav class="nav nav-pills flex-column">
+                                    <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('users')">
+                                        <i class="fas fa-users"></i> Gestión de Usuarios
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('create-user')">
+                                        <i class="fas fa-user-plus"></i> Crear Usuario
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('subscriptions')">
+                                        <i class="fas fa-credit-card"></i> Suscripciones
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showPaymentsSection()">
+                                        <i class="fas fa-dollar-sign"></i> Pagos MercadoPago
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('analytics')">
+                                        <i class="fas fa-chart-bar"></i> Analytics
+                                    </a>
+                                    <a class="nav-link" href="#" onclick="showSection('system')">
+                                        <i class="fas fa-cog"></i> Sistema
+                                    </a>
+                                </nav>
+                            </div>
+
+                            <!-- Main Content -->
+                            <div class="col-md-9 p-4">
+                                <!-- Dashboard Section -->
+                                <div id="dashboard-section" class="content-section">
+                                    <h3><i class="fas fa-tachometer-alt"></i> Dashboard Ejecutivo</h3>
+                                    
+                                    <!-- Metrics Cards -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card">
+                                                <div class="metric-value" id="total-users">0</div>
+                                                <div>Usuarios Total</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                                <div class="metric-value" id="active-users">0</div>
+                                                <div>Activos</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                                                <div class="metric-value" id="trial-users">0</div>
+                                                <div>En Prueba</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                                <div class="metric-value" id="revenue">$0</div>
+                                                <div>Ingresos</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Actions -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card card-custom">
+                                                <div class="card-body">
+                                                    <h5><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                                                    <button class="btn btn-primary-custom btn-custom me-2" onclick="showSection('create-user')">
+                                                        <i class="fas fa-user-plus"></i> Nuevo Usuario
+                                                    </button>
+                                                    <button class="btn btn-outline-primary btn-custom" onclick="refreshDashboard()">
+                                                        <i class="fas fa-sync"></i> Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card card-custom">
+                                                <div class="card-body">
+                                                    <h5><i class="fas fa-heartbeat"></i> Estado del Sistema</h5>
+                                                    <div id="system-health"></div>
+                                                    <button class="btn btn-outline-success btn-custom btn-sm" onclick="checkSystemHealth()">
+                                                        <i class="fas fa-check"></i> Verificar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Users Management Section -->
+                                <div id="users-section" class="content-section" style="display:none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3><i class="fas fa-users"></i> Gestión de Usuarios</h3>
+                                        <button class="btn btn-primary-custom btn-custom" onclick="loadUsers(true)">
+                                            <i class="fas fa-sync"></i> Actualizar Lista
+                                        </button>
+                                    </div>
+
+                                    <!-- Search and Filters -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <div class="search-box">
+                                                <i class="fas fa-search"></i>
+                                                <input type="text" class="form-control" id="user-search" placeholder="Buscar usuarios..." onkeyup="filterUsers()">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="status-filter" onchange="filterUsers()">
+                                                <option value="">Todos los estados</option>
+                                                <option value="active">Activos</option>
+                                                <option value="trial">En Prueba</option>
+                                                <option value="expired">Expirados</option>
+                                                <option value="paused">Pausados</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="plan-filter" onchange="filterUsers()">
+                                                <option value="">Todos los planes</option>
+                                                <option value="starter">Starter</option>
+                                                <option value="pro">Pro</option>
+                                                <option value="enterprise">Enterprise</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                                <i class="fas fa-times"></i> Limpiar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Users Stats -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <div class="stats-card">
+                                                <div class="row text-center">
+                                                    <div class="col">
+                                                        <strong id="stats-total">0</strong><br>
+                                                        <small class="text-muted">Total</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-active" class="text-success">0</strong><br>
+                                                        <small class="text-muted">Activos</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-trial" class="text-info">0</strong><br>
+                                                        <small class="text-muted">Prueba</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-expired" class="text-danger">0</strong><br>
+                                                        <small class="text-muted">Expirados</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <strong id="stats-paused" class="text-warning">0</strong><br>
+                                                        <small class="text-muted">Pausados</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Users Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Usuario</th>
+                                                    <th>Plan</th>
+                                                    <th>Estado</th>
+                                                    <th>Creado</th>
+                                                    <th>Expira</th>
+                                                    <th>Último Acceso</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="users-table-body">
+                                                <tr>
+                                                    <td colspan="7" class="text-center">
+                                                        <i class="fas fa-spinner fa-spin"></i> Cargando usuarios...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Create User Section -->
+                                <div id="create-user-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> <strong>Nuevo:</strong> Los usuarios se activan automáticamente, sin códigos de activación.
+                                    </div>
+                                    
+                                    <form id="create-user-form">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Username *</label>
+                                                    <input type="text" class="form-control" id="new-username" required>
+                                                    <small class="text-muted">Identificador único del tenant</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Password *</label>
+                                                    <input type="password" class="form-control" id="new-password" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email *</label>
+                                                    <input type="email" class="form-control" id="new-email" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Teléfono</label>
+                                                    <input type="text" class="form-control" id="new-telefono">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Empresa/Taller *</label>
+                                                    <input type="text" class="form-control" id="new-empresa" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Plan</label>
+                                                    <select class="form-select" id="new-plan">
+                                                        <option value="starter">Starter (Gratis - 15 días)</option>
+                                                        <option value="pro" selected>Pro ($14.999/mes)</option>
+                                                        <option value="enterprise">Enterprise (A medida)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Duración (días)</label>
+                                                    <input type="number" class="form-control" id="new-duracion" value="30">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary-custom btn-custom">
+                                            <i class="fas fa-user-plus"></i> Crear Usuario (Activo Inmediatamente)
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-custom" onclick="clearCreateForm()">
+                                            <i class="fas fa-eraser"></i> Limpiar
+                                        </button>
+                                    </form>
+                                    <div id="create-user-status" class="mt-3"></div>
+                                </div>
+
+                                <!-- Subscriptions, Payments, Analytics, System sections (básicos) -->
+                                <div id="subscriptions-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-credit-card"></i> Gestión de Suscripciones</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Panel de gestión de suscripciones en desarrollo...
+                                    </div>
+                                </div>
+
+                                <div id="payments-section" class="content-section" style="display:none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3><i class="fas fa-dollar-sign"></i> Dashboard MercadoPago</h3>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-primary btn-custom" onclick="loadPayments()">
+                                                <i class="fas fa-sync-alt"></i> Actualizar
+                                            </button>
+                                            <button class="btn btn-primary-custom btn-custom" onclick="generateFinancialReport()">
+                                                <i class="fas fa-file-download"></i> Reporte Financiero
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Statistics Cards -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stats-card">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <h6 class="text-muted">Total Transacciones</h6>
+                                                        <h3 id="total-transactions" class="text-primary">0</h3>
+                                                    </div>
+                                                    <i class="fas fa-receipt fa-2x text-primary"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stats-card">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <h6 class="text-muted">Pagos Aprobados</h6>
+                                                        <h3 id="approved-payments" class="text-success">0</h3>
+                                                    </div>
+                                                    <i class="fas fa-check-circle fa-2x text-success"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stats-card">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <h6 class="text-muted">Total Ingresos</h6>
+                                                        <h3 id="total-revenue" class="text-success">$0</h3>
+                                                    </div>
+                                                    <i class="fas fa-dollar-sign fa-2x text-success"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stats-card">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <h6 class="text-muted">Pendientes</h6>
+                                                        <h3 id="pending-payments" class="text-warning">0</h3>
+                                                    </div>
+                                                    <i class="fas fa-clock fa-2x text-warning"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Filters and Search -->
+                                    <div class="card card-custom mb-4">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Período</label>
+                                                    <select class="form-select" id="payment-period">
+                                                        <option value="today">Hoy</option>
+                                                        <option value="week">Esta Semana</option>
+                                                        <option value="month" selected>Este Mes</option>
+                                                        <option value="quarter">Trimestre</option>
+                                                        <option value="year">Este Año</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Estado</label>
+                                                    <select class="form-select" id="payment-status-filter">
+                                                        <option value="">Todos</option>
+                                                        <option value="approved">Aprobado</option>
+                                                        <option value="pending">Pendiente</option>
+                                                        <option value="cancelled">Cancelado</option>
+                                                        <option value="rejected">Rechazado</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Buscar Pago</label>
+                                                    <div class="search-box">
+                                                        <i class="fas fa-search"></i>
+                                                        <input type="text" class="form-control" id="payment-search" 
+                                                               placeholder="ID de pago, email, usuario...">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-end">
+                                                    <button class="btn btn-primary-custom btn-custom w-100" onclick="filterPayments()">
+                                                        <i class="fas fa-filter"></i> Filtrar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payments Table -->
+                                    <div class="card card-custom">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-list"></i> Transacciones Recientes
+                                                <span class="badge bg-primary ms-2" id="payments-count">0</span>
+                                            </h5>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>ID Pago</th>
+                                                            <th>Fecha</th>
+                                                            <th>Usuario/Email</th>
+                                                            <th>Plan</th>
+                                                            <th>Monto</th>
+                                                            <th>Método</th>
+                                                            <th>Estado</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="payments-table">
+                                                        <tr>
+                                                            <td colspan="8" class="text-center py-4">
+                                                                <div class="text-muted">
+                                                                    <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                                                                    <p>Cargando transacciones...</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Webhook Status -->
+                                    <div class="row mt-4">
+                                        <div class="col-md-8">
+                                            <div class="card card-custom">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0"><i class="fas fa-webhook"></i> Estado Webhook MercadoPago</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="alert alert-success">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <strong>URL Webhook:</strong> <code>https://api.fixlytaller.com/webhook/mercadopago</code>
+                                                    </div>
+                                                    <div id="webhook-logs"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card card-custom">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0"><i class="fas fa-tools"></i> Acciones Rápidas</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <button class="btn btn-outline-primary btn-custom w-100 mb-2" onclick="testWebhook()">
+                                                        <i class="fas fa-play"></i> Probar Webhook
+                                                    </button>
+                                                    <button class="btn btn-outline-success btn-custom w-100 mb-2" onclick="syncPayments()">
+                                                        <i class="fas fa-sync"></i> Sincronizar Pagos
+                                                    </button>
+                                                    <button class="btn btn-outline-info btn-custom w-100" onclick="exportPayments()">
+                                                        <i class="fas fa-download"></i> Exportar CSV
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="analytics-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-chart-bar"></i> Analytics y Reportes</h3>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Dashboard de analytics en desarrollo...
+                                    </div>
+                                </div>
+
+                                <div id="system-section" class="content-section" style="display:none;">
+                                    <h3><i class="fas fa-cog"></i> Configuración del Sistema</h3>
+                                    <div id="system-config-content">
+                                        <div class="card card-custom">
+                                            <div class="card-body">
+                                                <h5>Estado del Sistema</h5>
+                                                <div id="detailed-system-status"></div>
+                                                <button class="btn btn-primary-custom btn-custom" onclick="checkDetailedSystemHealth()">
+                                                    <i class="fas fa-diagnostics"></i> Diagnóstico Completo
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales para acciones de usuario -->
+    <!-- Extend User Modal -->
+    <div class="modal fade" id="extendUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Extender Suscripción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Usuario: <strong id="extend-username"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label">Días a agregar</label>
+                        <input type="number" class="form-control" id="extend-days" value="30">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cambiar plan (opcional)</label>
+                        <select class="form-select" id="extend-plan">
+                            <option value="">Mantener plan actual</option>
+                            <option value="starter">Starter</option>
+                            <option value="pro">Pro</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="confirmExtendUser()">Extender</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'https://api.fixlytaller.com';
+        let currentUsers = [];
+        let filteredUsers = [];
+        let adminLoggedIn = false;
+
+        // Login functionality
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            const statusDiv = document.getElementById('login-status');
+            
+            statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Verificando credenciales...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.user.role === 'admin') {
+                    statusDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check"></i> ¡Acceso autorizado!</div>';
+                    adminLoggedIn = true;
+                    
+                    setTimeout(() => {
+                        document.getElementById('login-section').style.display = 'none';
+                        document.getElementById('admin-dashboard').style.display = 'block';
+                        initializeDashboard();
+                    }, 1000);
+                } else {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Credenciales incorrectas</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error de conexión: ${error.message}</div>`;
+            }
+        });
+
+        // Dashboard initialization
+        function initializeDashboard() {
+            checkSystemHealth();
+            refreshDashboard();
+            loadUsers(true);
+            
+            // Setup plan change handler
+            document.getElementById('new-plan').addEventListener('change', function() {
+                const duracionField = document.getElementById('new-duracion');
+                switch(this.value) {
+                    case 'starter':
+                        duracionField.value = 15;
+                        break;
+                    case 'pro':
+                        duracionField.value = 30;
+                        break;
+                    case 'enterprise':
+                        duracionField.value = 365;
+                        break;
+                }
+            });
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Add active class to clicked nav link
+            event.target.classList.add('active');
+
+            // Load users when showing users section
+            if (sectionName === 'users') {
+                loadUsers();
+            }
+        }
+
+        // System health check
+        async function checkSystemHealth() {
+            const statusDiv = document.getElementById('system-health');
+            statusDiv.innerHTML = '<div class="loading p-2 rounded"><i class="fas fa-spinner fa-spin"></i> Verificando...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div class="success p-2 rounded">
+                        <strong><i class="fas fa-check-circle"></i> Sistema Operativo</strong><br>
+                        <small>v${data.version} | ${data.features?.includes('no_activation_codes') ? 'Sin códigos' : 'Códigos activos'}</small>
+                    </div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error p-2 rounded"><i class="fas fa-exclamation-triangle"></i> Error: ${error.message}</div>`;
+            }
+        }
+
+        // Detailed system health
+        async function checkDetailedSystemHealth() {
+            const statusDiv = document.getElementById('detailed-system-status');
+            statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Ejecutando diagnóstico completo...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle"></i> Sistema Operativo</h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Backend:</strong><br>
+                                • Versión: ${data.version}<br>
+                                • Características: ${data.features?.join(', ')}<br>
+                                • Estado: Funcional
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Cambios recientes:</strong><br>
+                                ${data.changes?.map(c => `• ${c}`).join('<br>') || 'Ninguno'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error del sistema: ${error.message}</div>`;
+            }
+        }
+
+        // Dashboard refresh
+        function refreshDashboard() {
+            loadUsers().then(() => {
+                updateDashboardMetrics();
+            });
+        }
+
+        function updateDashboardMetrics() {
+            const stats = getStatsFromUsers();
+            document.getElementById('total-users').textContent = stats.total;
+            document.getElementById('active-users').textContent = stats.active;
+            document.getElementById('trial-users').textContent = stats.trial;
+            
+            // Calcular ingresos aproximados (Pro users * $14.999)
+            const revenue = stats.pro * 14999;
+            document.getElementById('revenue').textContent = `$${revenue.toLocaleString()}`;
+        }
+
+        function getStatsFromUsers() {
+            return {
+                total: currentUsers.length,
+                active: currentUsers.filter(u => u.status === 'active').length,
+                trial: currentUsers.filter(u => u.status === 'trial').length,
+                expired: currentUsers.filter(u => u.status === 'expired').length,
+                paused: currentUsers.filter(u => u.status === 'paused').length,
+                pro: currentUsers.filter(u => u.plan === 'pro').length
+            };
+        }
+
+        // User management - MEJORADO
+        async function loadUsers(force = false) {
+            if (!adminLoggedIn && !force) return;
+
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</td></tr>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: {
+                        'Authorization': 'Bearer admin123'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUsers = data.users || [];
+                    filteredUsers = [...currentUsers];
+                    
+                    displayUsers();
+                    updateStatsDisplay(data);
+                    updateDashboardMetrics();
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+                
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error cargando usuarios: ${error.message}</td></tr>`;
+            }
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('users-table-body');
+            
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay usuarios que mostrar</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            filteredUsers.forEach(user => {
+                const row = createUserRow(user);
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStatsDisplay(data) {
+            document.getElementById('stats-total').textContent = data.totalUsers || 0;
+            document.getElementById('stats-active').textContent = data.activeUsers || 0;
+            document.getElementById('stats-trial').textContent = data.trialUsers || 0;
+            document.getElementById('stats-expired').textContent = data.expiredUsers || 0;
+            document.getElementById('stats-paused').textContent = data.pausedUsers || 0;
+        }
+
+        function createUserRow(user) {
+            const tr = document.createElement('tr');
+            
+            const statusClass = {
+                'active': 'status-active',
+                'trial': 'status-trial',
+                'expired': 'status-expired',
+                'paused': 'status-paused'
+            }[user.status] || 'status-active';
+
+            const planClass = {
+                'starter': 'plan-starter',
+                'pro': 'plan-pro',
+                'enterprise': 'plan-enterprise'
+            }[user.plan] || 'plan-starter';
+
+            const avatar = user.empresa.charAt(0).toUpperCase();
+            const lastAccess = user.ultimoAcceso ? 
+                new Date(user.ultimoAcceso).toLocaleDateString('es-ES') : 
+                'Nunca';
+            
+            tr.innerHTML = `
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar">${avatar}</div>
+                        <div>
+                            <strong>${user.username}</strong><br>
+                            <div class="user-details">
+                                ${user.empresa}<br>
+                                <small>${user.email}</small>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="plan-badge ${planClass}">
+                        ${user.plan.toUpperCase()}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">${user.status}</span>
+                </td>
+                <td>${formatDate(user.fechaCreacion)}</td>
+                <td>${formatDate(user.fechaExpiracion)}</td>
+                <td>
+                    <div class="last-access">${lastAccess}</div>
+                </td>
+                <td class="action-buttons">
+                    ${user.status === 'paused' ? 
+                        `<button class="btn btn-sm btn-outline-success" onclick="togglePauseUser('${user.username}', 'resume')" title="Reactivar">
+                            <i class="fas fa-play"></i>
+                        </button>` :
+                        `<button class="btn btn-sm btn-outline-warning" onclick="togglePauseUser('${user.username}', 'pause')" title="Pausar">
+                            <i class="fas fa-pause"></i>
+                        </button>`
+                    }
+                    <button class="btn btn-sm btn-outline-success" onclick="extendUser('${user.username}')" title="Extender">
+                        <i class="fas fa-calendar-plus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.username}')" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            return tr;
+        }
+
+        // User actions - IMPLEMENTADAS
+        async function togglePauseUser(username, action) {
+            const actionText = action === 'pause' ? 'pausar' : 'reactivar';
+            
+            if (!confirm(`¿${actionText.charAt(0).toUpperCase() + actionText.slice(1)} usuario ${username}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}/pause`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer admin123',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Usuario ${username} ${actionText}do exitosamente`, 'success');
+                    loadUsers(true); // Recargar lista
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        function extendUser(username) {
+            document.getElementById('extend-username').textContent = username;
+            document.getElementById('extend-days').value = 30;
+            document.getElementById('extend-plan').value = '';
+            
+            new bootstrap.Modal(document.getElementById('extendUserModal')).show();
+        }
+
+        async function confirmExtendUser() {
+            const username = document.getElementById('extend-username').textContent;
+            const days = parseInt(document.getElementById('extend-days').value);
+            const newPlan = document.getElementById('extend-plan').value;
+
+            if (!days || days < 1) {
+                showNotification('Ingresa un número válido de días', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}/extend`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer admin123',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ days, newPlan })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Suscripción de ${username} extendida ${days} días`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('extendUserModal')).hide();
+                    loadUsers(true);
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteUser(username) {
+            if (!confirm(`¿ELIMINAR permanentemente el usuario ${username}?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer admin123',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ softDelete: true })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Usuario ${username} eliminado exitosamente`, 'success');
+                    loadUsers(true);
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        // Filtering functions
+        function filterUsers() {
+            const searchTerm = document.getElementById('user-search').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const planFilter = document.getElementById('plan-filter').value;
+
+            filteredUsers = currentUsers.filter(user => {
+                const matchesSearch = !searchTerm || 
+                    user.username.toLowerCase().includes(searchTerm) ||
+                    user.empresa.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = !statusFilter || user.status === statusFilter;
+                const matchesPlan = !planFilter || user.plan === planFilter;
+
+                return matchesSearch && matchesStatus && matchesPlan;
+            });
+
+            displayUsers();
+        }
+
+        function clearFilters() {
+            document.getElementById('user-search').value = '';
+            document.getElementById('status-filter').value = '';
+            document.getElementById('plan-filter').value = '';
+            filteredUsers = [...currentUsers];
+            displayUsers();
+        }
+
+        // Create user - ACTUALIZADO SIN CÓDIGOS
+        document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('new-username').value,
+                password: document.getElementById('new-password').value,
+                email: document.getElementById('new-email').value,
+                telefono: document.getElementById('new-telefono').value,
+                empresa: document.getElementById('new-empresa').value,
+                tipo: document.getElementById('new-plan').value,
+                duracion: parseInt(document.getElementById('new-duracion').value)
+            };
+            
+            const statusDiv = document.getElementById('create-user-status');
+            statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-spinner fa-spin"></i> Creando usuario...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle"></i> ¡Usuario creado exitosamente!</h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Credenciales:</strong><br>
+                                    • Usuario: <code>${data.username}</code><br>
+                                    • Password: <code>${data.password}</code><br>
+                                    • Tenant ID: <code>${data.tenantId}</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Estado:</strong><br>
+                                    • ✅ Activo inmediatamente<br>
+                                    • 📧 Email enviado<br>
+                                    • 🗓️ Expira: ${new Date(data.fechaExpiracion).toLocaleDateString('es-ES')}
+                                </div>
+                            </div>
+                            <hr>
+                            <strong>Ya puede hacer login en:</strong> 
+                            <a href="https://app.fixlytaller.com/" target="_blank" class="btn btn-sm btn-primary">app.fixlytaller.com</a>
+                        </div>
+                    `;
+                    
+                    clearCreateForm();
+                    loadUsers(true); // Refresh user list
+                } else {
+                    statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error: ${error.message}</div>`;
+            }
+        });
+
+        // Utility functions
+        function clearCreateForm() {
+            document.getElementById('create-user-form').reset();
+            document.getElementById('new-duracion').value = '30';
+            document.getElementById('new-plan').value = 'pro';
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('es-ES');
+        }
+
+        function showNotification(message, type = 'info') {
+            // Crear notificación temporal
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        function logout() {
+            adminLoggedIn = false;
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('login-status').innerHTML = '';
+            currentUsers = [];
+            filteredUsers = [];
+        }
+
+        // ==========================================
+        // MERCADOPAGO DASHBOARD FUNCTIONS
+        // ==========================================
+
+        let allPayments = [];
+        let paymentsLoaded = false;
+
+        async function loadPayments() {
+            showNotification('Cargando transacciones de MercadoPago...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': ADMIN_KEY
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    allPayments = data.payments || [];
+                    updatePaymentStats(data.statistics);
+                    renderPaymentsTable(allPayments);
+                    paymentsLoaded = true;
+                    showNotification('Transacciones cargadas exitosamente', 'success');
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                showNotification(`Error al cargar pagos: ${error.message}`, 'error');
+                renderPaymentsError();
+            }
+        }
+
+        function updatePaymentStats(stats) {
+            document.getElementById('total-transactions').textContent = stats.totalTransactions || 0;
+            document.getElementById('approved-payments').textContent = stats.approvedPayments || 0;
+            document.getElementById('total-revenue').textContent = `$${stats.totalRevenue || 0}`;
+            document.getElementById('pending-payments').textContent = stats.pendingPayments || 0;
+            document.getElementById('payments-count').textContent = stats.totalTransactions || 0;
+        }
+
+        function renderPaymentsTable(payments) {
+            const tbody = document.getElementById('payments-table');
+            
+            if (!payments || payments.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <p>No hay transacciones para mostrar</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = payments.map(payment => `
+                <tr>
+                    <td>
+                        <small class="text-muted">#${payment.id}</small>
+                    </td>
+                    <td>${formatDate(payment.date_created)}</td>
+                    <td>
+                        <div>
+                            <strong>${payment.userEmail || 'N/A'}</strong>
+                            ${payment.username ? `<br><small class="text-muted">${payment.username}</small>` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="plan-badge plan-${payment.plan || 'pro'}">${payment.plan || 'Pro'}</span>
+                    </td>
+                    <td><strong>$${payment.transaction_amount}</strong></td>
+                    <td>${payment.payment_method_id || 'N/A'}</td>
+                    <td>${getPaymentStatusBadge(payment.status)}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewPaymentDetails('${payment.id}')"
+                                title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        ${payment.status === 'pending' ? `
+                            <button class="btn btn-sm btn-outline-success" onclick="processPayment('${payment.id}', 'approve')"
+                                    title="Aprobar">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        ` : ''}
+                        ${payment.status === 'approved' ? `
+                            <button class="btn btn-sm btn-outline-warning" onclick="processPayment('${payment.id}', 'refund')"
+                                    title="Reembolsar">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getPaymentStatusBadge(status) {
+            const statusConfig = {
+                'approved': { class: 'status-active', text: 'Aprobado', icon: 'check-circle' },
+                'pending': { class: 'status-trial', text: 'Pendiente', icon: 'clock' },
+                'cancelled': { class: 'status-paused', text: 'Cancelado', icon: 'times-circle' },
+                'rejected': { class: 'status-expired', text: 'Rechazado', icon: 'exclamation-circle' }
+            };
+            
+            const config = statusConfig[status] || statusConfig['pending'];
+            return `<span class="status-badge ${config.class}">
+                        <i class="fas fa-${config.icon}"></i> ${config.text}
+                    </span>`;
+        }
+
+        function renderPaymentsError() {
+            const tbody = document.getElementById('payments-table');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <p>Error al cargar transacciones</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadPayments()">
+                                <i class="fas fa-retry"></i> Reintentar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function filterPayments() {
+            const period = document.getElementById('payment-period').value;
+            const status = document.getElementById('payment-status-filter').value;
+            const search = document.getElementById('payment-search').value.toLowerCase();
+            
+            let filtered = [...allPayments];
+            
+            // Filter by period
+            const now = new Date();
+            if (period !== 'all') {
+                filtered = filtered.filter(payment => {
+                    const paymentDate = new Date(payment.date_created);
+                    switch (period) {
+                        case 'today':
+                            return paymentDate.toDateString() === now.toDateString();
+                        case 'week':
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            return paymentDate >= weekAgo;
+                        case 'month':
+                            return paymentDate.getMonth() === now.getMonth() && 
+                                   paymentDate.getFullYear() === now.getFullYear();
+                        case 'quarter':
+                            const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+                            return paymentDate >= quarterStart;
+                        case 'year':
+                            return paymentDate.getFullYear() === now.getFullYear();
+                        default:
+                            return true;
+                    }
+                });
+            }
+            
+            // Filter by status
+            if (status) {
+                filtered = filtered.filter(payment => payment.status === status);
+            }
+            
+            // Filter by search
+            if (search) {
+                filtered = filtered.filter(payment => 
+                    payment.id.toString().toLowerCase().includes(search) ||
+                    (payment.userEmail && payment.userEmail.toLowerCase().includes(search)) ||
+                    (payment.username && payment.username.toLowerCase().includes(search))
+                );
+            }
+            
+            renderPaymentsTable(filtered);
+            showNotification(`Filtrados ${filtered.length} de ${allPayments.length} pagos`, 'info');
+        }
+
+        async function viewPaymentDetails(paymentId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payment/${paymentId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': ADMIN_KEY
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showPaymentDetailsModal(data.payment);
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error al cargar detalles: ${error.message}`, 'error');
+            }
+        }
+
+        function showPaymentDetailsModal(payment) {
+            // Create modal HTML
+            const modalHtml = `
+                <div class="modal fade" id="paymentDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalles del Pago #${payment.id}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Información de Pago</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>ID:</strong></td><td>#${payment.id}</td></tr>
+                                            <tr><td><strong>Estado:</strong></td><td>${getPaymentStatusBadge(payment.status)}</td></tr>
+                                            <tr><td><strong>Monto:</strong></td><td><strong>$${payment.transaction_amount}</strong></td></tr>
+                                            <tr><td><strong>Moneda:</strong></td><td>${payment.currency_id}</td></tr>
+                                            <tr><td><strong>Método:</strong></td><td>${payment.payment_method_id}</td></tr>
+                                            <tr><td><strong>Fecha:</strong></td><td>${formatDate(payment.date_created)}</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Información del Usuario</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Email:</strong></td><td>${payment.payer?.email || 'N/A'}</td></tr>
+                                            <tr><td><strong>Nombre:</strong></td><td>${payment.payer?.first_name || ''} ${payment.payer?.last_name || ''}</td></tr>
+                                            <tr><td><strong>Documento:</strong></td><td>${payment.payer?.identification?.number || 'N/A'}</td></tr>
+                                            <tr><td><strong>Teléfono:</strong></td><td>${payment.payer?.phone?.number || 'N/A'}</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                ${payment.description ? `<div class="mt-3"><strong>Descripción:</strong> ${payment.description}</div>` : ''}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal and add new one
+            const existingModal = document.getElementById('paymentDetailsModal');
+            if (existingModal) existingModal.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
+            modal.show();
+        }
+
+        async function processPayment(paymentId, action) {
+            if (!confirm(`¿Está seguro de ${action === 'approve' ? 'aprobar' : 'reembolsar'} este pago?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payment/process`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': ADMIN_KEY
+                    },
+                    body: JSON.stringify({ paymentId, action })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Pago ${action === 'approve' ? 'aprobado' : 'reembolsado'} exitosamente`, 'success');
+                    loadPayments(); // Refresh
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function generateFinancialReport() {
+            try {
+                const period = document.getElementById('payment-period').value;
+                const response = await fetch(`${API_BASE}/api/admin/reports/financial?period=${period}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': ADMIN_KEY
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    downloadFinancialReport(data.report, period);
+                    showNotification('Reporte generado exitosamente', 'success');
+                } else {
+                    showNotification(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function downloadFinancialReport(report, period) {
+            const csv = generateCSV(report);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `reporte-financiero-${period}-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function generateCSV(data) {
+            const headers = ['ID Pago', 'Fecha', 'Usuario', 'Email', 'Monto', 'Estado', 'Método'];
+            const rows = data.transactions.map(t => [
+                t.id,
+                t.date_created,
+                t.username || 'N/A',
+                t.userEmail || 'N/A',
+                t.transaction_amount,
+                t.status,
+                t.payment_method_id || 'N/A'
+            ]);
+            
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        async function testWebhook() {
+            showNotification('Probando webhook MercadoPago...', 'info');
+            // Implement webhook test logic
+        }
+
+        async function syncPayments() {
+            showNotification('Sincronizando pagos con MercadoPago...', 'info');
+            await loadPayments();
+        }
+
+        function exportPayments() {
+            if (!paymentsLoaded || allPayments.length === 0) {
+                showNotification('No hay pagos para exportar', 'warning');
+                return;
+            }
+            
+            const csv = generateCSV({ transactions: allPayments });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pagos-mercadopago-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('Pagos exportados exitosamente', 'success');
+        }
+
+        // Auto-load payments when payments section is shown
+        function showPaymentsSection() {
+            showSection('payments');
+            if (!paymentsLoaded) {
+                loadPayments();
+            }
+        }
+
+        // Auto-focus password field on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('admin-password').focus();
+        });
+    </script>
+</body>
+</html>

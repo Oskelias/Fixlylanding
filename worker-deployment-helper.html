@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Worker Deployment Helper - Version 4.2.0</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+        .header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section { 
+            background: white; 
+            padding: 25px; 
+            margin: 20px 0; 
+            border-radius: 10px; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        .code-block { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef;
+            border-radius: 5px; 
+            padding: 15px; 
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .copy-btn { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 10px 0;
+            float: right;
+        }
+        .copy-btn:hover { 
+            background: #218838; 
+        }
+        .status { 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 15px 0; 
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb; 
+        }
+        .warning { 
+            background: #fff3cd; 
+            color: #856404; 
+            border: 1px solid #ffeaa7; 
+        }
+        .step { 
+            counter-increment: step-counter; 
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 5px;
+        }
+        .step::before { 
+            content: "Paso " counter(step-counter); 
+            display: block; 
+            font-weight: bold; 
+            color: #007bff; 
+            margin-bottom: 10px;
+        }
+        .steps-container { 
+            counter-reset: step-counter; 
+        }
+        .url-link { 
+            color: #007bff; 
+            text-decoration: none; 
+            font-weight: bold; 
+        }
+        .url-link:hover { 
+            text-decoration: underline; 
+        }
+        #worker-code {
+            height: 400px;
+            resize: vertical;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .old-version { background-color: #fff5f5; }
+        .new-version { background-color: #f0fff4; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Worker Deployment Helper</h1>
+        <h2>Actualización a Version 4.2.0 Email Fixed</h2>
+        <p>Sistema Multi-tenant Mundo Electrónico</p>
+    </div>
+
+    <div class="section">
+        <h3>📊 Comparación de Versiones</h3>
+        <table class="comparison-table">
+            <tr>
+                <th>Aspecto</th>
+                <th class="old-version">Versión Actual (4.1.0)</th>
+                <th class="new-version">Nueva Versión (4.2.0)</th>
+            </tr>
+            <tr>
+                <td><strong>Tamaño</strong></td>
+                <td class="old-version">23,314 bytes</td>
+                <td class="new-version">24,809 bytes</td>
+            </tr>
+            <tr>
+                <td><strong>Email System</strong></td>
+                <td class="old-version">Básico</td>
+                <td class="new-version">Mejorado con retry y logging</td>
+            </tr>
+            <tr>
+                <td><strong>Error Handling</strong></td>
+                <td class="old-version">Estándar</td>
+                <td class="new-version">Mejorado para MailChannels</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-tenant</strong></td>
+                <td class="old-version">✅ Funcionando</td>
+                <td class="new-version">✅ Mantiene + Mejoras</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>🎯 Estado Actual del Sistema</h3>
+        
+        <div class="status success">
+            <strong>✅ FRONTEND DESPLEGADO</strong><br>
+            • Multi-tenant login: <a href="https://app.fixlytaller.com/" target="_blank" class="url-link">app.fixlytaller.com</a><br>
+            • Admin panel: <a href="https://sistema.fixlytaller.com/" target="_blank" class="url-link">sistema.fixlytaller.com</a>
+        </div>
+        
+        <div class="status warning">
+            <strong>⚠️ BACKEND PENDIENTE</strong><br>
+            • Worker actual: Version 4.1.0<br>
+            • Recomendado: Actualizar a 4.2.0 para mejores emails
+        </div>
+        
+        <button onclick="checkCurrentWorker()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+            🔍 Verificar Worker Actual
+        </button>
+        <div id="current-status"></div>
+    </div>
+
+    <div class="section">
+        <h3>🔧 Deployment - Opción Dashboard (RECOMENDADO)</h3>
+        
+        <div class="steps-container">
+            <div class="step">
+                Ve al Dashboard de Cloudflare Workers:<br>
+                <a href="https://dash.cloudflare.com/workers" target="_blank" class="url-link">
+                    🔗 https://dash.cloudflare.com/workers
+                </a>
+            </div>
+            
+            <div class="step">
+                Busca tu worker existente (probablemente llamado algo como "fixly-backend-api" o similar asociado con api.fixlytaller.com)
+            </div>
+            
+            <div class="step">
+                Haz clic en el worker para editarlo
+            </div>
+            
+            <div class="step">
+                <strong>Selecciona y copia TODO el código de abajo:</strong>
+                <button class="copy-btn" onclick="copyWorkerCode()">📋 Copiar Código</button>
+                <textarea id="worker-code" class="code-block" readonly></textarea>
+            </div>
+            
+            <div class="step">
+                Pega el código en el editor del Dashboard de Cloudflare, reemplazando todo el contenido existente
+            </div>
+            
+            <div class="step">
+                Haz clic en "Save and Deploy" o "Deploy"
+            </div>
+            
+            <div class="step">
+                <strong>Verifica el deployment:</strong>
+                <button onclick="verifyDeployment()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                    ✅ Verificar Deployment
+                </button>
+                <div id="deployment-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🧪 Test Completo del Sistema</h3>
+        <p>Una vez desplegado el worker actualizado, puedes probar todo el flujo:</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                <strong>1️⃣ Admin Panel</strong><br>
+                <a href="https://sistema.fixlytaller.com/" target="_blank" class="url-link">Crear Usuario</a>
+            </div>
+            <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                <strong>2️⃣ Multi-tenant Login</strong><br>
+                <a href="https://app.fixlytaller.com/" target="_blank" class="url-link">Login Usuario</a>
+            </div>
+            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                <strong>3️⃣ Dashboard</strong><br>
+                <span style="color: #666;">Datos del Tenant</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar el código del worker al inicializar la página
+        async function loadWorkerCode() {
+            try {
+                const response = await fetch('./worker-completo-email-fixed.js');
+                const code = await response.text();
+                document.getElementById('worker-code').value = code;
+            } catch (error) {
+                document.getElementById('worker-code').value = 'Error cargando el código. Asegúrate de que el archivo worker-completo-email-fixed.js esté disponible.';
+            }
+        }
+
+        function copyWorkerCode() {
+            const codeElement = document.getElementById('worker-code');
+            codeElement.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Copiado!';
+            btn.style.background = '#28a745';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '#28a745';
+            }, 2000);
+        }
+
+        async function checkCurrentWorker() {
+            const statusDiv = document.getElementById('current-status');
+            statusDiv.innerHTML = '<div class="status info">🔍 Verificando worker actual...</div>';
+            
+            try {
+                const response = await fetch('https://api.fixlytaller.com/health');
+                const data = await response.json();
+                
+                const isOldVersion = data.version === '4.1.0-login-fixed';
+                const isNewVersion = data.version === '4.2.0-email-fixed';
+                
+                let statusClass = 'info';
+                let message = '';
+                
+                if (isOldVersion) {
+                    statusClass = 'warning';
+                    message = `
+                        <strong>⚠️ WORKER DESACTUALIZADO</strong><br>
+                        Versión actual: ${data.version}<br>
+                        <strong>Recomendación:</strong> Actualizar a 4.2.0-email-fixed
+                    `;
+                } else if (isNewVersion) {
+                    statusClass = 'success';
+                    message = `
+                        <strong>✅ WORKER ACTUALIZADO</strong><br>
+                        Versión: ${data.version}<br>
+                        Email Status: ${data.emailStatus || 'Standard'}
+                    `;
+                } else {
+                    statusClass = 'info';
+                    message = `
+                        <strong>ℹ️ WORKER DETECTADO</strong><br>
+                        Versión: ${data.version}<br>
+                        Features: ${data.features ? data.features.join(', ') : 'N/A'}
+                    `;
+                }
+                
+                statusDiv.innerHTML = `<div class="status ${statusClass}">${message}</div>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status warning">❌ Error al verificar: ${error.message}</div>`;
+            }
+        }
+
+        async function verifyDeployment() {
+            const statusDiv = document.getElementById('deployment-status');
+            statusDiv.innerHTML = '<div class="status info">🔍 Verificando deployment...</div>';
+            
+            try {
+                const response = await fetch('https://api.fixlytaller.com/health?_t=' + Date.now());
+                const data = await response.json();
+                
+                const isUpdated = data.version === '4.2.0-email-fixed';
+                const hasEmailStatus = data.emailStatus === 'improved-with-retry-and-logging';
+                
+                if (isUpdated && hasEmailStatus) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>🎉 ¡DEPLOYMENT EXITOSO!</strong><br>
+                            ✅ Versión: ${data.version}<br>
+                            ✅ Email Status: ${data.emailStatus}<br>
+                            ✅ Multi-tenant: ${data.features.includes('multi-tenant') ? 'Activo' : 'Inactivo'}<br>
+                            <strong>Sistema completo funcionando!</strong>
+                        </div>
+                    `;
+                } else if (isUpdated) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>✅ Worker actualizado correctamente</strong><br>
+                            Versión: ${data.version}<br>
+                            (Email status puede tardar unos momentos en actualizarse)
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status warning">
+                            <strong>⚠️ Aún no actualizado</strong><br>
+                            Versión detectada: ${data.version}<br>
+                            Esperada: 4.2.0-email-fixed
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status warning">❌ Error en verificación: ${error.message}</div>`;
+            }
+        }
+
+        // Cargar código al inicializar
+        window.addEventListener('load', () => {
+            loadWorkerCode();
+            checkCurrentWorker();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Endpoints - Fixly Taller</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0"><i class="fas fa-tools me-2"></i>Test Admin Endpoints - Worker v4.3.0</h3>
+                        <p class="mb-0">Prueba de endpoints de administración empresarial</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Configuration -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="apiUrl" class="form-label">Worker API URL:</label>
+                                <input type="text" class="form-control" id="apiUrl" 
+                                       value="https://fixly-backend.oskelias.workers.dev" 
+                                       placeholder="https://your-worker.workers.dev">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="adminToken" class="form-label">Admin Token:</label>
+                                <input type="password" class="form-control" id="adminToken" 
+                                       placeholder="admin-token-here" value="admin123">
+                            </div>
+                        </div>
+
+                        <!-- Health Check -->
+                        <div class="card mb-3 border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Health Check</h5>
+                            </div>
+                            <div class="card-body">
+                                <button class="btn btn-success" onclick="testHealth()">
+                                    <i class="fas fa-play me-2"></i>Test Health Endpoint
+                                </button>
+                                <div id="healthResult" class="mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- User Management Tests -->
+                        <div class="card mb-3 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management Tests</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <button class="btn btn-primary w-100" onclick="testListUsers()">
+                                            <i class="fas fa-list me-2"></i>List All Users
+                                        </button>
+                                        <div id="listUsersResult" class="mt-2"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" id="pauseUsername" 
+                                                   placeholder="Username to pause">
+                                            <select class="form-select" id="pauseAction">
+                                                <option value="pause">Pause</option>
+                                                <option value="resume">Resume</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-warning w-100" onclick="testPauseUser()">
+                                            <i class="fas fa-pause me-2"></i>Pause/Resume User
+                                        </button>
+                                        <div id="pauseUserResult" class="mt-2"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" id="extendUsername" 
+                                                   placeholder="Username to extend">
+                                            <input type="number" class="form-control" id="extendDays" 
+                                                   placeholder="Days" value="30" min="1" max="365">
+                                        </div>
+                                        <div class="input-group mb-2">
+                                            <select class="form-select" id="extendPlan">
+                                                <option value="">Keep current plan</option>
+                                                <option value="starter">Starter (15 días gratis)</option>
+                                                <option value="trial">Starter (15 días gratis)</option>
+                                                <option value="pro">Pro ($14.999/mes)</option>
+                                                <option value="enterprise">Enterprise (A medida)</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-info w-100" onclick="testExtendUser()">
+                                            <i class="fas fa-calendar-plus me-2"></i>Extend Subscription
+                                        </button>
+                                        <div id="extendUserResult" class="mt-2"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" id="deleteUsername" 
+                                                   placeholder="Username to delete">
+                                        </div>
+                                        <button class="btn btn-danger w-100" onclick="testDeleteUser()" 
+                                                data-bs-toggle="tooltip" title="Soft delete - recoverable">
+                                            <i class="fas fa-trash me-2"></i>Delete User (Soft)
+                                        </button>
+                                        <div id="deleteUserResult" class="mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MercadoPago Webhook Test -->
+                        <div class="card mb-3 border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>MercadoPago Webhook Test</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="webhookUsername" class="form-label">Username:</label>
+                                        <input type="text" class="form-control mb-2" id="webhookUsername" 
+                                               placeholder="existing-username">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="webhookAmount" class="form-label">Payment Amount:</label>
+                                        <select class="form-select mb-2" id="webhookAmount">
+                                            <option value="14999" selected>$14.999 (Plan Pro)</option>
+                                            <option value="29999">$29.999 (Enterprise Custom)</option>
+                                            <option value="49999">$49.999 (Enterprise Premium)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-warning" onclick="testMercadoPagoWebhook()">
+                                    <i class="fas fa-money-bill me-2"></i>Simulate Payment Webhook
+                                </button>
+                                <div id="webhookResult" class="mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- Results Display -->
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Test Results</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="globalResults" style="max-height: 400px; overflow-y: auto;">
+                                    <p class="text-muted">Test results will appear here...</p>
+                                </div>
+                                <button class="btn btn-secondary mt-3" onclick="clearResults()">
+                                    <i class="fas fa-broom me-2"></i>Clear Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value.trim();
+        }
+
+        function getAdminToken() {
+            return document.getElementById('adminToken').value.trim();
+        }
+
+        function addResult(title, data, isError = false) {
+            const results = document.getElementById('globalResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const alertClass = isError ? 'alert-danger' : 'alert-success';
+            const icon = isError ? 'fas fa-times-circle' : 'fas fa-check-circle';
+            
+            const resultHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <h6><i class="${icon} me-2"></i>${title} - ${timestamp}</h6>
+                    <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.85em;">${JSON.stringify(data, null, 2)}</pre>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            results.insertAdjacentHTML('afterbegin', resultHtml);
+        }
+
+        function clearResults() {
+            document.getElementById('globalResults').innerHTML = '<p class="text-muted">Test results cleared...</p>';
+        }
+
+        async function makeRequest(endpoint, method = 'GET', body = null) {
+            const apiUrl = getApiUrl();
+            const adminToken = getAdminToken();
+            
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminToken}`,
+                    'X-Admin-Key': adminToken
+                }
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}${endpoint}`, options);
+                const data = await response.json();
+                
+                return {
+                    status: response.status,
+                    data: data,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    data: { error: error.message },
+                    headers: {}
+                };
+            }
+        }
+
+        async function testHealth() {
+            const result = await makeRequest('/health');
+            addResult('Health Check', result, result.status !== 200);
+            document.getElementById('healthResult').innerHTML = 
+                `<small class="text-${result.status === 200 ? 'success' : 'danger'}">
+                    Status: ${result.status} - ${result.data.status || result.data.error}
+                </small>`;
+        }
+
+        async function testListUsers() {
+            const result = await makeRequest('/api/admin/users');
+            addResult('List Users', result, result.status !== 200);
+            document.getElementById('listUsersResult').innerHTML = 
+                `<small class="text-${result.status === 200 ? 'success' : 'danger'}">
+                    Found ${result.data.users ? result.data.users.length : 0} users
+                </small>`;
+        }
+
+        async function testPauseUser() {
+            const username = document.getElementById('pauseUsername').value.trim();
+            const action = document.getElementById('pauseAction').value;
+            
+            if (!username) {
+                addResult('Pause User Error', { error: 'Username required' }, true);
+                return;
+            }
+            
+            const result = await makeRequest(`/api/admin/user/${username}/pause`, 'PUT', { action });
+            addResult(`${action} User: ${username}`, result, result.status !== 200);
+            document.getElementById('pauseUserResult').innerHTML = 
+                `<small class="text-${result.status === 200 ? 'success' : 'danger'}">
+                    ${result.data.message || result.data.error}
+                </small>`;
+        }
+
+        async function testExtendUser() {
+            const username = document.getElementById('extendUsername').value.trim();
+            const days = parseInt(document.getElementById('extendDays').value) || 30;
+            const plan = document.getElementById('extendPlan').value;
+            
+            if (!username) {
+                addResult('Extend User Error', { error: 'Username required' }, true);
+                return;
+            }
+            
+            const body = { days };
+            if (plan) body.newPlan = plan;
+            
+            const result = await makeRequest(`/api/admin/user/${username}/extend`, 'PUT', body);
+            addResult(`Extend User: ${username}`, result, result.status !== 200);
+            document.getElementById('extendUserResult').innerHTML = 
+                `<small class="text-${result.status === 200 ? 'success' : 'danger'}">
+                    ${result.data.message || result.data.error}
+                </small>`;
+        }
+
+        async function testDeleteUser() {
+            const username = document.getElementById('deleteUsername').value.trim();
+            
+            if (!username) {
+                addResult('Delete User Error', { error: 'Username required' }, true);
+                return;
+            }
+            
+            if (!confirm(`¿Está seguro de eliminar al usuario "${username}"? (Eliminación suave - recuperable)`)) {
+                return;
+            }
+            
+            const result = await makeRequest(`/api/admin/user/${username}`, 'DELETE');
+            addResult(`Delete User: ${username}`, result, result.status !== 200);
+            document.getElementById('deleteUserResult').innerHTML = 
+                `<small class="text-${result.status === 200 ? 'success' : 'danger'}">
+                    ${result.data.message || result.data.error}
+                </small>`;
+        }
+
+        async function testMercadoPagoWebhook() {
+            const username = document.getElementById('webhookUsername').value.trim();
+            const amount = parseFloat(document.getElementById('webhookAmount').value);
+            
+            if (!username) {
+                addResult('MercadoPago Webhook Error', { error: 'Username required' }, true);
+                return;
+            }
+            
+            const webhookData = {
+                type: 'payment',
+                data: {
+                    id: Math.floor(Math.random() * 1000000).toString()
+                },
+                payment: {
+                    id: Math.floor(Math.random() * 1000000),
+                    status: 'approved',
+                    transaction_amount: amount,
+                    payer: {
+                        email: `${username}@test.com`
+                    },
+                    metadata: {
+                        username: username
+                    }
+                }
+            };
+            
+            const result = await makeRequest('/api/webhook/mercadopago', 'POST', webhookData);
+            addResult(`MercadoPago Webhook: ${username}`, result, result.status !== 200);
+            document.getElementById('webhookResult').innerHTML = 
+                `<small class="text-${result.status === 200 ? 'success' : 'danger'}">
+                    ${result.data.message || result.data.error}
+                </small>`;
+        }
+
+        // Load saved configuration
+        window.addEventListener('load', function() {
+            const savedApiUrl = localStorage.getItem('adminTestApiUrl');
+            const savedToken = localStorage.getItem('adminTestToken');
+            
+            if (savedApiUrl) {
+                document.getElementById('apiUrl').value = savedApiUrl;
+            }
+            if (savedToken) {
+                document.getElementById('adminToken').value = savedToken;
+            }
+        });
+
+        // Save configuration on change
+        document.getElementById('apiUrl').addEventListener('change', function() {
+            localStorage.setItem('adminTestApiUrl', this.value);
+        });
+
+        document.getElementById('adminToken').addEventListener('change', function() {
+            localStorage.setItem('adminTestToken', this.value);
+        });
+    </script>
+</body>
+</html>

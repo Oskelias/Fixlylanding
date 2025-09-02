@@ -29,20 +29,18 @@ const EMAIL_CONFIG = {
 // ==========================================
 // MERCADOPAGO CONFIGURATION
 // ==========================================
-// En Cloudflare Workers, las variables de entorno se acceden desde el objeto env del handler
-function getMercadoPagoConfig(env) {
-  return {
-    ACCESS_TOKEN: env?.MERCADOPAGO_ACCESS_TOKEN || 'APP_USR-7238814895470425-082411-647f2ca91ab0ceb5dc514289b0fe5ed0-2016413686',
-    API_URL: 'https://api.mercadopago.com',
-    WEBHOOK_SECRET: env?.MERCADOPAGO_WEBHOOK_SECRET || '5773f7d34f678376a5e637e02319f6d6e650edcbcbeff138b88f1c777dacb42a',
-    
-    // Precios configurados
-    PLANS_PRICES: {
-      'pro': 14999,  // $14.999 ARS
-      'enterprise': 999999 // Precio a medida
-    }
-  };
-}
+const MERCADOPAGO_CONFIG = {
+  // En producción, estos deberían ser variables de entorno
+  ACCESS_TOKEN: process.env.MERCADOPAGO_ACCESS_TOKEN || 'TEST-TOKEN',
+  API_URL: 'https://api.mercadopago.com',
+  WEBHOOK_SECRET: process.env.MERCADOPAGO_WEBHOOK_SECRET || 'webhook-secret',
+  
+  // Precios configurados
+  PLANS_PRICES: {
+    'pro': 14999,  // $14.999 ARS
+    'enterprise': 999999 // Precio a medida
+  }
+};
 
 // ==========================================
 // CORS CONFIGURATION
@@ -123,12 +121,11 @@ function generateTenantId() {
 // MERCADOPAGO HELPER FUNCTIONS
 // ==========================================
 
-async function getMercadoPagoPayment(paymentId, env) {
+async function getMercadoPagoPayment(paymentId) {
   try {
-    const mpConfig = getMercadoPagoConfig(env);
-    const response = await fetch(`${mpConfig.API_URL}/v1/payments/${paymentId}`, {
+    const response = await fetch(`${MERCADOPAGO_CONFIG.API_URL}/v1/payments/${paymentId}`, {
       headers: {
-        'Authorization': `Bearer ${mpConfig.ACCESS_TOKEN}`
+        'Authorization': `Bearer ${MERCADOPAGO_CONFIG.ACCESS_TOKEN}`
       }
     });
     
@@ -339,7 +336,7 @@ async function handleGetPaymentDetails(request, env) {
     }
 
     // Obtener detalles del pago desde MercadoPago
-    const paymentData = await getMercadoPagoPayment(paymentId, env);
+    const paymentData = await getMercadoPagoPayment(paymentId);
     
     if (!paymentData) {
       return new Response(JSON.stringify({
@@ -396,7 +393,7 @@ async function handleProcessPayment(request, env) {
       });
     }
 
-    const paymentData = await getMercadoPagoPayment(paymentId, env);
+    const paymentData = await getMercadoPagoPayment(paymentId);
     
     if (!paymentData) {
       return new Response(JSON.stringify({
@@ -962,7 +959,7 @@ async function handleMercadoPagoWebhook(request, env) {
       const paymentId = webhookData.data.id;
       
       // Obtener detalles del pago
-      const paymentData = await getMercadoPagoPayment(paymentId, env);
+      const paymentData = await getMercadoPagoPayment(paymentId);
       
       if (paymentData) {
         const paymentInfo = identifyUserFromPayment(paymentData);

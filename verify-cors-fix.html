@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔧 Verificar CORS Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #d1ecf1; color: #0c5460; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Verificar CORS Fix</h1>
+    
+    <div id="status"></div>
+    
+    <button onclick="testCORS()">🧪 Test CORS</button>
+    <button onclick="testLogin()">🔐 Test Login</button>
+    <button onclick="testHealth()">💓 Test Health</button>
+    
+    <script>
+        const API_BASE = 'https://api.fixlytaller.com';
+        
+        async function testCORS() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="status loading">🔍 Probando CORS preflight...</div>';
+            
+            try {
+                // Test OPTIONS request (preflight)
+                const optionsResponse = await fetch(`${API_BASE}/api/login`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'https://app.fixlytaller.com',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': optionsResponse.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': optionsResponse.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': optionsResponse.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                if (corsHeaders['Access-Control-Allow-Origin']) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>✅ CORS FUNCIONANDO</strong><br>
+                            • Allow-Origin: ${corsHeaders['Access-Control-Allow-Origin']}<br>
+                            • Allow-Methods: ${corsHeaders['Access-Control-Allow-Methods']}<br>
+                            • Status: ${optionsResponse.status}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            <strong>❌ CORS AÚN NO FUNCIONA</strong><br>
+                            • No hay headers CORS en OPTIONS<br>
+                            • Status: ${optionsResponse.status}<br>
+                            • Necesitas actualizar el worker
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Error CORS: ${error.message}</div>`;
+            }
+        }
+        
+        async function testLogin() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="status loading">🔐 Probando login...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'taller_segundotaller_559974',
+                        password: 'fix_2025_jk34'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>✅ LOGIN FUNCIONANDO</strong><br>
+                            • Usuario: ${data.user.username}<br>
+                            • Tenant: ${data.user.tenantId}<br>
+                            • Empresa: ${data.user.empresa}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            <strong>❌ Login falló</strong><br>
+                            Error: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Error login: ${error.message}</div>`;
+            }
+        }
+        
+        async function testHealth() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="status loading">💓 Verificando health...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                const isCorsFixed = data.version === '4.2.1-cors-fixed';
+                const hasCorsStatus = data.corsStatus === 'fixed-preflight-requests';
+                
+                if (isCorsFixed && hasCorsStatus) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>🎉 WORKER ACTUALIZADO</strong><br>
+                            • Version: ${data.version}<br>
+                            • CORS Status: ${data.corsStatus}<br>
+                            • Features: ${data.features.join(', ')}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            <strong>⚠️ WORKER NO ACTUALIZADO</strong><br>
+                            • Version actual: ${data.version}<br>
+                            • Esperada: 4.2.1-cors-fixed<br>
+                            • CORS Status: ${data.corsStatus || 'No disponible'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Error health: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', testHealth);
+    </script>
+</body>
+</html>

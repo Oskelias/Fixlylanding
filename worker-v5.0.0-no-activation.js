@@ -1,11 +1,12 @@
 /**
- * FIXLY BACKEND - VERSION 4.3.2 CORS FIXED
- * Cloudflare Worker con funcionalidades completas de administración empresarial
- * Ajustado para los planes actuales de Fixly Taller
+ * FIXLY BACKEND - VERSION 5.0.0 NO ACTIVATION CODES
+ * Sistema simplificado sin códigos de activación
  * 
- * CAMBIOS EN ESTA VERSIÓN:
- * - ✅ Agregado consola.fixlytaller.com a CORS allowed origins
- * - ✅ Todas las funcionalidades anteriores mantenidas
+ * CAMBIOS PRINCIPALES:
+ * - ❌ Eliminados códigos de activación
+ * - ✅ Usuarios activos inmediatamente al crearlos
+ * - ✅ Login directo con username/password
+ * - ✅ Admin endpoints mejorados para gestión completa
  */
 
 // ==========================================
@@ -25,7 +26,7 @@ const EMAIL_CONFIG = {
 };
 
 // ==========================================
-// CORS CONFIGURATION - ACTUALIZADO
+// CORS CONFIGURATION
 // ==========================================
 const allowedOrigins = [
   'https://fixlytaller.com',
@@ -38,11 +39,8 @@ const allowedOrigins = [
   'https://genspark.ai',
   'https://claude.ai',
   // Testing domains
-  'https://8000-i2laypwrf943b2kjj1zwi-6532622b.e2b.dev',
   'http://localhost:3000',
-  'http://localhost:8000',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:8000'
+  'http://localhost:8000'
 ];
 
 function getCorsHeaders(request) {
@@ -58,18 +56,14 @@ function getCorsHeaders(request) {
 }
 
 // ==========================================
-// PLAN CONFIGURATIONS - FIXLY TALLER ACTUAL
+// PLAN CONFIGURATIONS
 // ==========================================
 const PLANS = {
   starter: {
     name: 'Starter',
     duration: 15, 
     price: 0, 
-    features: [
-      '1 taller',
-      '2 usuarios máximo', 
-      'Todas las funcionalidades en prueba'
-    ],
+    features: ['1 taller', '2 usuarios máximo', 'Todas las funcionalidades en prueba'],
     displayPrice: '$0',
     description: '15 días de prueba'
   },
@@ -77,13 +71,7 @@ const PLANS = {
     name: 'Pro',
     duration: 30, 
     price: 14999, 
-    features: [
-      '1 taller',
-      'Hasta 5 usuarios',
-      'Todas las funcionalidades',
-      'Soporte',
-      'Base de datos SQL'
-    ],
+    features: ['1 taller', 'Hasta 5 usuarios', 'Todas las funcionalidades', 'Soporte', 'Base de datos SQL'],
     displayPrice: '$14.999',
     description: 'Plan completo'
   },
@@ -91,13 +79,7 @@ const PLANS = {
     name: 'Enterprise', 
     duration: 365, 
     price: 999999, 
-    features: [
-      'Multi-sucursal',
-      'Usuarios ilimitados', 
-      'Personalización completa',
-      'Soporte premium 24/7',
-      'Integración ERP'
-    ],
+    features: ['Multi-sucursal', 'Usuarios ilimitados', 'Personalización completa', 'Soporte premium 24/7', 'Integración ERP'],
     displayPrice: 'A medida',
     description: 'Solución empresarial'
   }
@@ -116,10 +98,6 @@ function isValidAdmin(request) {
 
 function generateTenantId() {
   return 'tenant_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-}
-
-function generateCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 // ==========================================
@@ -171,7 +149,7 @@ async function sendEmail(to, subject, htmlBody) {
 }
 
 // ==========================================
-// ADMIN MANAGEMENT FUNCTIONS
+// ADMIN MANAGEMENT FUNCTIONS MEJORADAS
 // ==========================================
 
 async function handleListUsers(request, env) {
@@ -190,25 +168,55 @@ async function handleListUsers(request, env) {
     const users = [];
     
     for (const key of usersList.keys) {
-      const userData = await env.FIXLY_USERS.get(key.name);
-      if (userData) {
-        const user = JSON.parse(userData);
-        users.push({
-          username: user.username,
-          empresa: user.empresa,
-          email: user.email,
-          plan: user.tipo,
-          status: user.activo ? 'active' : 'inactive',
-          fechaCreacion: user.fechaCreacion,
-          fechaExpiracion: user.fechaExpiracion,
-          validado: user.validado
-        });
+      try {
+        const userData = await env.FIXLY_USERS.get(key.name);
+        if (userData) {
+          const user = JSON.parse(userData);
+          
+          // Calcular estado del usuario
+          const now = new Date();
+          const expiration = new Date(user.fechaExpiracion);
+          let status = 'active';
+          
+          if (user.pausado) {
+            status = 'paused';
+          } else if (now > expiration) {
+            status = 'expired';
+          } else if (user.tipo === 'starter' || user.tipo === 'trial') {
+            status = 'trial';
+          }
+          
+          users.push({
+            username: user.username,
+            empresa: user.empresa,
+            email: user.email,
+            telefono: user.telefono || '',
+            plan: user.tipo,
+            status: status,
+            fechaCreacion: user.fechaCreacion,
+            fechaExpiracion: user.fechaExpiracion,
+            activo: user.activo,
+            pausado: user.pausado || false,
+            tenantId: user.tenantId,
+            ultimoAcceso: user.ultimoAcceso || null
+          });
+        }
+      } catch (parseError) {
+        console.error('Error parsing user data:', parseError);
       }
     }
     
+    // Ordenar por fecha de creación (más recientes primero)
+    users.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+    
     return new Response(JSON.stringify({
       success: true,
-      users: users
+      users: users,
+      totalUsers: users.length,
+      activeUsers: users.filter(u => u.status === 'active').length,
+      trialUsers: users.filter(u => u.status === 'trial').length,
+      expiredUsers: users.filter(u => u.status === 'expired').length,
+      pausedUsers: users.filter(u => u.status === 'paused').length
     }), {
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
     });
@@ -261,8 +269,8 @@ async function handlePauseUser(request, env) {
     }
 
     const userData = JSON.parse(userDataStr);
-    userData.activo = action === 'resume';
     userData.pausado = action === 'pause';
+    userData.activo = action === 'resume';
     userData.modificadoPor = 'admin';
     userData.fechaModificacion = new Date().toISOString();
 
@@ -277,7 +285,8 @@ async function handlePauseUser(request, env) {
 
     return new Response(JSON.stringify({
       success: true,
-      message: `Usuario ${action === 'pause' ? 'pausado' : 'reactivado'} exitosamente`
+      message: `Usuario ${action === 'pause' ? 'pausado' : 'reactivado'} exitosamente`,
+      newStatus: action === 'pause' ? 'paused' : 'active'
     }), {
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
     });
@@ -334,27 +343,32 @@ async function handleExtendUser(request, env) {
     const newExpiration = new Date(currentExpiration.getTime() + (days * 24 * 60 * 60 * 1000));
     
     userData.fechaExpiracion = newExpiration.toISOString();
-    if (newPlan) {
+    if (newPlan && PLANS[newPlan]) {
       userData.tipo = newPlan;
     }
     userData.modificadoPor = 'admin';
     userData.fechaModificacion = new Date().toISOString();
+    userData.activo = true;
+    userData.pausado = false;
 
     await env.FIXLY_USERS.put(`user_${username}`, JSON.stringify(userData));
+
+    const planInfo = PLANS[userData.tipo] || { name: userData.tipo, displayPrice: 'N/A' };
 
     await sendTelegramNotification(`
 📅 <b>Suscripción Extendida</b>
 👤 Usuario: ${username}
 🏢 Empresa: ${userData.empresa}
 📈 Días agregados: ${days}
-📋 Plan: ${newPlan || userData.tipo}
+📋 Plan: ${planInfo.name} (${planInfo.displayPrice})
 🗓️ Nueva expiración: ${newExpiration.toLocaleDateString('es-ES')}
     `);
 
     return new Response(JSON.stringify({
       success: true,
       message: `Suscripción extendida ${days} días`,
-      newExpiration: newExpiration.toISOString()
+      newExpiration: newExpiration.toISOString(),
+      newPlan: userData.tipo
     }), {
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
     });
@@ -383,6 +397,7 @@ async function handleDeleteUser(request, env) {
   try {
     const url = new URL(request.url);
     const username = url.pathname.split('/')[4];
+    const { softDelete = true } = await request.json() || {};
 
     if (!username) {
       return new Response(JSON.stringify({
@@ -406,15 +421,23 @@ async function handleDeleteUser(request, env) {
     }
 
     const userData = JSON.parse(userDataStr);
-    userData.eliminado = true;
-    userData.eliminadoPor = 'admin';
-    userData.fechaEliminacion = new Date().toISOString();
 
-    await env.FIXLY_USERS.put(`user_deleted_${username}`, JSON.stringify(userData));
-    await env.FIXLY_USERS.delete(`user_${username}`);
+    if (softDelete) {
+      // Soft delete: marcar como eliminado pero mantener datos
+      userData.eliminado = true;
+      userData.eliminadoPor = 'admin';
+      userData.fechaEliminacion = new Date().toISOString();
+      userData.activo = false;
+      
+      await env.FIXLY_USERS.put(`user_deleted_${username}`, JSON.stringify(userData));
+      await env.FIXLY_USERS.delete(`user_${username}`);
+    } else {
+      // Hard delete: eliminar completamente
+      await env.FIXLY_USERS.delete(`user_${username}`);
+    }
 
     await sendTelegramNotification(`
-🗑️ <b>Usuario Eliminado</b>
+🗑️ <b>Usuario ${softDelete ? 'Eliminado (Soft)' : 'Eliminado (Permanente)'}</b>
 👤 Usuario: ${username}
 🏢 Empresa: ${userData.empresa}
 ⏰ Fecha: ${new Date().toLocaleString('es-ES')}
@@ -422,7 +445,8 @@ async function handleDeleteUser(request, env) {
 
     return new Response(JSON.stringify({
       success: true,
-      message: 'Usuario eliminado exitosamente'
+      message: `Usuario eliminado exitosamente (${softDelete ? 'reversible' : 'permanente'})`,
+      deleteType: softDelete ? 'soft' : 'hard'
     }), {
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
     });
@@ -438,12 +462,12 @@ async function handleDeleteUser(request, env) {
 }
 
 // ==========================================
-// CORE FUNCTIONS
+// CORE FUNCTIONS - SIN CÓDIGOS DE ACTIVACIÓN
 // ==========================================
 
 async function handleGenerateCode(request, env) {
   try {
-    const { username, password, email, telefono, empresa, tipo = 'trial', duracion = 15 } = await request.json();
+    const { username, password, email, telefono, empresa, tipo = 'pro', duracion = 30 } = await request.json();
 
     if (!username || !password || !email || !empresa) {
       return new Response(JSON.stringify({
@@ -466,41 +490,41 @@ async function handleGenerateCode(request, env) {
       });
     }
 
-    const codigo = generateCode();
     const tenantId = generateTenantId();
     const fechaCreacion = new Date().toISOString();
     const fechaExpiracion = new Date(Date.now() + duracion * 24 * 60 * 60 * 1000).toISOString();
 
+    // USUARIOS ACTIVOS INMEDIATAMENTE - SIN CÓDIGOS
     const userData = {
       username,
       password,
       email,
       telefono: telefono || '',
       empresa,
-      codigo,
       tenantId,
       tipo,
       fechaCreacion,
       fechaExpiracion,
-      activo: false,
-      validado: false,
+      activo: true,        // ✅ ACTIVO INMEDIATAMENTE
+      validado: true,      // ✅ VALIDADO AUTOMÁTICAMENTE
+      pausado: false,
       role: 'user'
     };
 
     await env.FIXLY_USERS.put(`user_${username}`, JSON.stringify(userData));
 
-    const planInfo = PLANS[tipo] || PLANS.trial;
+    const planInfo = PLANS[tipo] || PLANS.pro;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">¡Bienvenido a Fixly Taller!</h2>
         <p>Hola <strong>${empresa}</strong>,</p>
-        <p>Tu cuenta ha sido creada exitosamente. Aquí están tus credenciales de acceso:</p>
+        <p>Tu cuenta ha sido creada exitosamente y está <strong>lista para usar</strong>.</p>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3>Credenciales de Acceso</h3>
           <p><strong>Usuario:</strong> ${username}</p>
           <p><strong>Contraseña:</strong> ${password}</p>
-          <p><strong>Código de Activación:</strong> <span style="font-size: 18px; color: #667eea; font-weight: bold;">${codigo}</span></p>
+          <p><strong>URL:</strong> <a href="https://app.fixlytaller.com">https://app.fixlytaller.com</a></p>
         </div>
 
         <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -510,42 +534,39 @@ async function handleGenerateCode(request, env) {
           <p><strong>Válido hasta:</strong> ${new Date(fechaExpiracion).toLocaleDateString('es-ES')}</p>
         </div>
 
-        <p><strong>Próximos pasos:</strong></p>
-        <ol>
-          <li>Ingresa a <a href="https://app.fixlytaller.com">https://app.fixlytaller.com</a></li>
-          <li>Usa tu código de activación: <strong>${codigo}</strong></li>
-          <li>Completa la configuración de tu taller</li>
-        </ol>
+        <p><strong>¡Ya puedes empezar a usar el sistema!</strong></p>
+        <p>Solo ingresa a <a href="https://app.fixlytaller.com">app.fixlytaller.com</a> con tu usuario y contraseña.</p>
 
         <p>¡Estás listo para gestionar tu taller de manera profesional!</p>
         <p>Saludos,<br>Equipo Fixly Taller</p>
       </div>
     `;
 
-    await sendEmail(email, '🔧 Bienvenido a Fixly Taller - Credenciales de Acceso', emailHtml);
+    await sendEmail(email, '🔧 Bienvenido a Fixly Taller - Cuenta Activa', emailHtml);
 
     await sendTelegramNotification(`
-🎉 <b>Nuevo Usuario Registrado</b>
+🎉 <b>Nuevo Usuario Creado - ACTIVO</b>
 👤 Usuario: ${username}
 🏢 Empresa: ${empresa}
 📧 Email: ${email}
 📋 Plan: ${planInfo.name} (${planInfo.displayPrice})
 🗓️ Válido hasta: ${new Date(fechaExpiracion).toLocaleDateString('es-ES')}
-🔑 Código: ${codigo}
+✅ Estado: ACTIVO (sin códigos)
     `);
 
     return new Response(JSON.stringify({
       success: true,
       username,
       password,
-      codigo,
       tenantId,
       empresa,
       email,
       tipo,
       fechaCreacion,
       fechaExpiracion,
-      message: 'Usuario creado exitosamente. Revisa tu email para las instrucciones de activación.'
+      activo: true,
+      validado: true,
+      message: 'Usuario creado exitosamente y activo inmediatamente. Ya puede hacer login.'
     }), {
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
     });
@@ -560,73 +581,15 @@ async function handleGenerateCode(request, env) {
   }
 }
 
+// Mantener el endpoint de validación por compatibilidad, pero que siempre devuelva error
 async function handleValidateCode(request, env) {
-  try {
-    const { codigo } = await request.json();
-
-    if (!codigo) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Código requerido'
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-      });
-    }
-
-    const usersList = await env.FIXLY_USERS.list({ prefix: 'user_' });
-    
-    for (const key of usersList.keys) {
-      const userData = await env.FIXLY_USERS.get(key.name);
-      if (userData) {
-        const user = JSON.parse(userData);
-        if (user.codigo === codigo.toUpperCase()) {
-          user.validado = true;
-          user.activo = true;
-          user.fechaActivacion = new Date().toISOString();
-          
-          await env.FIXLY_USERS.put(key.name, JSON.stringify(user));
-
-          await sendTelegramNotification(`
-✅ <b>Usuario Activado</b>
-👤 Usuario: ${user.username}
-🏢 Empresa: ${user.empresa}
-🗓️ Activado: ${new Date().toLocaleString('es-ES')}
-          `);
-
-          return new Response(JSON.stringify({
-            success: true,
-            user: {
-              username: user.username,
-              empresa: user.empresa,
-              tenantId: user.tenantId,
-              plan: user.tipo,
-              fechaExpiracion: user.fechaExpiracion
-            },
-            message: 'Código validado correctamente'
-          }), {
-            headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-          });
-        }
-      }
-    }
-
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Código inválido o expirado'
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Error validando código: ' + error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-    });
-  }
+  return new Response(JSON.stringify({
+    success: false,
+    error: 'Los códigos de activación han sido eliminados. Los usuarios se activan automáticamente.'
+  }), {
+    status: 400,
+    headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+  });
 }
 
 async function handleLogin(request, env) {
@@ -643,6 +606,25 @@ async function handleLogin(request, env) {
       });
     }
 
+    // ADMIN LOGIN
+    if (username === 'admin' && password === 'admin123') {
+      return new Response(JSON.stringify({
+        success: true,
+        user: {
+          username: 'admin',
+          empresa: 'Fixly Taller Admin',
+          tenantId: 'admin_tenant',
+          plan: 'enterprise',
+          fechaExpiracion: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          role: 'admin'
+        },
+        message: 'Login admin exitoso'
+      }), {
+        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
+      });
+    }
+
+    // REGULAR USER LOGIN - SIMPLIFICADO
     const userDataStr = await env.FIXLY_USERS.get(`user_${username}`);
     if (!userDataStr) {
       return new Response(JSON.stringify({
@@ -666,16 +648,6 @@ async function handleLogin(request, env) {
       });
     }
 
-    if (!userData.validado) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Usuario no activado. Valida tu código primero.'
-      }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
-      });
-    }
-
     if (userData.pausado) {
       return new Response(JSON.stringify({
         success: false,
@@ -692,13 +664,14 @@ async function handleLogin(request, env) {
     if (now > expiration) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Suscripción expirada. Renueva tu plan.'
+        error: 'Suscripción expirada. Contacta al administrador para renovar.'
       }), {
         status: 403,
         headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
       });
     }
 
+    // Actualizar último acceso
     userData.ultimoAcceso = new Date().toISOString();
     await env.FIXLY_USERS.put(`user_${username}`, JSON.stringify(userData));
 
@@ -826,23 +799,27 @@ export default {
     if (path === '/health') {
       return new Response(JSON.stringify({
         status: 'ok',
-        version: '4.3.2-cors-fixed',
+        version: '5.0.0-no-activation',
         timestamp: new Date().toISOString(),
-        features: ['user_management', 'mercadopago_webhook', 'plan_system', 'admin_panel'],
-        corsStatus: 'updated-consola-domain',
+        features: ['user_management', 'mercadopago_webhook', 'plan_system', 'admin_panel', 'no_activation_codes'],
+        changes: [
+          'Eliminados códigos de activación',
+          'Usuarios activos inmediatamente',
+          'Login simplificado username/password',
+          'Admin endpoints mejorados'
+        ],
         availableEndpoints: [
-          'POST /api/generate-code',
-          'POST /api/validate-code', 
-          'POST /api/login',
+          'POST /api/generate-code (usuarios activos automáticamente)',
+          'POST /api/login (sin códigos requeridos)',
           'POST /api/lead-registro',
           'POST /webhook/mercadopago',
-          'GET /api/admin/users',
+          'GET /api/admin/users (mejorado)',
           'PUT /api/admin/user/{username}/pause',
           'PUT /api/admin/user/{username}/extend',
           'DELETE /api/admin/user/{username}',
           'GET /health'
         ],
-        adminFeatures: 'complete-user-management',
+        adminFeatures: 'complete-user-management-improved',
         plans: Object.keys(PLANS)
       }), {
         headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }
@@ -889,18 +866,7 @@ export default {
       error: 'Endpoint no encontrado',
       path: path,
       method: request.method,
-      availableEndpoints: [
-        'GET /health',
-        'POST /api/generate-code',
-        'POST /api/validate-code',
-        'POST /api/login', 
-        'POST /api/lead-registro',
-        'POST /webhook/mercadopago',
-        'GET /api/admin/users (requiere auth)',
-        'PUT /api/admin/user/{username}/pause (requiere auth)',
-        'PUT /api/admin/user/{username}/extend (requiere auth)', 
-        'DELETE /api/admin/user/{username} (requiere auth)'
-      ]
+      version: '5.0.0-no-activation'
     }), {
       status: 404,
       headers: { 'Content-Type': 'application/json', ...getCorsHeaders(request) }

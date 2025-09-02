@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Deployment Verification - Fixly MercadoPago System</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .deployment-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Fixly MercadoPago System Deployment</h1>
+            <p>Sistema completo implementado con gestión de usuarios y MercadoPago</p>
+            <p><strong>Pull Request:</strong> <a href="https://github.com/Oskelias/Fixlylanding/pull/5" style="color: #ffd700;">#5 - Complete MercadoPago System</a></p>
+        </div>
+
+        <div class="deployment-info">
+            <h3>📋 Archivos Desplegados</h3>
+            <ul>
+                <li><strong>Backend:</strong> functions/_middleware.js - Versión 5.1.0 con MercadoPago completo</li>
+                <li><strong>Admin Console:</strong> admin-console-completo-gestion-usuarios.html - Gestión completa de usuarios</li>
+                <li><strong>Test System:</strong> test-sistema-completo-final.html - Verificación integral</li>
+            </ul>
+        </div>
+
+        <div class="deployment-info">
+            <h3>🌐 URLs Esperadas (después del merge)</h3>
+            <div id="urls-info">
+                <p><strong>Backend API:</strong> https://fixlytaller.pages.dev/api/</p>
+                <p><strong>Admin Console:</strong> https://fixlytaller.pages.dev/admin-console-completo-gestion-usuarios.html</p>
+                <p><strong>Test System:</strong> https://fixlytaller.pages.dev/test-sistema-completo-final.html</p>
+                <p><strong>Health Check:</strong> https://fixlytaller.pages.dev/health</p>
+            </div>
+        </div>
+
+        <div class="deployment-info">
+            <h3>✅ Funcionalidades Implementadas</h3>
+            <div class="row">
+                <div style="float: left; width: 48%; margin: 1%;">
+                    <h4>👥 Gestión de Usuarios</h4>
+                    <ul>
+                        <li>Crear usuarios (activación inmediata)</li>
+                        <li>Editar información de usuarios</li>
+                        <li>Pausar/Reanudar suscripciones</li>
+                        <li>Eliminar usuarios con confirmación</li>
+                        <li>Extender períodos de suscripción</li>
+                        <li>Filtros avanzados y búsqueda</li>
+                    </ul>
+                </div>
+                <div style="float: right; width: 48%; margin: 1%;">
+                    <h4>💳 MercadoPago Integration</h4>
+                    <ul>
+                        <li>Dashboard de transacciones</li>
+                        <li>Activación automática por pagos</li>
+                        <li>Reportes financieros</li>
+                        <li>Gestión de webhooks</li>
+                        <li>Procesamiento de reembolsos</li>
+                        <li>Análisis de pagos</li>
+                    </ul>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+
+        <div class="deployment-info">
+            <h3>⚙️ Configuración Requerida</h3>
+            <div class="warning">
+                <strong>Variables de Entorno en Cloudflare:</strong>
+                <ul>
+                    <li><code>MERCADOPAGO_ACCESS_TOKEN</code> - Token de acceso de MercadoPago</li>
+                    <li><code>MERCADOPAGO_WEBHOOK_SECRET</code> - Secret para verificar webhooks</li>
+                </ul>
+            </div>
+            <div class="info">
+                <strong>Webhook URL para configurar en MercadoPago:</strong><br>
+                <code>https://fixlytaller.pages.dev/webhook/mercadopago</code>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="https://github.com/Oskelias/Fixlylanding/pull/5" class="btn">Ver Pull Request</a>
+            <button onclick="testBackend()" class="btn">Test Backend API</button>
+            <button onclick="testHealthCheck()" class="btn">Health Check</button>
+        </div>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixlytaller.pages.dev';
+        
+        async function testBackend() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<div class="info">🔄 Probando conexión con backend...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultsDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Backend Funcionando</h4>
+                            <p><strong>Versión:</strong> ${data.version}</p>
+                            <p><strong>Características:</strong> ${data.features?.join(', ')}</p>
+                            <p><strong>Endpoints:</strong> ${data.availableEndpoints?.length} disponibles</p>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `<div class="warning">⚠️ Backend responde pero con errores: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Error conectando con backend: ${error.message}</div>`;
+            }
+        }
+        
+        async function testHealthCheck() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<div class="info">🔄 Verificando health check...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Health Check Exitoso</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Health check falló: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-test on load
+        window.onload = function() {
+            setTimeout(testHealthCheck, 1000);
+        };
+    </script>
+</body>
+</html>

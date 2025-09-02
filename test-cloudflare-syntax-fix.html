@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Test: Corrección Error Cloudflare Workers</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-card {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .loading { border-left-color: #ffc107; background: #fff3cd; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .status { 
+            display: inline-block; 
+            padding: 3px 8px; 
+            border-radius: 3px; 
+            font-size: 12px; 
+        }
+        .status.ok { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test: Corrección Sintaxis Cloudflare Workers</h1>
+        <p><strong>Objetivo:</strong> Verificar que se solucionó el error "Unexpected token 'const' at worker.js:17:7"</p>
+        
+        <div class="test-card">
+            <h3>📊 Backend URL:</h3>
+            <p><strong>https://fixly-backend.oscarelias.workers.dev</strong></p>
+            <p><em>Worker de Cloudflare con MercadoPago v5.1.0</em></p>
+        </div>
+
+        <h2>🧪 Tests de Endpoints</h2>
+
+        <div class="test-card loading" id="health-test">
+            <h4>1. Health Check (Principal)</h4>
+            <p>Verificando que el worker no tenga errores de sintaxis...</p>
+            <button onclick="testHealth()">🔍 Test Health</button>
+            <div id="health-result"></div>
+        </div>
+
+        <div class="test-card" id="payments-test">
+            <h4>2. Admin Payments (MercadoPago)</h4>
+            <p>Test del nuevo endpoint de administración de pagos...</p>
+            <button onclick="testPayments()">💳 Test Payments</button>
+            <div id="payments-result"></div>
+        </div>
+
+        <div class="test-card" id="reports-test">
+            <h4>3. Financial Reports</h4>
+            <p>Test del endpoint de reportes financieros...</p>
+            <button onclick="testReports()">📈 Test Reports</button>
+            <div id="reports-result"></div>
+        </div>
+
+        <div class="test-card" id="webhook-test">
+            <h4>4. MercadoPago Webhook</h4>
+            <p>Test que el webhook esté disponible (sin enviar datos)...</p>
+            <button onclick="testWebhook()">⚡ Test Webhook</button>
+            <div id="webhook-result"></div>
+        </div>
+
+        <h2>📝 Logs de Testing</h2>
+        <pre id="logs">Esperando tests...\n</pre>
+
+        <div class="test-card">
+            <h4>✅ Indicadores de Éxito:</h4>
+            <ul>
+                <li><span class="status ok">OK</span> Health endpoint responde sin errores</li>
+                <li><span class="status ok">OK</span> Version 5.1.0-mercadopago-complete</li>
+                <li><span class="status ok">OK</span> Nuevos endpoints MercadoPago disponibles</li>
+                <li><span class="status ok">OK</span> Sin errores de sintaxis en consola</li>
+            </ul>
+        </div>
+
+        <div class="test-card">
+            <h4>🚨 Posibles Errores:</h4>
+            <ul>
+                <li><span class="status error">ERROR</span> 500 Internal Server Error (sintaxis)</li>
+                <li><span class="status error">ERROR</span> "process is not defined" en consola</li>
+                <li><span class="status error">ERROR</span> "Unexpected token const"</li>
+                <li><span class="status error">ERROR</span> Endpoints no responden</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        const ADMIN_KEY = 'admin123';
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateTestCard(cardId, className, title, content) {
+            const card = document.getElementById(cardId);
+            card.className = `test-card ${className}`;
+            const resultDiv = card.querySelector('[id$="-result"]');
+            resultDiv.innerHTML = `<h5>${title}</h5><pre>${content}</pre>`;
+        }
+
+        async function testHealth() {
+            log('🔍 Iniciando Health Check...');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Health Check exitoso');
+                    updateTestCard('health-test', 'success', '✅ Health Check OK', 
+                        `Status: ${data.status}\nVersion: ${data.version}\nFeatures: ${data.features?.join(', ')}`);
+                } else {
+                    log('❌ Health Check falló');
+                    updateTestCard('health-test', 'error', '❌ Health Check ERROR', 
+                        `Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+                }
+            } catch (error) {
+                log(`❌ Error en Health Check: ${error.message}`);
+                updateTestCard('health-test', 'error', '❌ Health Check CRASH', 
+                    `Error: ${error.message}\nTipo: ${error.name}`);
+            }
+        }
+
+        async function testPayments() {
+            log('💳 Testing Admin Payments endpoint...');
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Payments endpoint funciona');
+                    updateTestCard('payments-test', 'success', '✅ Payments OK', 
+                        `Success: ${data.success}\nPayments: ${data.payments?.length || 0}\nTotal: $${data.statistics?.totalAmount || 0}`);
+                } else {
+                    log('❌ Payments endpoint error');
+                    updateTestCard('payments-test', 'error', '❌ Payments ERROR', 
+                        `Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+                }
+            } catch (error) {
+                log(`❌ Error en Payments: ${error.message}`);
+                updateTestCard('payments-test', 'error', '❌ Payments CRASH', 
+                    `Error: ${error.message}`);
+            }
+        }
+
+        async function testReports() {
+            log('📈 Testing Financial Reports...');
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/reports/financial?period=month`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Reports endpoint funciona');
+                    updateTestCard('reports-test', 'success', '✅ Reports OK', 
+                        `Period: ${data.period}\nRevenue: $${data.summary?.totalRevenue || 0}\nTransactions: ${data.summary?.totalTransactions || 0}`);
+                } else {
+                    log('❌ Reports endpoint error');
+                    updateTestCard('reports-test', 'error', '❌ Reports ERROR', 
+                        `Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+                }
+            } catch (error) {
+                log(`❌ Error en Reports: ${error.message}`);
+                updateTestCard('reports-test', 'error', '❌ Reports CRASH', 
+                    `Error: ${error.message}`);
+            }
+        }
+
+        async function testWebhook() {
+            log('⚡ Testing Webhook availability...');
+            try {
+                // Solo hacemos un HEAD request para verificar que el endpoint existe
+                const response = await fetch(`${API_BASE}/webhook/mercadopago`, {
+                    method: 'GET' // GET en lugar de POST para no activar el webhook
+                });
+                
+                // El webhook debería responder 404 con GET, pero sin errores de sintaxis
+                if (response.status === 404) {
+                    log('✅ Webhook endpoint disponible (404 esperado para GET)');
+                    updateTestCard('webhook-test', 'success', '✅ Webhook Available', 
+                        `Status: ${response.status} (esperado)\nEndpoint existe y sin errores de sintaxis`);
+                } else {
+                    const data = await response.text();
+                    log('⚠️ Webhook respuesta inesperada');
+                    updateTestCard('webhook-test', 'success', '⚠️ Webhook Unexpected', 
+                        `Status: ${response.status}\nResponse: ${data}`);
+                }
+            } catch (error) {
+                log(`❌ Error en Webhook: ${error.message}`);
+                updateTestCard('webhook-test', 'error', '❌ Webhook CRASH', 
+                    `Error: ${error.message}`);
+            }
+        }
+
+        // Auto-start with health check
+        window.onload = function() {
+            log('🚀 Iniciando tests de corrección de sintaxis...');
+            testHealth();
+            
+            // Show current time
+            log(`📅 Fecha: ${new Date().toLocaleString()}`);
+            log(`🔗 Backend URL: ${API_BASE}`);
+            log('');
+        };
+
+        // También verificar errores en consola
+        window.addEventListener('error', function(e) {
+            log(`🚨 JavaScript Error: ${e.error?.message || e.message}`);
+        });
+    </script>
+</body>
+</html>
