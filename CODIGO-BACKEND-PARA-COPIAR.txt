@@ -1,0 +1,10 @@
+# 📋 CÓDIGO BACKEND COMPLETO PARA CLOUDFLARE WORKERS
+
+## INSTRUCCIONES:
+## 1. Selecciona TODO este código (desde la línea siguiente hasta el final)
+## 2. Cópialo (Ctrl+C)
+## 3. Ve a tu Cloudflare Worker 
+## 4. Pega este código reemplazando todo lo que esté ahí
+## 5. Click "Save and Deploy"
+
+## ⚠️ IMPORTANTE: Copia desde la línea que dice "/**" hasta la última línea

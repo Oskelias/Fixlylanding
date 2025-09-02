@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Admin Console Completo</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        .admin-url-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-pending { background: #ffc107; }
+        
+        .webhook-section {
+            background: linear-gradient(135deg, #009ee3, #0088cc);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+        
+        .final-checklist {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Completo Admin Console + MercadoPago</h1>
+        
+        <!-- URL Admin Console -->
+        <div class="test-section">
+            <h2>🎯 Configurar URL Admin Console</h2>
+            <p>Ingresa la URL de tu admin console deployado:</p>
+            <input type="url" id="admin-url" class="admin-url-input" 
+                   placeholder="https://tu-proyecto.pages.dev" 
+                   value="">
+            <button onclick="setAdminUrl()">💾 Configurar URL</button>
+            <div id="url-status"></div>
+        </div>
+
+        <!-- Tests Grid -->
+        <div class="test-grid">
+            <!-- Test 1: Backend -->
+            <div class="test-card">
+                <h3>🚀 Backend Status</h3>
+                <p>Verificar backend funcionando</p>
+                <button onclick="testBackend()">🔍 Test Backend</button>
+                <div id="backend-result">
+                    <div class="status-indicator status-pending"></div>
+                    <span>Pendiente</span>
+                </div>
+            </div>
+
+            <!-- Test 2: Admin Console -->
+            <div class="test-card">
+                <h3>🏢 Admin Console</h3>
+                <p>Verificar admin console accesible</p>
+                <button onclick="testAdminConsole()">🧪 Test Console</button>
+                <div id="console-result">
+                    <div class="status-indicator status-pending"></div>
+                    <span>Pendiente</span>
+                </div>
+            </div>
+
+            <!-- Test 3: MercadoPago Endpoints -->
+            <div class="test-card">
+                <h3>💳 MercadoPago</h3>
+                <p>Verificar endpoints MercadoPago</p>
+                <button onclick="testMercadoPago()">💰 Test MP</button>
+                <div id="mp-result">
+                    <div class="status-indicator status-pending"></div>
+                    <span>Pendiente</span>
+                </div>
+            </div>
+
+            <!-- Test 4: Usuario Test -->
+            <div class="test-card">
+                <h3>👤 Usuario Test</h3>
+                <p>Crear y probar usuario</p>
+                <button onclick="testUserCreation()">👥 Test Usuario</button>
+                <div id="user-result">
+                    <div class="status-indicator status-pending"></div>
+                    <span>Pendiente</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Webhook Configuration -->
+        <div class="webhook-section">
+            <h2>🔄 Configuración Webhook MercadoPago</h2>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px;">
+                <h3>📋 Información para MercadoPago:</h3>
+                <p><strong>URL Webhook:</strong></p>
+                <code style="background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 4px; display: block; margin: 10px 0;">
+                    https://fixly-backend.oscarelias.workers.dev/webhook/mercadopago
+                </code>
+                <p><strong>Events a configurar:</strong></p>
+                <ul>
+                    <li>✅ payment.created</li>
+                    <li>✅ payment.updated</li>
+                </ul>
+                
+                <button onclick="testWebhook()" style="background: rgba(255,255,255,0.2); border: 2px solid white;">
+                    ⚡ Test Webhook
+                </button>
+                
+                <div style="margin-top: 15px;">
+                    <a href="https://www.mercadopago.com.ar/developers" target="_blank" 
+                       style="color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 6px; display: inline-block;">
+                        🌐 Abrir MercadoPago Developers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Completo Automático -->
+        <div class="test-section warning">
+            <h2>🎯 Test Automático Completo</h2>
+            <p>Ejecutar todos los tests de una vez:</p>
+            <button onclick="runAllTests()" class="btn-success" style="font-size: 18px; padding: 15px 30px;">
+                🚀 Ejecutar Todos los Tests
+            </button>
+            <div id="all-tests-result"></div>
+        </div>
+
+        <!-- Checklist Final -->
+        <div class="final-checklist">
+            <h2>✅ Checklist Final del Sistema</h2>
+            <div id="final-checklist">
+                <div class="checklist-item" data-test="backend">
+                    <span class="status-indicator status-pending"></span>
+                    Backend funcionando correctamente
+                </div>
+                <div class="checklist-item" data-test="console">
+                    <span class="status-indicator status-pending"></span>
+                    Admin console accesible y funcional
+                </div>
+                <div class="checklist-item" data-test="mercadopago">
+                    <span class="status-indicator status-pending"></span>
+                    Endpoints MercadoPago respondiendo
+                </div>
+                <div class="checklist-item" data-test="users">
+                    <span class="status-indicator status-pending"></span>
+                    Gestión de usuarios funcionando
+                </div>
+                <div class="checklist-item" data-test="webhook">
+                    <span class="status-indicator status-pending"></span>
+                    Webhook MercadoPago configurado
+                </div>
+            </div>
+            
+            <div id="system-status" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                <h3>🎯 Estado del Sistema: <span id="system-status-text">Verificando...</span></h3>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="test-section">
+            <h2>📋 Logs de Testing</h2>
+            <pre id="logs">Esperando tests...\n</pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        const ADMIN_KEY = 'admin123';
+        let ADMIN_CONSOLE_URL = '';
+
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateStatus(testId, success, message) {
+            const indicator = document.querySelector(`[data-test="${testId}"] .status-indicator`);
+            const item = document.querySelector(`[data-test="${testId}"]`);
+            
+            if (indicator) {
+                indicator.className = `status-indicator ${success ? 'status-success' : 'status-error'}`;
+            }
+            
+            // Update individual test results
+            const resultDiv = document.getElementById(`${testId === 'console' ? 'console' : testId}-result`);
+            if (resultDiv) {
+                resultDiv.innerHTML = `
+                    <div class="status-indicator ${success ? 'status-success' : 'status-error'}"></div>
+                    <span>${success ? '✅' : '❌'} ${message}</span>
+                `;
+            }
+        }
+
+        function setAdminUrl() {
+            const url = document.getElementById('admin-url').value;
+            if (!url) {
+                alert('Por favor ingresa la URL del admin console');
+                return;
+            }
+            
+            ADMIN_CONSOLE_URL = url.endsWith('/') ? url.slice(0, -1) : url;
+            document.getElementById('url-status').innerHTML = `
+                <div style="color: #28a745; margin-top: 10px;">
+                    ✅ URL configurada: <a href="${ADMIN_CONSOLE_URL}" target="_blank">${ADMIN_CONSOLE_URL}</a>
+                </div>
+            `;
+            log(`✅ URL admin console configurada: ${ADMIN_CONSOLE_URL}`);
+        }
+
+        async function testBackend() {
+            log('🚀 Testing backend...');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'ok' && data.version === '5.1.0-mercadopago-complete') {
+                    updateStatus('backend', true, `Backend OK (${data.version})`);
+                    log('✅ Backend funcionando correctamente');
+                    return true;
+                } else {
+                    updateStatus('backend', false, `Versión incorrecta: ${data.version}`);
+                    log('❌ Backend versión incorrecta');
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('backend', false, `Error: ${error.message}`);
+                log(`❌ Error backend: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testAdminConsole() {
+            if (!ADMIN_CONSOLE_URL) {
+                alert('Primero configura la URL del admin console');
+                return false;
+            }
+            
+            log('🏢 Testing admin console...');
+            try {
+                const response = await fetch(ADMIN_CONSOLE_URL, { method: 'HEAD' });
+                if (response.ok) {
+                    updateStatus('console', true, 'Console accesible');
+                    log('✅ Admin console accesible');
+                    return true;
+                } else {
+                    updateStatus('console', false, `HTTP ${response.status}`);
+                    log(`❌ Admin console error: ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('console', false, `Error: ${error.message}`);
+                log(`❌ Error admin console: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testMercadoPago() {
+            log('💳 Testing MercadoPago endpoints...');
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatus('mercadopago', true, 'Endpoints funcionando');
+                    log('✅ MercadoPago endpoints OK');
+                    return true;
+                } else {
+                    updateStatus('mercadopago', false, `Error: ${data.error}`);
+                    log(`❌ MercadoPago error: ${data.error}`);
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('mercadopago', false, `Error: ${error.message}`);
+                log(`❌ Error MercadoPago: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testUserCreation() {
+            log('👤 Testing creación usuario...');
+            try {
+                // Crear usuario test
+                const createResponse = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'testuser_' + Date.now(),
+                        password: 'test123',
+                        email: 'test@ejemplo.com',
+                        empresa: 'Test Company',
+                        tipo: 'pro'
+                    })
+                });
+                
+                const createData = await createResponse.json();
+                
+                if (createData.success) {
+                    updateStatus('users', true, 'Usuario creado correctamente');
+                    log('✅ Usuario test creado');
+                    return true;
+                } else {
+                    updateStatus('users', false, `Error: ${createData.error}`);
+                    log(`❌ Error creando usuario: ${createData.error}`);
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('users', false, `Error: ${error.message}`);
+                log(`❌ Error test usuario: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testWebhook() {
+            log('🔄 Testing webhook...');
+            try {
+                const response = await fetch(`${API_BASE}/webhook/mercadopago`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'payment',
+                        action: 'payment.updated',
+                        data: { id: 'test_webhook_' + Date.now() }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatus('webhook', true, 'Webhook funcionando');
+                    log('✅ Webhook test OK');
+                    return true;
+                } else {
+                    updateStatus('webhook', false, 'Webhook error');
+                    log('❌ Webhook test error');
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('webhook', false, `Error: ${error.message}`);
+                log(`❌ Error webhook: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function runAllTests() {
+            log('🎯 Ejecutando todos los tests...');
+            const resultDiv = document.getElementById('all-tests-result');
+            resultDiv.innerHTML = '<p style="color: #007bff;">⏳ Ejecutando tests...</p>';
+            
+            const results = {
+                backend: await testBackend(),
+                console: await testAdminConsole(),
+                mercadopago: await testMercadoPago(),
+                users: await testUserCreation(),
+                webhook: await testWebhook()
+            };
+            
+            const passedTests = Object.values(results).filter(Boolean).length;
+            const totalTests = Object.keys(results).length;
+            const allPassed = passedTests === totalTests;
+            
+            // Update system status
+            const statusText = document.getElementById('system-status-text');
+            const systemStatus = document.getElementById('system-status');
+            
+            if (allPassed) {
+                statusText.textContent = '🎉 SISTEMA COMPLETAMENTE FUNCIONAL';
+                systemStatus.style.background = '#d4edda';
+                systemStatus.style.color = '#155724';
+            } else {
+                statusText.textContent = `⚠️ ${passedTests}/${totalTests} tests pasados`;
+                systemStatus.style.background = '#fff3cd';
+                systemStatus.style.color = '#856404';
+            }
+            
+            resultDiv.innerHTML = `
+                <h3 style="color: ${allPassed ? '#28a745' : '#ffc107'};">
+                    ${allPassed ? '🎉' : '⚠️'} Resultado: ${passedTests}/${totalTests} tests exitosos
+                </h3>
+                <div style="margin-top: 15px;">
+                    ${Object.entries(results).map(([test, passed]) => `
+                        <div style="margin: 5px 0;">
+                            ${passed ? '✅' : '❌'} ${test.charAt(0).toUpperCase() + test.slice(1)}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${allPassed ? `
+                    <div style="background: #d4edda; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <h4 style="color: #28a745;">🚀 ¡SISTEMA LISTO PARA PRODUCCIÓN!</h4>
+                        <p style="margin: 10px 0 0 0; color: #155724;">
+                            Todos los componentes están funcionando correctamente.
+                            El sistema MercadoPago está completamente operativo.
+                        </p>
+                    </div>
+                ` : `
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <h4 style="color: #856404;">⚠️ Algunos tests fallaron</h4>
+                        <p style="margin: 10px 0 0 0; color: #856404;">
+                            Revisa los logs y corrige los problemas identificados.
+                        </p>
+                    </div>
+                `}
+            `;
+            
+            log(`🏁 Tests completados: ${passedTests}/${totalTests} exitosos`);
+        }
+
+        // Auto-test backend al cargar
+        window.onload = function() {
+            log('🚀 Iniciando test automático backend...');
+            testBackend();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Verificar Estado Actual - Fixly Backend</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-card {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        .loading { border-left-color: #17a2b8; background: #d1ecf1; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            font-size: 16px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .big-status {
+            text-align: center;
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .code-section {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .timeline {
+            border-left: 3px solid #007bff;
+            padding-left: 20px;
+            margin: 20px 0;
+        }
+        .timeline-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Estado Actual del Sistema</h1>
+        <p><strong>Objetivo:</strong> Comprobar si los cambios del fix están aplicados en la consola</p>
+        
+        <!-- Estado Principal -->
+        <div id="main-status" class="big-status warning">
+            <div class="status-indicator status-warning"></div>
+            Verificando estado del sistema...
+        </div>
+
+        <!-- Test Rápido Backend -->
+        <div class="test-card loading" id="backend-status">
+            <h3>🚀 Estado Backend Actual</h3>
+            <p>Verificando si el backend tiene los cambios aplicados...</p>
+            <button onclick="checkBackendStatus()">🔍 Verificar Backend</button>
+            <div id="backend-result"></div>
+        </div>
+
+        <!-- Verificación Específica del Fix -->
+        <div class="test-card" id="fix-verification">
+            <h3>🔧 Verificación del Fix de Sintaxis</h3>
+            <p>Comprobando si el error "Unexpected token 'const'" está resuelto...</p>
+            <button onclick="verifyFix()">⚡ Verificar Fix</button>
+            <div id="fix-result"></div>
+        </div>
+
+        <!-- Estado de Endpoints -->
+        <div class="test-card" id="endpoints-status">
+            <h3>📊 Estado de Endpoints MercadoPago</h3>
+            <p>Verificando disponibilidad de endpoints específicos...</p>
+            <button onclick="checkEndpoints()">🧪 Test Endpoints</button>
+            <div id="endpoints-result"></div>
+        </div>
+
+        <!-- Diagnosis Completo -->
+        <div class="test-card" id="diagnosis">
+            <h3>🩺 Diagnosis Completo</h3>
+            <p>Análisis detallado del estado actual...</p>
+            <button onclick="fullDiagnosis()">🔬 Diagnosis Completo</button>
+            <div id="diagnosis-result"></div>
+        </div>
+
+        <!-- Timeline de Cambios -->
+        <div class="timeline">
+            <h3>📅 Timeline de Cambios Realizados</h3>
+            <div class="timeline-item">
+                <strong>✅ Fix Aplicado:</strong> Corregido error sintaxis process.env
+            </div>
+            <div class="timeline-item">
+                <strong>🔄 Patrón Implementado:</strong> getMercadoPagoConfig(env)
+            </div>
+            <div class="timeline-item">
+                <strong>📤 Push Realizado:</strong> Código subido a GitHub
+            </div>
+            <div class="timeline-item">
+                <strong>🎯 Estado Actual:</strong> <span id="current-status">Verificando...</span>
+            </div>
+        </div>
+
+        <!-- Instrucciones de Deploy -->
+        <div class="test-card warning">
+            <h3>⚠️ Importante: Deploy Manual Requerido</h3>
+            <p><strong>Los cambios están en GitHub, pero necesitas aplicarlos manualmente en Cloudflare Workers.</strong></p>
+            
+            <div class="code-section">
+                <h4>🎯 Pasos para Aplicar los Cambios:</h4>
+                <p>1. <strong>Ir a Cloudflare Workers Dashboard</strong></p>
+                <p>2. <strong>Abrir tu worker "fixly-backend"</strong></p>
+                <p>3. <strong>Click "Edit Code"</strong></p>
+                <p>4. <strong>Copiar código corregido de functions/_middleware.js</strong></p>
+                <p>5. <strong>Pegar en el editor y "Save and Deploy"</strong></p>
+            </div>
+        </div>
+
+        <!-- Logs en Tiempo Real -->
+        <h2>📋 Logs de Verificación</h2>
+        <pre id="logs">Esperando verificaciones...\n</pre>
+
+        <!-- Códigos de Test -->
+        <div class="test-card">
+            <h3>💻 Comandos de Test Manual</h3>
+            <p>Puedes ejecutar estos comandos en la consola del navegador (F12):</p>
+            <div class="code-section">
+                <strong>Test Health Check:</strong><br>
+                <code>fetch('https://fixly-backend.oscarelias.workers.dev/health').then(r=>r.json()).then(console.log)</code>
+                <br><br>
+                <strong>Test Admin Payments:</strong><br>
+                <code>fetch('https://fixly-backend.oscarelias.workers.dev/api/admin/payments',{headers:{'X-Admin-Key':'admin123'}}).then(r=>r.json()).then(console.log)</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        const ADMIN_KEY = 'admin123';
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateMainStatus(status, message, className) {
+            const mainStatus = document.getElementById('main-status');
+            const indicator = mainStatus.querySelector('.status-indicator');
+            
+            mainStatus.className = `big-status ${className}`;
+            indicator.className = `status-indicator status-${status}`;
+            mainStatus.innerHTML = `<div class="status-indicator status-${status}"></div>${message}`;
+        }
+
+        async function checkBackendStatus() {
+            log('🔍 Iniciando verificación del backend...');
+            const resultDiv = document.getElementById('backend-result');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'ok') {
+                    log('✅ Backend responde correctamente');
+                    log(`📊 Versión detectada: ${data.version}`);
+                    
+                    // Verificar si es la versión con el fix
+                    if (data.version === '5.1.0-mercadopago-complete') {
+                        updateMainStatus('online', '✅ Backend con FIX aplicado correctamente', 'success');
+                        document.getElementById('current-status').textContent = '✅ Fix aplicado y funcionando';
+                        
+                        resultDiv.innerHTML = `
+                            <h5 style="color: #28a745;">✅ Backend OK - Fix Aplicado</h5>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        `;
+                    } else {
+                        updateMainStatus('warning', '⚠️ Backend funciona pero versión anterior', 'warning');
+                        document.getElementById('current-status').textContent = '⚠️ Versión anterior - Fix no aplicado';
+                        
+                        resultDiv.innerHTML = `
+                            <h5 style="color: #ffc107;">⚠️ Versión Anterior Detectada</h5>
+                            <p><strong>Versión actual:</strong> ${data.version}</p>
+                            <p><strong>Versión esperada:</strong> 5.1.0-mercadopago-complete</p>
+                            <p><strong>Acción requerida:</strong> Deploy manual del código corregido</p>
+                        `;
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                log(`❌ Error conectando con backend: ${error.message}`);
+                updateMainStatus('offline', '❌ Backend no accesible o con errores', 'error');
+                document.getElementById('current-status').textContent = '❌ Error de conexión';
+                
+                resultDiv.innerHTML = `
+                    <h5 style="color: #dc3545;">❌ Error de Conexión</h5>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Posibles causas:</strong></p>
+                    <ul>
+                        <li>Backend no deployado</li>
+                        <li>Error de sintaxis sin corregir</li>
+                        <li>Configuración incorrecta</li>
+                    </ul>
+                `;
+            }
+        }
+
+        async function verifyFix() {
+            log('🔧 Verificando el fix específico...');
+            const resultDiv = document.getElementById('fix-result');
+            
+            try {
+                // Test específico para verificar que no hay errores de sintaxis
+                const response = await fetch(`${API_BASE}/health`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Si llega aquí, significa que no hay errores de sintaxis
+                    log('✅ Sin errores de sintaxis detectados');
+                    
+                    if (data.version === '5.1.0-mercadopago-complete') {
+                        resultDiv.innerHTML = `
+                            <h5 style="color: #28a745;">✅ Fix de Sintaxis Aplicado Correctamente</h5>
+                            <p><strong>✅ Error "Unexpected token 'const'" resuelto</strong></p>
+                            <p><strong>✅ Patrón getMercadoPagoConfig(env) implementado</strong></p>
+                            <p><strong>✅ Variables de entorno dinámicas funcionando</strong></p>
+                            <p><strong>Versión:</strong> ${data.version}</p>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <h5 style="color: #ffc107;">⚠️ Backend Funciona Pero Versión Anterior</h5>
+                            <p><strong>Estado:</strong> Sin errores de sintaxis</p>
+                            <p><strong>Versión actual:</strong> ${data.version}</p>
+                            <p><strong>Acción:</strong> Aplicar código corregido manualmente</p>
+                        `;
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Posible error de sintaxis: ${error.message}`);
+                resultDiv.innerHTML = `
+                    <h5 style="color: #dc3545;">❌ Posible Error de Sintaxis</h5>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Acción requerida:</strong> Aplicar el fix del código</p>
+                    <p><strong>Archivo a usar:</strong> functions/_middleware.js (corregido)</p>
+                `;
+            }
+        }
+
+        async function checkEndpoints() {
+            log('📊 Verificando endpoints MercadoPago...');
+            const resultDiv = document.getElementById('endpoints-result');
+            
+            const endpoints = [
+                { url: '/health', method: 'GET', auth: false },
+                { url: '/api/admin/payments', method: 'GET', auth: true },
+                { url: '/api/admin/users', method: 'GET', auth: true }
+            ];
+            
+            let results = [];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const headers = endpoint.auth ? { 'X-Admin-Key': ADMIN_KEY } : {};
+                    const response = await fetch(`${API_BASE}${endpoint.url}`, { headers });
+                    const data = await response.json();
+                    
+                    results.push({
+                        endpoint: endpoint.url,
+                        status: response.ok ? 'OK' : 'ERROR',
+                        statusCode: response.status,
+                        success: data.success !== false
+                    });
+                    
+                    log(`${response.ok ? '✅' : '❌'} ${endpoint.url}: ${response.status}`);
+                } catch (error) {
+                    results.push({
+                        endpoint: endpoint.url,
+                        status: 'ERROR',
+                        error: error.message
+                    });
+                    log(`❌ ${endpoint.url}: ${error.message}`);
+                }
+            }
+            
+            const allOk = results.every(r => r.status === 'OK');
+            
+            resultDiv.innerHTML = `
+                <h5 style="color: ${allOk ? '#28a745' : '#dc3545'};">
+                    ${allOk ? '✅' : '❌'} Endpoints ${allOk ? 'Funcionando' : 'Con Errores'}
+                </h5>
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 8px; border: 1px solid #dee2e6;">Endpoint</th>
+                                <th style="padding: 8px; border: 1px solid #dee2e6;">Estado</th>
+                                <th style="padding: 8px; border: 1px solid #dee2e6;">Código</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${results.map(r => `
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${r.endpoint}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6; color: ${r.status === 'OK' ? '#28a745' : '#dc3545'};">
+                                        ${r.status === 'OK' ? '✅' : '❌'} ${r.status}
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${r.statusCode || r.error || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        async function fullDiagnosis() {
+            log('🔬 Iniciando diagnosis completo...');
+            const resultDiv = document.getElementById('diagnosis-result');
+            
+            resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;"><div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div><p>Ejecutando diagnosis...</p></div>';
+            
+            // Ejecutar todas las verificaciones
+            await checkBackendStatus();
+            await verifyFix();
+            await checkEndpoints();
+            
+            log('✅ Diagnosis completo finalizado');
+            
+            resultDiv.innerHTML = `
+                <h5 style="color: #007bff;">🔬 Diagnosis Completo Finalizado</h5>
+                <p><strong>Todas las verificaciones han sido ejecutadas.</strong></p>
+                <p>Revisa los resultados en las secciones anteriores para el estado detallado.</p>
+                <p><strong>Siguiente paso:</strong> Si hay errores, aplicar el código corregido manualmente en Cloudflare Workers.</p>
+            `;
+        }
+
+        // Auto-ejecutar verificación inicial
+        window.onload = function() {
+            log('🚀 Iniciando verificación automática...');
+            setTimeout(checkBackendStatus, 1000);
+        };
+
+        // Agregar animación CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

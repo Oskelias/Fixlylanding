@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Taller - Solicitud de Acceso</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">F</div>
+        <h1>Fixly Taller</h1>
+        <p class="subtitle">Sistema de Gestión para Talleres Mecánicos</p>
+        
+        <div class="info">
+            ⚡ <strong>Prueba gratuita de 15 días</strong><br>
+            🚀 Acceso inmediato después del registro<br>
+            📱 Notificación instantánea por Telegram
+        </div>
+        
+        <form id="leadForm">
+            <div class="form-group">
+                <label for="taller">🏢 Nombre del Taller *</label>
+                <input type="text" id="taller" name="taller" required placeholder="Ej: Taller Mecánico San José">
+            </div>
+            
+            <div class="form-group">
+                <label for="propietario">👤 Nombre del Propietario *</label>
+                <input type="text" id="propietario" name="propietario" required placeholder="Ej: Juan Carlos Pérez">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">📧 Email *</label>
+                <input type="email" id="email" name="email" required placeholder="propietario@taller.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="telefono">📱 Teléfono</label>
+                <input type="tel" id="telefono" name="telefono" placeholder="+54 11 1234-5678">
+            </div>
+            
+            <div class="form-group">
+                <label for="ciudad">📍 Ciudad</label>
+                <input type="text" id="ciudad" name="ciudad" placeholder="Ej: Buenos Aires">
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                📝 Solicitar Acceso Gratuito
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px;">Procesando solicitud...</p>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 🔧 URL CORREGIDA - Apunta al Worker correcto
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        
+        document.getElementById('leadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // Limpiar resultados anteriores
+            result.innerHTML = '';
+            
+            // Obtener datos del formulario
+            const formData = new FormData(e.target);
+            const data = {
+                taller: formData.get('taller'),
+                propietario: formData.get('propietario'), 
+                email: formData.get('email'),
+                telefono: formData.get('telefono'),
+                ciudad: formData.get('ciudad')
+            };
+            
+            // Validación
+            if (!data.taller || !data.propietario || !data.email) {
+                result.innerHTML = '<div class="error">❌ Por favor completa todos los campos obligatorios</div>';
+                return;
+            }
+            
+            // Estado de carga
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                console.log('Enviando a:', `${API_BASE}/api/lead-registro`);
+                console.log('Datos:', data);
+                
+                const response = await fetch(`${API_BASE}/api/lead-registro`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseData = await response.json();
+                console.log('Respuesta:', responseData);
+                
+                if (response.ok && responseData.success) {
+                    result.innerHTML = `
+                        <div class="success">
+                            ✅ <strong>¡Solicitud Procesada!</strong><br><br>
+                            📋 <strong>ID:</strong> ${responseData.leadId}<br>
+                            📱 Se ha enviado una notificación por Telegram<br>
+                            📧 Recibirás tus credenciales por email en breve<br><br>
+                            ⏱️ <strong>Te contactaremos en 24 horas</strong><br>
+                            🎁 <strong>15 días gratuitos incluidos</strong>
+                        </div>
+                    `;
+                    
+                    // Limpiar formulario
+                    e.target.reset();
+                    
+                } else {
+                    result.innerHTML = `
+                        <div class="error">
+                            ❌ <strong>Error:</strong> ${responseData.error || 'Error desconocido'}<br><br>
+                            🔄 Por favor intenta nuevamente o contactanos por WhatsApp
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                result.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Error de conexión</strong><br><br>
+                        🌐 No se pudo conectar con el servidor<br>
+                        🔄 Verifica tu conexión e intenta nuevamente<br><br>
+                        <strong>Error técnico:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Test de conectividad al cargar
+        window.addEventListener('load', async () => {
+            try {
+                console.log('Probando conectividad...');
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                console.log('Health check:', data);
+                
+                if (response.ok) {
+                    console.log('✅ Backend conectado correctamente');
+                } else {
+                    console.warn('⚠️ Backend responde pero con errores');
+                }
+            } catch (error) {
+                console.error('❌ Backend no disponible:', error);
+            }
+        });
+    </script>
+</body>
+</html>

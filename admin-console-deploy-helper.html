@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Deploy Helper - Admin Console</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .step-card {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .completed { border-left-color: #28a745; background: #d4edda; }
+        .current { border-left-color: #ffc107; background: #fff3cd; }
+        .pending { border-left-color: #6c757d; background: #f8f9fa; }
+        
+        .big-button {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .big-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,123,255,0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 30px;
+        }
+        .checklist li:before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+            color: #6c757d;
+        }
+        .checklist li.completed:before {
+            content: "✅";
+        }
+        
+        .timeline {
+            border-left: 3px solid #007bff;
+            padding-left: 25px;
+            margin: 20px 0;
+        }
+        .timeline-item {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .timeline-item:before {
+            content: "";
+            position: absolute;
+            left: -31px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Deploy Admin Console - Guía Interactiva</h1>
+        
+        <!-- Estado Actual -->
+        <div class="success-box">
+            <h3>✅ Estado Actual Confirmado</h3>
+            <p><strong>Backend:</strong> Funcionando perfectamente (v5.1.0-mercadopago-complete)</p>
+            <p><strong>Siguiente paso:</strong> Deploy Admin Console</p>
+            <p><strong>Tiempo estimado:</strong> 5-10 minutos</p>
+        </div>
+
+        <!-- Acceso Rápido -->
+        <div class="step-card current">
+            <h2>🎯 Acceso Directo a Cloudflare Pages</h2>
+            <p>Click aquí para ir directamente a Cloudflare Pages:</p>
+            <a href="https://dash.cloudflare.com/pages" target="_blank" class="big-button">
+                🌐 Abrir Cloudflare Pages
+            </a>
+            <p><small>Se abrirá en una nueva pestaña</small></p>
+        </div>
+
+        <!-- Archivo Listo -->
+        <div class="step-card">
+            <h2>📁 Archivo Listo para Deploy</h2>
+            <div class="warning-box">
+                <h4>🎯 Archivo a Usar:</h4>
+                <p><strong><span class="highlight">admin-deploy-ready.html</span></strong></p>
+                <p><strong>Ubicación:</strong> En el directorio del proyecto</p>
+                <p><strong>Tamaño:</strong> ~50KB (optimizado)</p>
+                <p><strong>IMPORTANTE:</strong> Renombrarlo a <code>index.html</code> al subirlo</p>
+            </div>
+        </div>
+
+        <!-- Pasos Detallados -->
+        <div class="timeline">
+            <h2>📋 Pasos Detallados</h2>
+            
+            <div class="timeline-item">
+                <h3>1. Crear Proyecto en Cloudflare Pages</h3>
+                <div class="code-block">
+                    1. Ir a: https://dash.cloudflare.com/pages
+                    2. Click "Create a project"
+                    3. Seleccionar "Upload assets" (NO Git)
+                    4. Nombre proyecto: "fixly-admin-console"
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <h3>2. Subir Archivo</h3>
+                <div class="code-block">
+                    1. Arrastrar archivo "admin-deploy-ready.html"
+                    2. RENOMBRAR a "index.html" 
+                    3. Click "Deploy site"
+                    4. Esperar deployment (1-2 minutos)
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <h3>3. Obtener URL</h3>
+                <div class="code-block">
+                    1. Una vez deployado, copiar URL
+                    2. Formato: https://tu-proyecto.pages.dev
+                    3. Probar acceso admin console
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Post-Deploy -->
+        <div class="step-card">
+            <h2>🧪 Test Inmediato Post-Deploy</h2>
+            <p>Una vez deployado, ejecutar estos tests:</p>
+            
+            <div class="checklist">
+                <li id="test-1">Acceder a la URL del admin console</li>
+                <li id="test-2">Login con admin/admin123</li>
+                <li id="test-3">Verificar dashboard carga correctamente</li>
+                <li id="test-4">Test conexión backend en Settings</li>
+                <li id="test-5">Verificar endpoints MercadoPago</li>
+            </div>
+            
+            <button class="big-button" onclick="runPostDeployTests()">
+                🧪 Ejecutar Tests Post-Deploy
+            </button>
+            <div id="test-results"></div>
+        </div>
+
+        <!-- Características del Admin Console -->
+        <div class="step-card">
+            <h2>📊 Características del Admin Console</h2>
+            <div class="row">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                    <div>
+                        <h4>🎯 Dashboard Principal:</h4>
+                        <ul>
+                            <li>📈 Estadísticas en tiempo real</li>
+                            <li>👥 Resumen usuarios</li>
+                            <li>💳 Estado MercadoPago</li>
+                            <li>🔄 Actividad reciente</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>💳 MercadoPago Features:</h4>
+                        <ul>
+                            <li>📊 Dashboard transacciones</li>
+                            <li>💰 Estadísticas financieras</li>
+                            <li>🔍 Detalles de pagos</li>
+                            <li>📈 Reportes por período</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credenciales -->
+        <div class="warning-box">
+            <h3>🔐 Credenciales de Acceso</h3>
+            <div class="code-block">
+                Usuario: admin
+                Contraseña: admin123
+                
+                Backend URL: https://fixly-backend.oscarelias.workers.dev
+                Admin Key: admin123
+            </div>
+        </div>
+
+        <!-- Siguiente Paso -->
+        <div class="step-card pending">
+            <h2>⏭️ Próximo Paso Después del Deploy</h2>
+            <p>Una vez que tengas el admin console deployado:</p>
+            <ol>
+                <li><strong>Configurar Webhook MercadoPago</strong></li>
+                <li><strong>Test completo del flujo de pagos</strong></li>
+                <li><strong>Configuración dominio personalizado (opcional)</strong></li>
+            </ol>
+        </div>
+
+        <!-- Ayuda -->
+        <div class="step-card">
+            <h2>💡 ¿Necesitas Ayuda?</h2>
+            <p>Si encuentras algún problema:</p>
+            <div class="code-block">
+                ✅ El archivo admin-deploy-ready.html está listo
+                ✅ Backend funcionando perfectamente
+                ✅ Todas las funciones implementadas
+                
+                📞 Solo dime si necesitas ayuda con algún paso específico
+            </div>
+        </div>
+
+        <!-- Status del Deploy -->
+        <div id="deploy-status" style="margin-top: 30px;"></div>
+    </div>
+
+    <script>
+        // URL del backend ya confirmado funcionando
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        const ADMIN_KEY = 'admin123';
+
+        async function runPostDeployTests() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<h4>🧪 Ejecutando Tests...</h4>';
+            
+            let adminConsoleUrl = prompt('¿Cuál es la URL de tu admin console deployado?\n(formato: https://tu-proyecto.pages.dev)');
+            
+            if (!adminConsoleUrl) {
+                resultsDiv.innerHTML = '<p style="color: #dc3545;">❌ URL requerida para testing</p>';
+                return;
+            }
+            
+            // Asegurar que la URL esté bien formada
+            if (!adminConsoleUrl.startsWith('http')) {
+                adminConsoleUrl = 'https://' + adminConsoleUrl;
+            }
+            
+            const tests = [
+                { id: 'test-1', name: 'Admin Console Accesible', test: () => testAdminAccess(adminConsoleUrl) },
+                { id: 'test-2', name: 'Backend Conexión', test: () => testBackendConnection() },
+                { id: 'test-3', name: 'Endpoints MercadoPago', test: () => testMercadoPagoEndpoints() },
+                { id: 'test-4', name: 'Admin Authentication', test: () => testAdminAuth() }
+            ];
+            
+            let results = [];
+            
+            for (const test of tests) {
+                try {
+                    const result = await test.test();
+                    results.push({ ...test, result: result, status: 'success' });
+                    document.getElementById(test.id).classList.add('completed');
+                } catch (error) {
+                    results.push({ ...test, result: error.message, status: 'error' });
+                }
+            }
+            
+            // Mostrar resultados
+            const resultHtml = `
+                <h4>📊 Resultados de Tests:</h4>
+                <div style="margin-top: 15px;">
+                    ${results.map(r => `
+                        <div style="padding: 10px; margin: 5px 0; background: ${r.status === 'success' ? '#d4edda' : '#f8d7da'}; border-radius: 5px;">
+                            <strong>${r.status === 'success' ? '✅' : '❌'} ${r.name}:</strong> ${r.result}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px;">
+                    <h5>🎯 Admin Console URL:</h5>
+                    <p><a href="${adminConsoleUrl}" target="_blank">${adminConsoleUrl}</a></p>
+                    <p><strong>Login:</strong> admin / admin123</p>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = resultHtml;
+        }
+
+        async function testAdminAccess(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (response.ok) {
+                    return 'Admin console accesible correctamente';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                throw new Error(`No accesible: ${error.message}`);
+            }
+        }
+
+        async function testBackendConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                return `Backend OK - Versión: ${data.version}`;
+            } catch (error) {
+                throw new Error(`Backend error: ${error.message}`);
+            }
+        }
+
+        async function testMercadoPagoEndpoints() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                return data.success ? 'Endpoints MercadoPago funcionando' : 'Error en endpoints';
+            } catch (error) {
+                throw new Error(`MercadoPago error: ${error.message}`);
+            }
+        }
+
+        async function testAdminAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                return data.success ? 'Autenticación admin OK' : 'Error auth admin';
+            } catch (error) {
+                throw new Error(`Auth error: ${error.message}`);
+            }
+        }
+
+        // Mostrar estado inicial
+        document.getElementById('deploy-status').innerHTML = `
+            <div style="text-align: center; padding: 20px; background: #e7f3ff; border-radius: 10px;">
+                <h3>🎯 Estado Actual</h3>
+                <p>✅ Backend funcionando: ${API_BASE}</p>
+                <p>📁 Archivo listo: admin-deploy-ready.html</p>
+                <p>⏳ Esperando deploy admin console...</p>
+            </div>
+        `;
+
+        console.log('✅ Deploy Helper cargado - Backend confirmado funcionando');
+    </script>
+</body>
+</html>

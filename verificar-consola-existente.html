@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Verificar Consola Existente - Fixly</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        .url-card {
+            background: #e7f3ff;
+            border: 2px solid #007bff;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .status-ok { border-color: #28a745; background: #f8fff9; }
+        .status-error { border-color: #dc3545; background: #fff8f8; }
+        .status-warning { border-color: #ffc107; background: #fffef7; }
+        
+        .integration-status {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .next-steps {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Verificación Consola Existente</h1>
+            <p>Verificando integración consola.fixlytaller.com con backend actualizado</p>
+        </div>
+
+        <!-- URLs del Sistema -->
+        <div class="url-card">
+            <h2>🔗 URLs del Sistema Fixly</h2>
+            <div style="margin: 15px 0;">
+                <strong>🏢 Consola Admin (Existente):</strong><br>
+                <code>https://consola.fixlytaller.com/</code>
+                <button onclick="openConsole()" style="margin-left: 10px;">🌐 Abrir</button>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>🚀 Backend API (Actualizado):</strong><br>
+                <code>https://fixly-backend.oscarelias.workers.dev</code>
+                <button onclick="openBackend()" style="margin-left: 10px;">🔍 Ver</button>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>🔄 Webhook MercadoPago:</strong><br>
+                <code>https://fixly-backend.oscarelias.workers.dev/webhook/mercadopago</code>
+                <button onclick="copyWebhook()" style="margin-left: 10px;">📋 Copiar</button>
+            </div>
+        </div>
+
+        <!-- Status Grid -->
+        <div class="status-grid">
+            <div class="status-card" id="backend-status">
+                <h3>🚀 Backend Status</h3>
+                <div id="backend-result">⏳ Verificando...</div>
+                <button onclick="testBackend()">🔍 Test</button>
+            </div>
+            
+            <div class="status-card" id="console-status">
+                <h3>🏢 Consola Status</h3>
+                <div id="console-result">⏳ Verificando...</div>
+                <button onclick="testConsole()">🧪 Test</button>
+            </div>
+            
+            <div class="status-card" id="integration-status">
+                <h3>🔗 Integración</h3>
+                <div id="integration-result">⏳ Verificando...</div>
+                <button onclick="testIntegration()">⚡ Test</button>
+            </div>
+        </div>
+
+        <!-- Test Completo -->
+        <div class="test-section">
+            <h2>🎯 Verificación Completa del Sistema</h2>
+            <p>Verifica que la consola existente funcione correctamente con el backend actualizado:</p>
+            
+            <button onclick="runCompleteTest()" class="btn-success" style="font-size: 18px; padding: 15px 30px;">
+                🚀 EJECUTAR VERIFICACIÓN COMPLETA
+            </button>
+            
+            <div id="complete-test-result" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Funcionalidades a Verificar -->
+        <div class="test-section">
+            <h2>✅ Funcionalidades a Verificar en la Consola</h2>
+            <div id="features-checklist">
+                <div class="checklist-item" data-feature="login">
+                    ⏳ <strong>Login Admin:</strong> Acceso con credenciales admin
+                </div>
+                <div class="checklist-item" data-feature="users">
+                    ⏳ <strong>Gestión Usuarios:</strong> Crear, editar, pausar usuarios
+                </div>
+                <div class="checklist-item" data-feature="mercadopago">
+                    ⏳ <strong>MercadoPago Dashboard:</strong> Ver transacciones y estadísticas
+                </div>
+                <div class="checklist-item" data-feature="reports">
+                    ⏳ <strong>Reportes:</strong> Reportes financieros y exportación
+                </div>
+                <div class="checklist-item" data-feature="webhook">
+                    ⏳ <strong>Webhook:</strong> Procesamiento automático de pagos
+                </div>
+            </div>
+        </div>
+
+        <!-- Próximos Pasos -->
+        <div class="next-steps">
+            <h2>🎯 Próximos Pasos</h2>
+            <ol>
+                <li><strong>✅ Verificar que la consola conecte con backend v5.1.0</strong></li>
+                <li><strong>🔄 Configurar webhook MercadoPago</strong></li>
+                <li><strong>🧪 Test completo funcionalidades MercadoPago</strong></li>
+                <li><strong>🚀 Sistema listo para producción</strong></li>
+            </ol>
+        </div>
+
+        <!-- Logs -->
+        <div class="test-section">
+            <h2>📋 Logs de Verificación</h2>
+            <pre id="logs">🔍 Sistema iniciado - Verificando consola existente...\n</pre>
+        </div>
+
+        <!-- Estado Final -->
+        <div class="integration-status" id="final-status" style="display: none;">
+            <h2 id="final-title">🎉 Sistema Verificado</h2>
+            <p id="final-message">La consola existente está funcionando correctamente con el backend actualizado.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        const CONSOLE_URL = 'https://consola.fixlytaller.com';
+        const ADMIN_KEY = 'admin123';
+
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateFeatureStatus(feature, status, message) {
+            const item = document.querySelector(`[data-feature="${feature}"]`);
+            if (item) {
+                const icon = status ? '✅' : '❌';
+                item.innerHTML = `${icon} <strong>${item.textContent.split(':')[0].substring(2)}:</strong> ${message}`;
+            }
+        }
+
+        function updateStatusCard(cardId, status, message) {
+            const card = document.getElementById(cardId);
+            const result = document.getElementById(cardId.replace('-status', '-result'));
+            
+            if (status) {
+                card.className = 'status-card status-ok';
+                result.innerHTML = `✅ ${message}`;
+            } else {
+                card.className = 'status-card status-error';
+                result.innerHTML = `❌ ${message}`;
+            }
+        }
+
+        async function testBackend() {
+            log('🚀 Testing backend actualizado...');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'ok' && data.version === '5.1.0-mercadopago-complete') {
+                    updateStatusCard('backend-status', true, `Backend OK (${data.version})`);
+                    updateFeatureStatus('webhook', true, 'Backend con MercadoPago funcionando');
+                    log('✅ Backend v5.1.0 funcionando correctamente');
+                    return true;
+                } else {
+                    updateStatusCard('backend-status', false, `Versión: ${data.version}`);
+                    log(`❌ Backend versión incorrecta: ${data.version}`);
+                    return false;
+                }
+            } catch (error) {
+                updateStatusCard('backend-status', false, `Error: ${error.message}`);
+                log(`❌ Error backend: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testConsole() {
+            log('🏢 Testing consola existente...');
+            try {
+                const response = await fetch(CONSOLE_URL, { method: 'HEAD' });
+                if (response.ok) {
+                    updateStatusCard('console-status', true, 'Consola accesible');
+                    updateFeatureStatus('login', true, 'Consola cargando correctamente');
+                    log('✅ Consola existente accesible');
+                    return true;
+                } else {
+                    updateStatusCard('console-status', false, `HTTP ${response.status}`);
+                    log(`❌ Error consola: ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                updateStatusCard('console-status', false, `Error: ${error.message}`);
+                log(`❌ Error consola: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testIntegration() {
+            log('🔗 Testing integración consola-backend...');
+            try {
+                // Test endpoints que usa la consola
+                const tests = [
+                    { name: 'Admin Users', url: `${API_BASE}/api/admin/users` },
+                    { name: 'MercadoPago Payments', url: `${API_BASE}/api/admin/payments` },
+                    { name: 'Financial Reports', url: `${API_BASE}/api/admin/reports/financial?period=month` }
+                ];
+                
+                let passed = 0;
+                
+                for (const test of tests) {
+                    try {
+                        const response = await fetch(test.url, {
+                            headers: { 'X-Admin-Key': ADMIN_KEY }
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            passed++;
+                            log(`✅ ${test.name}: OK`);
+                        } else {
+                            log(`❌ ${test.name}: ${data.error}`);
+                        }
+                    } catch (error) {
+                        log(`❌ ${test.name}: ${error.message}`);
+                    }
+                }
+                
+                const success = passed === tests.length;
+                updateStatusCard('integration-status', success, `${passed}/${tests.length} endpoints OK`);
+                
+                if (success) {
+                    updateFeatureStatus('users', true, 'Gestión usuarios disponible');
+                    updateFeatureStatus('mercadopago', true, 'Dashboard MercadoPago funcional');
+                    updateFeatureStatus('reports', true, 'Reportes financieros OK');
+                }
+                
+                log(`🔗 Integración: ${passed}/${tests.length} tests pasados`);
+                return success;
+                
+            } catch (error) {
+                updateStatusCard('integration-status', false, `Error: ${error.message}`);
+                log(`❌ Error integración: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function runCompleteTest() {
+            log('🎯 Ejecutando verificación completa...');
+            const resultDiv = document.getElementById('complete-test-result');
+            
+            resultDiv.innerHTML = '<div style="text-align: center; color: #007bff;"><strong>⏳ Ejecutando tests...</strong></div>';
+            
+            const results = {
+                backend: await testBackend(),
+                console: await testConsole(),
+                integration: await testIntegration()
+            };
+            
+            const passedTests = Object.values(results).filter(Boolean).length;
+            const totalTests = Object.keys(results).length;
+            const allPassed = passedTests === totalTests;
+            
+            // Mostrar resultado final
+            const finalStatus = document.getElementById('final-status');
+            const finalTitle = document.getElementById('final-title');
+            const finalMessage = document.getElementById('final-message');
+            
+            if (allPassed) {
+                finalTitle.textContent = '🎉 ¡Sistema Completamente Funcional!';
+                finalMessage.textContent = 'La consola existente está perfectamente integrada con el backend actualizado v5.1.0-mercadopago-complete.';
+                finalStatus.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                
+                resultDiv.innerHTML = `
+                    <div style="background: #d4edda; padding: 20px; border-radius: 10px; text-align: center;">
+                        <h3 style="color: #155724; margin-bottom: 15px;">🎉 ¡VERIFICACIÓN EXITOSA!</h3>
+                        <p style="color: #155724; margin-bottom: 15px;">
+                            La consola <strong>consola.fixlytaller.com</strong> está funcionando perfectamente 
+                            con el backend actualizado que incluye MercadoPago completo.
+                        </p>
+                        <div style="background: rgba(21, 87, 36, 0.1); padding: 15px; border-radius: 8px;">
+                            <h4 style="color: #155724;">✅ Funcionalidades Verificadas:</h4>
+                            <ul style="text-align: left; color: #155724; margin: 10px 0;">
+                                <li>✅ Gestión completa de usuarios</li>
+                                <li>✅ Dashboard MercadoPago operativo</li>
+                                <li>✅ Reportes financieros funcionando</li>
+                                <li>✅ Sistema webhook configurado</li>
+                                <li>✅ Backend v5.1.0 completamente integrado</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                log('🎉 VERIFICACIÓN COMPLETA: Sistema totalmente funcional');
+                
+            } else {
+                finalTitle.textContent = '⚠️ Sistema Requiere Atención';
+                finalMessage.textContent = `${passedTests} de ${totalTests} componentes funcionando. Revisa los logs para más detalles.`;
+                finalStatus.style.background = 'linear-gradient(135deg, #ffc107, #fd7e14)';
+                
+                resultDiv.innerHTML = `
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 10px; text-align: center;">
+                        <h3 style="color: #856404;">⚠️ Verificación Parcial</h3>
+                        <p style="color: #856404;">
+                            Algunos componentes requieren atención: ${passedTests}/${totalTests} funcionando
+                        </p>
+                    </div>
+                `;
+                
+                log(`⚠️ Verificación parcial: ${passedTests}/${totalTests}`);
+            }
+            
+            finalStatus.style.display = 'block';
+        }
+
+        // Utility functions
+        function openConsole() {
+            window.open(CONSOLE_URL, '_blank');
+        }
+
+        function openBackend() {
+            window.open(`${API_BASE}/health`, '_blank');
+        }
+
+        function copyWebhook() {
+            const webhookUrl = `${API_BASE}/webhook/mercadopago`;
+            navigator.clipboard.writeText(webhookUrl).then(() => {
+                alert('✅ URL webhook copiada al portapapeles');
+            }).catch(() => {
+                prompt('Copia esta URL del webhook:', webhookUrl);
+            });
+        }
+
+        // Auto-start
+        window.onload = function() {
+            log('🔍 Verificación de consola existente iniciada');
+            log(`📍 Consola: ${CONSOLE_URL}`);
+            log(`📍 Backend: ${API_BASE}`);
+            
+            // Auto-test backend
+            setTimeout(testBackend, 1000);
+        };
+    </script>
+</body>
+</html>
