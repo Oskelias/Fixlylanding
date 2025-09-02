@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Directo del Formulario - Fixly</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status { padding: 15px; margin: 15px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .test-log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Test Completo del Sistema Fixly</h1>
+            <p>Prueba integral: Worker + Telegram + Formulario</p>
+        </div>
+
+        <!-- Test 1: Worker Status -->
+        <div class="test-section">
+            <h3>1️⃣ Estado del Worker</h3>
+            <button onclick="testWorkerStatus()" class="btn">🔍 Verificar Worker</button>
+            <div id="workerResult"></div>
+        </div>
+
+        <!-- Test 2: Telegram -->
+        <div class="test-section">
+            <h3>2️⃣ Test de Telegram</h3>
+            <button onclick="testTelegram()" class="btn">📱 Probar Telegram</button>
+            <div id="telegramResult"></div>
+        </div>
+
+        <!-- Test 3: Formulario Completo -->
+        <div class="test-section">
+            <h3>3️⃣ Test de Lead Registration</h3>
+            <p>Datos de prueba para generar un lead real:</p>
+            
+            <div class="form-group">
+                <label>Taller:</label>
+                <input type="text" id="testTaller" value="Taller Test Automation">
+            </div>
+            <div class="form-group">
+                <label>Propietario:</label>
+                <input type="text" id="testPropietario" value="Test Usuario">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="testEmail" value="test@fixlytaller.com">
+            </div>
+            <div class="form-group">
+                <label>Teléfono:</label>
+                <input type="tel" id="testTelefono" value="+54 11 1234-5678">
+            </div>
+            <div class="form-group">
+                <label>Ciudad:</label>
+                <input type="text" id="testCiudad" value="Buenos Aires">
+            </div>
+            
+            <button onclick="testLeadRegistration()" class="btn">🚀 Enviar Lead de Prueba</button>
+            <div id="leadResult"></div>
+        </div>
+
+        <!-- Test 4: Landing Page Status -->
+        <div class="test-section">
+            <h3>4️⃣ Estado de la Landing Page</h3>
+            <button onclick="checkLandingStatus()" class="btn">🌐 Verificar Landing</button>
+            <div id="landingResult"></div>
+        </div>
+
+        <!-- Test completo -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="runAllTests()" class="btn" style="font-size: 18px; padding: 20px 40px;">
+                🎯 EJECUTAR TODOS LOS TESTS
+            </button>
+        </div>
+
+        <!-- Log de resultados -->
+        <div class="test-section">
+            <h3>📊 Log de Resultados</h3>
+            <div class="test-log" id="testLog"></div>
+        </div>
+    </div>
+
+    <script>
+        const WORKER_URL = 'https://fixly-backend.oscarelias.workers.dev';
+        const LANDING_URL = 'https://fixlytaller.com';
+        
+        function log(message) {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            element.innerHTML = '';
+            element.appendChild(div);
+        }
+        
+        async function testWorkerStatus() {
+            log('🔍 Iniciando test del Worker...');
+            showResult('workerResult', '⏳ Probando conexión con el Worker...', 'info');
+            
+            try {
+                const response = await fetch(`${WORKER_URL}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Worker OK - ' + data.version);
+                    showResult('workerResult', `✅ Worker funcionando correctamente<br><strong>Versión:</strong> ${data.version}<br><strong>Endpoints:</strong> ${data.endpoints?.join(', ')}`, 'success');
+                } else {
+                    log('❌ Worker Error - ' + response.status);
+                    showResult('workerResult', `❌ Worker responde con errores: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('❌ Worker No Conecta - ' + error.message);
+                showResult('workerResult', `❌ No se puede conectar al Worker: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testTelegram() {
+            log('📱 Iniciando test de Telegram...');
+            showResult('telegramResult', '⏳ Enviando mensaje de prueba a Telegram...', 'info');
+            
+            try {
+                const response = await fetch(`${WORKER_URL}/test-telegram`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    log('✅ Telegram OK - Mensaje enviado');
+                    showResult('telegramResult', `✅ Telegram funcionando correctamente<br><strong>Bot:</strong> ${data.telegramResult.success ? 'Activo' : 'Error'}<br><strong>Configuración:</strong> Token ✅ Chat ✅`, 'success');
+                } else {
+                    log('❌ Telegram Error - ' + (data.error || 'Unknown'));
+                    showResult('telegramResult', `❌ Error en Telegram: ${data.error || 'Error desconocido'}`, 'error');
+                }
+            } catch (error) {
+                log('❌ Telegram No Conecta - ' + error.message);
+                showResult('telegramResult', `❌ Error conectando Telegram: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testLeadRegistration() {
+            log('🚀 Iniciando test de Lead Registration...');
+            showResult('leadResult', '⏳ Enviando lead de prueba...', 'info');
+            
+            const leadData = {
+                taller: document.getElementById('testTaller').value,
+                propietario: document.getElementById('testPropietario').value,
+                email: document.getElementById('testEmail').value,
+                telefono: document.getElementById('testTelefono').value,
+                ciudad: document.getElementById('testCiudad').value
+            };
+            
+            try {
+                log('📤 Enviando datos: ' + JSON.stringify(leadData));
+                
+                const response = await fetch(`${WORKER_URL}/api/lead-registro`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(leadData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    log('✅ Lead Registrado - ID: ' + data.leadId);
+                    showResult('leadResult', `✅ Lead registrado exitosamente<br><strong>ID:</strong> ${data.leadId}<br><strong>Telegram:</strong> ${data.telegramSent ? 'Enviado ✅' : 'Error ❌'}<br><strong>Mensaje:</strong> ${data.message}`, 'success');
+                } else {
+                    log('❌ Lead Error - ' + (data.error || 'Unknown'));
+                    showResult('leadResult', `❌ Error registrando lead: ${data.error || 'Error desconocido'}<br><strong>Detalles:</strong> ${data.details || 'N/A'}`, 'error');
+                }
+            } catch (error) {
+                log('❌ Lead No Conecta - ' + error.message);
+                showResult('leadResult', `❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        async function checkLandingStatus() {
+            log('🌐 Verificando estado de Landing Page...');
+            showResult('landingResult', '⏳ Comprobando landing page...', 'info');
+            
+            try {
+                const response = await fetch(LANDING_URL);
+                
+                if (response.ok) {
+                    log('✅ Landing OK - Código: ' + response.status);
+                    showResult('landingResult', `✅ Landing page accesible<br><strong>Status:</strong> ${response.status}<br><strong>URL:</strong> ${LANDING_URL}<br><strong>Nota:</strong> Verifica manualmente que el JavaScript use la URL correcta del Worker`, 'success');
+                } else {
+                    log('❌ Landing Error - Código: ' + response.status);
+                    showResult('landingResult', `⚠️ Landing page responde con código: ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log('❌ Landing No Conecta - ' + error.message);
+                showResult('landingResult', `❌ Error accediendo a landing: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runAllTests() {
+            log('🎯 INICIANDO BATERÍA COMPLETA DE TESTS...');
+            
+            await testWorkerStatus();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            await testTelegram();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            await testLeadRegistration();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            await checkLandingStatus();
+            
+            log('🏁 TODOS LOS TESTS COMPLETADOS');
+        }
+        
+        // Auto-ejecutar test básico al cargar
+        window.onload = function() {
+            log('🚀 Iniciando tests automáticos...');
+            setTimeout(testWorkerStatus, 1000);
+        };
+    </script>
+</body>
+</html>
