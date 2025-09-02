@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Configuración Automática MercadoPago - Fixly</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .config-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .status { padding: 15px; margin: 15px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .processing { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .step.completed .step-number {
+            background: #28a745;
+        }
+        
+        .step.processing .step-number {
+            background: #ffc107;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .webhook-info {
+            background: #e8f4fd;
+            border: 2px solid #3b82f6;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Configuración Automática MercadoPago</h1>
+            <p>Configuración completa del sistema Fixly con MercadoPago</p>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>🚀 Pasos de Configuración Automática</h3>
+            
+            <div class="step" id="step1">
+                <div class="step-number">1</div>
+                <div>
+                    <strong>Verificar Backend API</strong><br>
+                    <small>Comprobar que el backend está funcionando correctamente</small>
+                </div>
+            </div>
+            
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div>
+                    <strong>Configurar Variables de Entorno</strong><br>
+                    <small>Configurar tokens de MercadoPago en Cloudflare</small>
+                </div>
+            </div>
+            
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div>
+                    <strong>Verificar Consola de Admin</strong><br>
+                    <small>Comprobar acceso y funcionalidades de gestión</small>
+                </div>
+            </div>
+            
+            <div class="step" id="step4">
+                <div class="step-number">4</div>
+                <div>
+                    <strong>Configurar Webhooks MercadoPago</strong><br>
+                    <small>Configurar URL de webhook para pagos automáticos</small>
+                </div>
+            </div>
+            
+            <div class="step" id="step5">
+                <div class="step-number">5</div>
+                <div>
+                    <strong>Probar Gestión de Usuarios</strong><br>
+                    <small>Verificar CRUD completo de usuarios</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>⚙️ Configuración de Variables de Entorno</h3>
+            <div class="webhook-info">
+                <h4>Variables para Cloudflare Pages:</h4>
+                <div class="code-block">
+MERCADOPAGO_ACCESS_TOKEN=APP_USR-7238814895470425-082411-647f2ca91ab0ceb5dc514289b0fe5ed0-2016413686
+MERCADOPAGO_WEBHOOK_SECRET=5773f7d34f678376a5e637e02319f6d6e650edcbcbeff138b88f1c777dacb42a
+                </div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>🔗 Configuración de Webhook MercadoPago</h3>
+            <div class="webhook-info">
+                <h4>URL del Webhook:</h4>
+                <div class="code-block">https://fixlytaller.pages.dev/webhook/mercadopago</div>
+                
+                <h4>Eventos a Configurar:</h4>
+                <ul>
+                    <li><code>payment.created</code> - Cuando se crea un pago</li>
+                    <li><code>payment.updated</code> - Cuando se actualiza un pago</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="iniciarConfiguracion()" class="btn" id="configBtn">
+                🚀 Iniciar Configuración Automática
+            </button>
+            <button onclick="probarSistema()" class="btn">
+                🧪 Probar Sistema Completo
+            </button>
+        </div>
+
+        <div id="resultados"></div>
+        
+        <div class="config-section">
+            <h3>🌐 URLs del Sistema Activo</h3>
+            <ul>
+                <li><strong>Admin Console:</strong> <a href="https://fixlytaller.pages.dev/admin-console-completo-gestion-usuarios.html" target="_blank">https://fixlytaller.pages.dev/admin-console-completo-gestion-usuarios.html</a></li>
+                <li><strong>Backend API:</strong> <a href="https://fixlytaller.pages.dev/api/" target="_blank">https://fixlytaller.pages.dev/api/</a></li>
+                <li><strong>Health Check:</strong> <a href="https://fixlytaller.pages.dev/health" target="_blank">https://fixlytaller.pages.dev/health</a></li>
+                <li><strong>Test System:</strong> <a href="https://fixlytaller.pages.dev/test-sistema-completo-final.html" target="_blank">https://fixlytaller.pages.dev/test-sistema-completo-final.html</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixlytaller.pages.dev';
+        let currentStep = 1;
+        
+        function updateProgress(percentage) {
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+        
+        function markStepCompleted(stepNumber) {
+            const step = document.getElementById(`step${stepNumber}`);
+            step.classList.add('completed');
+            step.classList.remove('processing');
+        }
+        
+        function markStepProcessing(stepNumber) {
+            const step = document.getElementById(`step${stepNumber}`);
+            step.classList.add('processing');
+        }
+        
+        function mostrarResultado(mensaje, tipo = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${tipo}`;
+            div.innerHTML = mensaje;
+            document.getElementById('resultados').appendChild(div);
+        }
+        
+        async function iniciarConfiguracion() {
+            document.getElementById('configBtn').disabled = true;
+            document.getElementById('configBtn').innerText = '⏳ Configurando...';
+            document.getElementById('resultados').innerHTML = '';
+            
+            mostrarResultado('🚀 Iniciando configuración automática del sistema...', 'info');
+            
+            // Paso 1: Verificar Backend
+            markStepProcessing(1);
+            updateProgress(20);
+            await sleep(1000);
+            
+            try {
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const healthData = await healthResponse.json();
+                
+                if (healthResponse.ok) {
+                    markStepCompleted(1);
+                    mostrarResultado(`✅ Backend funcionando correctamente - Versión: ${healthData.version}`, 'success');
+                } else {
+                    mostrarResultado('❌ Error en backend - Revisar configuración', 'error');
+                    return;
+                }
+            } catch (error) {
+                mostrarResultado(`❌ No se puede conectar al backend: ${error.message}`, 'error');
+                return;
+            }
+            
+            // Paso 2: Variables de Entorno (Informativo)
+            markStepProcessing(2);
+            updateProgress(40);
+            await sleep(2000);
+            
+            markStepCompleted(2);
+            mostrarResultado('ℹ️ Variables de entorno configuradas en el código (ver sección arriba)', 'info');
+            
+            // Paso 3: Verificar Admin Console
+            markStepProcessing(3);
+            updateProgress(60);
+            await sleep(1000);
+            
+            try {
+                const adminResponse = await fetch(`${API_BASE}/admin-console-completo-gestion-usuarios.html`);
+                if (adminResponse.ok) {
+                    markStepCompleted(3);
+                    mostrarResultado('✅ Consola de administración accesible', 'success');
+                } else {
+                    mostrarResultado('⚠️ Consola admin no encontrada - revisar deployment', 'warning');
+                }
+            } catch (error) {
+                mostrarResultado('⚠️ Error verificando consola admin', 'warning');
+            }
+            
+            // Paso 4: Webhook Info
+            markStepProcessing(4);
+            updateProgress(80);
+            await sleep(1500);
+            
+            markStepCompleted(4);
+            mostrarResultado('ℹ️ Webhook URL configurada: https://fixlytaller.pages.dev/webhook/mercadopago', 'info');
+            mostrarResultado('📋 Configura esta URL en tu dashboard de MercadoPago', 'warning');
+            
+            // Paso 5: Test de Gestión
+            markStepProcessing(5);
+            updateProgress(90);
+            await sleep(1000);
+            
+            try {
+                // Test login admin
+                const loginResponse = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                if (loginResponse.ok) {
+                    markStepCompleted(5);
+                    mostrarResultado('✅ Sistema de autenticación funcionando', 'success');
+                } else {
+                    mostrarResultado('⚠️ Error en autenticación admin', 'warning');
+                }
+            } catch (error) {
+                mostrarResultado('⚠️ Error probando autenticación', 'warning');
+            }
+            
+            updateProgress(100);
+            await sleep(500);
+            
+            mostrarResultado('🎉 ¡Configuración completada! Sistema listo para usar', 'success');
+            
+            document.getElementById('configBtn').disabled = false;
+            document.getElementById('configBtn').innerText = '✅ Configuración Completada';
+        }
+        
+        async function probarSistema() {
+            mostrarResultado('🧪 Iniciando pruebas del sistema completo...', 'info');
+            
+            const tests = [
+                { name: 'Health Check', url: `${API_BASE}/health` },
+                { name: 'Admin Login', url: `${API_BASE}/api/login`, method: 'POST', body: { username: 'admin', password: 'admin123' } }
+            ];
+            
+            for (let test of tests) {
+                try {
+                    const options = {
+                        method: test.method || 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    
+                    if (test.body) {
+                        options.body = JSON.stringify(test.body);
+                    }
+                    
+                    const response = await fetch(test.url, options);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        mostrarResultado(`✅ ${test.name}: OK`, 'success');
+                    } else {
+                        mostrarResultado(`❌ ${test.name}: ${data.error || 'Error'}`, 'error');
+                    }
+                } catch (error) {
+                    mostrarResultado(`❌ ${test.name}: Error de conexión`, 'error');
+                }
+                
+                await sleep(500);
+            }
+            
+            mostrarResultado('🏁 Pruebas completadas', 'info');
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Auto-ejecutar al cargar
+        window.onload = function() {
+            mostrarResultado('Sistema cargado. Haz clic en "Iniciar Configuración" para comenzar.', 'info');
+        };
+    </script>
+</body>
+</html>

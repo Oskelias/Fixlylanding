@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Completo - Gestión de Usuarios Fixly</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .test-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .test-card.success {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .test-card.error {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+        
+        .test-card.processing {
+            border-color: #ffc107;
+            background: #fffef8;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .user-list {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+            width: auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Test Completo - Gestión de Usuarios</h1>
+            <p>Prueba todas las funcionalidades del módulo de gestión de usuarios</p>
+            <p><strong>Sistema:</strong> Fixly Taller v5.1.0 MercadoPago</p>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">-</div>
+                <div class="stat-label">Total Usuarios</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeUsers">-</div>
+                <div class="stat-label">Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pausedUsers">-</div>
+                <div class="stat-label">Pausados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="expiredUsers">-</div>
+                <div class="stat-label">Expirados</div>
+            </div>
+        </div>
+
+        <div class="test-grid">
+            <!-- Test de Conexión -->
+            <div class="test-card" id="conexionCard">
+                <h4>🔗 Test de Conexión</h4>
+                <button onclick="testConexion()" class="btn" id="conexionBtn">Probar Conexión Backend</button>
+                <div id="conexionResult"></div>
+            </div>
+
+            <!-- Test de Autenticación -->
+            <div class="test-card" id="authCard">
+                <h4>🔐 Test de Autenticación</h4>
+                <button onclick="testAuth()" class="btn" id="authBtn">Probar Login Admin</button>
+                <div id="authResult"></div>
+            </div>
+
+            <!-- Crear Usuario -->
+            <div class="test-card" id="createCard">
+                <h4>➕ Crear Usuario de Prueba</h4>
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="newUsername" placeholder="Ej: test_user_001" value="test_user_001">
+                </div>
+                <div class="form-group">
+                    <label>Empresa:</label>
+                    <input type="text" id="newEmpresa" placeholder="Empresa Test" value="Empresa Test">
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="newEmail" placeholder="test@fixly.com" value="test@fixly.com">
+                </div>
+                <div class="form-group">
+                    <label>Plan:</label>
+                    <select id="newPlan">
+                        <option value="starter">Starter (Prueba)</option>
+                        <option value="pro" selected>Pro</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                </div>
+                <button onclick="crearUsuario()" class="btn" id="createBtn">Crear Usuario</button>
+                <div id="createResult"></div>
+            </div>
+
+            <!-- Listar Usuarios -->
+            <div class="test-card" id="listCard">
+                <h4>📋 Lista de Usuarios</h4>
+                <button onclick="listarUsuarios()" class="btn" id="listBtn">Cargar Usuarios</button>
+                <div id="listResult"></div>
+                <div class="user-list" id="userList" style="display: none;"></div>
+            </div>
+
+            <!-- Gestión de Usuario -->
+            <div class="test-card" id="manageCard">
+                <h4>⚙️ Gestionar Usuario</h4>
+                <div class="form-group">
+                    <label>Username a gestionar:</label>
+                    <input type="text" id="manageUsername" placeholder="test_user_001" value="test_user_001">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                    <button onclick="pausarUsuario()" class="btn btn-sm" id="pauseBtn">Pausar</button>
+                    <button onclick="reanudarUsuario()" class="btn btn-sm" id="resumeBtn">Reanudar</button>
+                    <button onclick="extenderUsuario()" class="btn btn-sm" id="extendBtn">Extender +30d</button>
+                    <button onclick="eliminarUsuario()" class="btn btn-sm" id="deleteBtn">Eliminar</button>
+                </div>
+                <div id="manageResult"></div>
+            </div>
+
+            <!-- Test de MercadoPago -->
+            <div class="test-card" id="mpCard">
+                <h4>💳 Test MercadoPago</h4>
+                <button onclick="testMercadoPago()" class="btn" id="mpBtn">Probar Endpoints MP</button>
+                <button onclick="testWebhook()" class="btn" id="webhookBtn">Test Webhook</button>
+                <div id="mpResult"></div>
+            </div>
+        </div>
+
+        <!-- Controles Generales -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="ejecutarTodosTests()" class="btn" style="font-size: 18px; padding: 15px 40px;">
+                🚀 Ejecutar Todos los Tests
+            </button>
+            <button onclick="limpiarResultados()" class="btn" style="background: #6c757d;">
+                🗑️ Limpiar Resultados
+            </button>
+        </div>
+
+        <div id="generalResults"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://fixlytaller.pages.dev';
+        const ADMIN_KEY = 'admin123';
+        
+        function mostrarResultado(elementId, mensaje, tipo = 'info') {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = `test-result ${tipo}`;
+            div.innerHTML = mensaje;
+            element.appendChild(div);
+        }
+        
+        function limpiarResultado(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+        
+        function setCardStatus(cardId, status) {
+            const card = document.getElementById(cardId);
+            card.className = `test-card ${status}`;
+        }
+        
+        async function testConexion() {
+            limpiarResultado('conexionResult');
+            setCardStatus('conexionCard', 'processing');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    setCardStatus('conexionCard', 'success');
+                    mostrarResultado('conexionResult', `✅ Conectado - Versión: ${data.version}`, 'success');
+                    mostrarResultado('conexionResult', `🔧 Características: ${data.features?.join(', ')}`, 'info');
+                } else {
+                    setCardStatus('conexionCard', 'error');
+                    mostrarResultado('conexionResult', '❌ Backend responde con errores', 'error');
+                }
+            } catch (error) {
+                setCardStatus('conexionCard', 'error');
+                mostrarResultado('conexionResult', `❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAuth() {
+            limpiarResultado('authResult');
+            setCardStatus('authCard', 'processing');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    setCardStatus('authCard', 'success');
+                    mostrarResultado('authResult', '✅ Autenticación admin exitosa', 'success');
+                    mostrarResultado('authResult', `👤 Usuario: ${data.user.username}`, 'info');
+                } else {
+                    setCardStatus('authCard', 'error');
+                    mostrarResultado('authResult', `❌ Error login: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                setCardStatus('authCard', 'error');
+                mostrarResultado('authResult', `❌ Error conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        async function crearUsuario() {
+            limpiarResultado('createResult');
+            setCardStatus('createCard', 'processing');
+            
+            const userData = {
+                username: document.getElementById('newUsername').value,
+                password: 'test123',
+                empresa: document.getElementById('newEmpresa').value,
+                email: document.getElementById('newEmail').value,
+                telefono: '+34666666666',
+                tipo: document.getElementById('newPlan').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    setCardStatus('createCard', 'success');
+                    mostrarResultado('createResult', '✅ Usuario creado exitosamente', 'success');
+                    mostrarResultado('createResult', `👤 Username: ${data.username}`, 'info');
+                    mostrarResultado('createResult', `🔑 Password: ${data.password}`, 'info');
+                    mostrarResultado('createResult', `✨ Estado: ${data.activo ? 'Activo' : 'Inactivo'}`, data.activo ? 'success' : 'warning');
+                    
+                    // Actualizar campo de gestión
+                    document.getElementById('manageUsername').value = data.username;
+                } else {
+                    setCardStatus('createCard', 'error');
+                    mostrarResultado('createResult', `❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                setCardStatus('createCard', 'error');
+                mostrarResultado('createResult', `❌ Error conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        async function listarUsuarios() {
+            limpiarResultado('listResult');
+            setCardStatus('listCard', 'processing');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    setCardStatus('listCard', 'success');
+                    mostrarResultado('listResult', `✅ ${data.users.length} usuarios encontrados`, 'success');
+                    
+                    // Actualizar estadísticas
+                    document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+                    document.getElementById('activeUsers').textContent = data.activeUsers || 0;
+                    document.getElementById('pausedUsers').textContent = data.pausedUsers || 0;
+                    document.getElementById('expiredUsers').textContent = data.expiredUsers || 0;
+                    
+                    // Mostrar lista de usuarios
+                    const userList = document.getElementById('userList');
+                    userList.innerHTML = '';
+                    
+                    data.users.forEach(user => {
+                        const userItem = document.createElement('div');
+                        userItem.className = 'user-item';
+                        userItem.innerHTML = `
+                            <div class="user-info">
+                                <strong>${user.username}</strong><br>
+                                <small>${user.empresa} - ${user.plan} - ${user.status}</small>
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn btn-sm" onclick="seleccionarUsuario('${user.username}')">
+                                    Gestionar
+                                </button>
+                            </div>
+                        `;
+                        userList.appendChild(userItem);
+                    });
+                    
+                    userList.style.display = 'block';
+                } else {
+                    setCardStatus('listCard', 'error');
+                    mostrarResultado('listResult', `❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                setCardStatus('listCard', 'error');
+                mostrarResultado('listResult', `❌ Error conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        function seleccionarUsuario(username) {
+            document.getElementById('manageUsername').value = username;
+            mostrarResultado('manageResult', `👤 Usuario seleccionado: ${username}`, 'info');
+        }
+        
+        async function pausarUsuario() {
+            await gestionarUsuario('pause', 'pausar');
+        }
+        
+        async function reanudarUsuario() {
+            await gestionarUsuario('resume', 'reanudar');
+        }
+        
+        async function gestionarUsuario(action, actionText) {
+            limpiarResultado('manageResult');
+            setCardStatus('manageCard', 'processing');
+            
+            const username = document.getElementById('manageUsername').value;
+            if (!username) {
+                mostrarResultado('manageResult', '❌ Ingresa un username', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}/pause`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({ action })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    setCardStatus('manageCard', 'success');
+                    mostrarResultado('manageResult', `✅ Usuario ${actionText}do exitosamente`, 'success');
+                    mostrarResultado('manageResult', `📊 Nuevo estado: ${data.newStatus}`, 'info');
+                } else {
+                    setCardStatus('manageCard', 'error');
+                    mostrarResultado('manageResult', `❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                setCardStatus('manageCard', 'error');
+                mostrarResultado('manageResult', `❌ Error conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        async function extenderUsuario() {
+            // Implementar extensión de usuario (placeholder)
+            mostrarResultado('manageResult', '⏳ Función de extensión en desarrollo', 'warning');
+        }
+        
+        async function eliminarUsuario() {
+            const username = document.getElementById('manageUsername').value;
+            if (!username) {
+                mostrarResultado('manageResult', '❌ Ingresa un username', 'error');
+                return;
+            }
+            
+            if (!confirm(`¿Eliminar usuario ${username}? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+            
+            mostrarResultado('manageResult', `⏳ Eliminando usuario ${username}...`, 'warning');
+            // Implementar eliminación (placeholder por ahora)
+        }
+        
+        async function testMercadoPago() {
+            limpiarResultado('mpResult');
+            setCardStatus('mpCard', 'processing');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    setCardStatus('mpCard', 'success');
+                    mostrarResultado('mpResult', '✅ Endpoint MercadoPago funcionando', 'success');
+                    mostrarResultado('mpResult', `💰 Total pagos: ${data.statistics?.totalPayments || 0}`, 'info');
+                    mostrarResultado('mpResult', `💵 Monto total: $${data.statistics?.totalAmount || 0}`, 'info');
+                } else {
+                    setCardStatus('mpCard', 'error');
+                    mostrarResultado('mpResult', `❌ Error MP: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                setCardStatus('mpCard', 'error');
+                mostrarResultado('mpResult', `❌ Error conexión MP: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testWebhook() {
+            mostrarResultado('mpResult', '🔗 URL Webhook: https://fixlytaller.pages.dev/webhook/mercadopago', 'info');
+            mostrarResultado('mpResult', '📋 Configurar en MercadoPago Dashboard', 'warning');
+        }
+        
+        async function ejecutarTodosTests() {
+            document.getElementById('generalResults').innerHTML = '<div class="info">🚀 Ejecutando todos los tests...</div>';
+            
+            await testConexion();
+            await sleep(1000);
+            await testAuth();
+            await sleep(1000);
+            await listarUsuarios();
+            await sleep(1000);
+            await testMercadoPago();
+            
+            document.getElementById('generalResults').innerHTML = '<div class="success">✅ Todos los tests completados</div>';
+        }
+        
+        function limpiarResultados() {
+            const resultIds = ['conexionResult', 'authResult', 'createResult', 'listResult', 'manageResult', 'mpResult'];
+            resultIds.forEach(id => limpiarResultado(id));
+            
+            // Reset card status
+            const cardIds = ['conexionCard', 'authCard', 'createCard', 'listCard', 'manageCard', 'mpCard'];
+            cardIds.forEach(id => setCardStatus(id, ''));
+            
+            document.getElementById('generalResults').innerHTML = '';
+            document.getElementById('userList').style.display = 'none';
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Auto-ejecutar al cargar
+        window.onload = function() {
+            setTimeout(() => {
+                testConexion();
+                listarUsuarios();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
