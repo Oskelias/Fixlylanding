@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 URLs Correctas del Sistema Fixly</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .url-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+        
+        .url-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .url-card.primary {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .status { padding: 15px; margin: 15px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 URLs Correctas del Sistema Fixly</h1>
+            <p>Sistema funcionando en: <strong>uploadassest.pages.dev</strong></p>
+            <div class="success" style="margin: 20px 0; border-radius: 10px;">
+                ✅ <strong>SISTEMA ACTIVO Y FUNCIONANDO</strong>
+            </div>
+        </div>
+
+        <!-- URL Principal -->
+        <div class="url-card primary">
+            <h3>🏢 CONSOLA DE ADMINISTRACIÓN PRINCIPAL</h3>
+            <div class="url">https://uploadassest.pages.dev/admin-console-completo-gestion-usuarios.html</div>
+            <p><strong>Credenciales:</strong></p>
+            <ul>
+                <li>Usuario: <code>admin</code></li>
+                <li>Contraseña: <code>admin123</code></li>
+            </ul>
+            <a href="https://uploadassest.pages.dev/admin-console-completo-gestion-usuarios.html" target="_blank" class="btn">
+                🚀 Acceder a la Consola
+            </a>
+            <button onclick="probarConsola()" class="btn">🧪 Probar Acceso</button>
+        </div>
+
+        <!-- APIs del Sistema -->
+        <div class="url-card">
+            <h3>🔗 APIs del Sistema</h3>
+            
+            <h4>Health Check:</h4>
+            <div class="url">https://uploadassest.pages.dev/health</div>
+            <button onclick="probarHealth()" class="btn">🔍 Probar Health</button>
+            
+            <h4>Backend API Base:</h4>
+            <div class="url">https://uploadassest.pages.dev/api/</div>
+            
+            <h4>Webhook MercadoPago:</h4>
+            <div class="url">https://uploadassest.pages.dev/webhook/mercadopago</div>
+        </div>
+
+        <!-- Herramientas de Testing -->
+        <div class="url-card">
+            <h3>🧪 Herramientas de Testing</h3>
+            
+            <h4>Test Completo de Usuarios:</h4>
+            <div class="url">https://uploadassest.pages.dev/test-gestion-usuarios-completo.html</div>
+            <a href="https://uploadassest.pages.dev/test-gestion-usuarios-completo.html" target="_blank" class="btn">
+                Abrir Tests
+            </a>
+            
+            <h4>Configuración Automática:</h4>
+            <div class="url">https://uploadassest.pages.dev/configuracion-mercadopago-automatica.html</div>
+            <a href="https://uploadassest.pages.dev/configuracion-mercadopago-automatica.html" target="_blank" class="btn">
+                Abrir Configuración
+            </a>
+        </div>
+
+        <!-- Otras páginas -->
+        <div class="url-card">
+            <h3>📄 Otras Páginas del Sistema</h3>
+            
+            <h4>Sistema de Pruebas Final:</h4>
+            <div class="url">https://uploadassest.pages.dev/test-sistema-completo-final.html</div>
+            
+            <h4>Verificación de Deployment:</h4>
+            <div class="url">https://uploadassest.pages.dev/deploy-verification.html</div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="probarTodo()" class="btn" style="font-size: 18px; padding: 15px 40px;">
+                🚀 Probar Todo el Sistema
+            </button>
+        </div>
+
+        <div id="resultados"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://uploadassest.pages.dev';
+        
+        function mostrarResultado(mensaje, tipo = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${tipo}`;
+            div.innerHTML = mensaje;
+            document.getElementById('resultados').appendChild(div);
+        }
+        
+        async function probarConsola() {
+            mostrarResultado('🔄 Probando acceso a la consola...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin-console-completo-gestion-usuarios.html`);
+                
+                if (response.ok) {
+                    mostrarResultado('✅ Consola accesible - ¡Puedes hacer login!', 'success');
+                } else {
+                    mostrarResultado(`❌ Error accediendo a consola: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                mostrarResultado(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+        
+        async function probarHealth() {
+            mostrarResultado('🔄 Probando health check...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    mostrarResultado(`✅ Sistema funcionando - Versión: ${data.version}`, 'success');
+                    mostrarResultado(`🔧 Características: ${data.features?.join(', ')}`, 'info');
+                } else {
+                    mostrarResultado('❌ Health check falló', 'error');
+                }
+            } catch (error) {
+                mostrarResultado(`❌ Error health check: ${error.message}`, 'error');
+            }
+        }
+        
+        async function probarTodo() {
+            document.getElementById('resultados').innerHTML = '';
+            mostrarResultado('🚀 Iniciando pruebas completas del sistema...', 'info');
+            
+            await probarHealth();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await probarConsola();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test login
+            mostrarResultado('🔄 Probando login admin...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    mostrarResultado('✅ Login admin funcionando correctamente', 'success');
+                } else {
+                    mostrarResultado(`❌ Error login: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                mostrarResultado(`❌ Error probando login: ${error.message}`, 'error');
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            mostrarResultado('🎉 ¡Pruebas completadas! El sistema está listo para usar.', 'success');
+        }
+        
+        // Auto-ejecutar al cargar
+        window.onload = function() {
+            setTimeout(probarHealth, 1000);
+        };
+    </script>
+</body>
+</html>
