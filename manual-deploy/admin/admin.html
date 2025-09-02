@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Fixly Taller</title>
+</head>
+<body>
+    <script>
+        // Verificar autenticación admin y redirigir
+        const session = sessionStorage.getItem('fixly_admin_session');
+        if (session) {
+            // Ya está logueado, ir al panel
+            window.location.href = '/index.html';
+        } else {
+            // No está logueado, ir al login
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mundo Electrónico - Sistema de Gestión</title>
+    <title>Fixly Taller - Login</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -36,7 +36,7 @@
         }
 
         .logo h1 {
-            color: #667eea;
+            color: #1e3c72;
             font-size: 28px;
             margin-bottom: 5px;
         }
@@ -69,13 +69,13 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.1);
+            border-color: #2a5298;
+            box-shadow: 0 0 10px rgba(42, 82, 152, 0.1);
         }
 
         .login-btn {
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
             padding: 15px;
             border: none;
@@ -98,23 +98,24 @@
             transform: none;
         }
 
-        .alert {
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c66;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
             display: none;
         }
 
-        .alert-danger {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c66;
-        }
-
-        .alert-success {
+        .success {
             background: #efe;
             border: 1px solid #cfc;
             color: #6c6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
         }
 
         .loading {
@@ -122,7 +123,7 @@
             width: 20px;
             height: 20px;
             border: 2px solid #f3f3f3;
-            border-top: 2px solid #667eea;
+            border-top: 2px solid #2a5298;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -136,6 +137,16 @@
             color: #666;
             font-size: 12px;
             margin-top: 20px;
+            text-align: left;
+        }
+
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #666;
             text-align: left;
         }
 
@@ -165,29 +176,35 @@
 
         .user-item:hover {
             background: #f0f8ff;
-            border-color: #667eea;
+            border-color: #2a5298;
+        }
+
+        .user-item small {
+            display: block;
+            color: #666;
+            margin-top: 3px;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">
-            <h1>📱 Mundo Electrónico</h1>
-            <p>Sistema de Gestión Multi-Tenant</p>
+            <h1>🛠️ Fixly Taller</h1>
+            <p>Sistema de Gestión</p>
         </div>
 
-        <div id="errorMessage" class="alert alert-danger"></div>
-        <div id="successMessage" class="alert alert-success"></div>
+        <div id="errorMessage" class="error"></div>
+        <div id="successMessage" class="success"></div>
 
         <form id="loginForm">
             <div class="form-group">
                 <label for="username">Usuario</label>
-                <input type="text" id="username" name="username" required placeholder="Ingresa tu usuario">
+                <input type="text" id="username" name="username" required>
             </div>
 
             <div class="form-group">
                 <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" required placeholder="Ingresa tu contraseña">
+                <input type="password" id="password" name="password" required>
             </div>
 
             <button type="submit" id="loginBtn" class="login-btn">
@@ -197,53 +214,45 @@
         </form>
 
         <div class="help-text">
-            <strong>👤 Usuarios Multi-Tenant:</strong><br>
-            Cada taller tiene sus propios datos separados.<br>
-            <small>Los usuarios son creados por el administrador.</small>
+            <strong>👤 Usuario por defecto:</strong><br>
+            Usuario: <code>admin</code><br>
+            Contraseña: <code>admin123</code>
         </div>
 
-        <!-- Usuarios de ejemplo para testing -->
-        <div class="user-suggestions" id="userSuggestions" style="display: none;">
-            <h4>🧪 Usuarios de Prueba:</h4>
+        <!-- USUARIOS DE PRUEBA -->
+        <div class="user-suggestions">
+            <h4>🧪 Usuarios de Prueba Disponibles:</h4>
             
-            <div class="user-item" onclick="fillCredentials('admin', 'admin123')">
-                <strong>Sistema Original</strong>
-                <small>admin / admin123</small>
+            <div class="user-item" onclick="fillCredentials('admin', 'fixly2024!')">
+                <strong>Administrador</strong>
+                <small>admin / fixly2024!</small>
             </div>
             
-            <div class="user-item" onclick="fillCredentials('taller1', 'pass123')">
-                <strong>Taller Ejemplo 1</strong>
-                <small>taller1 / pass123</small>
+            <div class="user-item" onclick="fillCredentials('taller_tallerautotest1756696755558_705028', 'fix_2025_2tsE')">
+                <strong>Usuario Automático</strong>
+                <small>taller_tallerautotest1756696755558_705028 / fix_2025_2tsE</small>
             </div>
             
-            <div class="user-item" onclick="fillCredentials('taller2', 'pass456')">
-                <strong>Taller Ejemplo 2</strong>
-                <small>taller2 / pass456</small>
+            <div class="user-item" onclick="fillCredentials('manual_user_1756696757136', 'manual_pass_123')">
+                <strong>Usuario Manual</strong>
+                <small>manual_user_1756696757136 / manual_pass_123</small>
             </div>
         </div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
     </div>
 
     <script>
-        // ================================
-        // MULTI-TENANT LOGIN SYSTEM
-        // Integración con API Fixly existente
-        // ================================
-        
-        const API_BASE = 'https://api.fixlytaller.com';
-        
-        // Referencias DOM
+        const API_URL = 'https://api.fixlytaller.com';
+
+        // Referencias a elementos
         const form = document.getElementById('loginForm');
         const errorDiv = document.getElementById('errorMessage');
         const successDiv = document.getElementById('successMessage');
         const btnText = document.getElementById('btnText');
         const btnLoading = document.getElementById('btnLoading');
         const loginBtn = document.getElementById('loginBtn');
-        const userSuggestions = document.getElementById('userSuggestions');
-
-        // Mostrar usuarios de prueba en desarrollo
-        if (window.location.hostname.includes('localhost') || window.location.hostname.includes('pages.dev')) {
-            userSuggestions.style.display = 'block';
-        }
+        const debugInfo = document.getElementById('debugInfo');
 
         // Función para llenar credenciales
         function fillCredentials(username, password) {
@@ -251,55 +260,63 @@
             document.getElementById('password').value = password;
         }
 
-        // Función para mostrar mensajes
+        // Función para mostrar error
         function showError(message) {
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
             successDiv.style.display = 'none';
         }
 
+        // Función para mostrar éxito
         function showSuccess(message) {
             successDiv.textContent = message;
             successDiv.style.display = 'block';
             errorDiv.style.display = 'none';
         }
 
+        // Función para ocultar mensajes
         function hideMessages() {
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
         }
 
-        // Estado de loading
-        function setLoading(isLoading) {
-            if (isLoading) {
-                btnText.style.display = 'none';
-                btnLoading.style.display = 'inline-block';
-                loginBtn.disabled = true;
-            } else {
-                btnText.style.display = 'inline';
-                btnLoading.style.display = 'none';
-                loginBtn.disabled = false;
-            }
+        // Función para mostrar debug info
+        function showDebug(info) {
+            debugInfo.innerHTML = info;
+            debugInfo.style.display = 'block';
         }
 
-        // Función principal de login multi-tenant
+        // Función principal de login
         async function performLogin(username, password) {
             hideMessages();
-            setLoading(true);
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            loginBtn.disabled = true;
 
             try {
-                console.log('🔍 Iniciando login multi-tenant...');
+                // Primero verificar que la API esté disponible
+                console.log('🔍 Verificando API...');
+                showDebug('🔍 Verificando conexión con API...');
                 
-                // Verificar API disponible
-                const healthResponse = await fetch(`${API_BASE}/health`);
+                const healthResponse = await fetch(`${API_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
                 if (!healthResponse.ok) {
-                    throw new Error('API no disponible');
+                    throw new Error(`API no disponible: ${healthResponse.status}`);
                 }
 
-                console.log('🔐 Validando credenciales...');
+                const healthData = await healthResponse.json();
+                console.log('✅ API disponible:', healthData);
+                
+                // Ahora intentar login
+                showDebug('🔐 Intentando autenticación...');
+                console.log('🔐 Intentando login...');
 
-                // Login contra API multi-tenant
-                const loginResponse = await fetch(`${API_BASE}/api/login`, {
+                const loginResponse = await fetch(`${API_URL}/api/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -312,6 +329,8 @@
                     })
                 });
 
+                console.log('📡 Respuesta del servidor:', loginResponse.status);
+
                 if (!loginResponse.ok) {
                     const errorText = await loginResponse.text();
                     throw new Error(`Error ${loginResponse.status}: ${errorText}`);
@@ -321,28 +340,57 @@
                 console.log('📊 Datos de login:', loginData);
 
                 if (loginData.success) {
-                    showSuccess(`✅ Bienvenido ${loginData.user.username}! Cargando dashboard...`);
+                    showSuccess(`✅ Login exitoso! Bienvenido ${loginData.user.username}`);
                     
-                    // Guardar datos de sesión multi-tenant
-                    localStorage.setItem('mundo_electronico_token', loginData.token);
-                    localStorage.setItem('mundo_electronico_user', JSON.stringify(loginData.user));
-                    localStorage.setItem('mundo_electronico_tenant', loginData.user.tenantId || loginData.user.username);
-                    localStorage.setItem('mundo_electronico_expires', loginData.expiresAt);
+                    // Guardar datos de sesión
+                    localStorage.setItem('fixly_token', loginData.token);
+                    localStorage.setItem('token', loginData.token); // Para dashboard-taller.html
+                    localStorage.setItem('fixly_user', JSON.stringify(loginData.user));
+                    localStorage.setItem('fixly_expires', loginData.expiresAt);
 
-                    // Redirigir al dashboard
+                    showDebug(`
+                        <strong>✅ Autenticación exitosa:</strong><br>
+                        Usuario: ${loginData.user.username}<br>
+                        Empresa: ${loginData.user.empresa}<br>
+                        Email: ${loginData.user.email}<br>
+                        Plan: ${loginData.user.plan}<br>
+                        Token: ${loginData.token.substring(0, 20)}...<br>
+                        Expira: ${new Date(loginData.expiresAt).toLocaleString()}
+                    `);
+
+                    // Redirigir después de 2 segundos
                     setTimeout(() => {
-                        window.location.href = '/dashboard.html';
-                    }, 1500);
+                        if (loginData.user.role === 'admin') {
+                            window.location.href = '/dashboard.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    }, 2000);
 
                 } else {
                     showError(`❌ ${loginData.error}`);
+                    showDebug(`❌ Error de autenticación: ${loginData.error}`);
                 }
 
             } catch (error) {
-                console.error('❌ Error en login:', error);
+                console.error('❌ Error completo:', error);
                 showError(`Error de conexión: ${error.message}`);
+                
+                showDebug(`
+                    <strong>❌ Error de conexión:</strong><br>
+                    Mensaje: ${error.message}<br>
+                    API URL: ${API_URL}<br>
+                    <br>
+                    <strong>Posibles causas:</strong><br>
+                    • Problema de CORS<br>
+                    • API no disponible<br>
+                    • Problema de red<br>
+                    • DNS no propagado
+                `);
             } finally {
-                setLoading(false);
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+                loginBtn.disabled = false;
             }
         }
 
@@ -361,35 +409,23 @@
             await performLogin(username, password);
         });
 
-        // Verificar sesión existente
-        window.addEventListener('load', () => {
-            const token = localStorage.getItem('mundo_electronico_token');
-            const expires = localStorage.getItem('mundo_electronico_expires');
-            
-            if (token && expires) {
-                const expirationDate = new Date(expires);
-                const now = new Date();
-                
-                if (now < expirationDate) {
-                    // Sesión válida, redirigir al dashboard
-                    showSuccess('Sesión activa detectada. Redirigiendo...');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard.html';
-                    }, 1000);
-                } else {
-                    // Sesión expirada, limpiar
-                    localStorage.removeItem('mundo_electronico_token');
-                    localStorage.removeItem('mundo_electronico_user');
-                    localStorage.removeItem('mundo_electronico_tenant');
-                    localStorage.removeItem('mundo_electronico_expires');
-                }
-            }
-        });
-
-        // Enter para submit
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !loginBtn.disabled) {
-                form.dispatchEvent(new Event('submit'));
+        // Verificar API al cargar la página
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                showDebug(`
+                    <strong>🔄 Estado de la API:</strong><br>
+                    Status: ${data.status}<br>
+                    Version: ${data.version}<br>
+                    Timestamp: ${new Date(data.timestamp).toLocaleString()}
+                `);
+            } catch (error) {
+                showDebug(`
+                    <strong>⚠️ API no disponible:</strong><br>
+                    ${error.message}<br>
+                    Verifica la conexión a internet
+                `);
             }
         });
     </script>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin - Panel Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .users-list {
+            grid-column: 1 / -1;
+        }
+
+        .user-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ Fixly Admin Panel Completo</h1>
+            <p>Sistema de Gestión de Usuarios - Version 2.0</p>
+        </div>
+
+        <div class="admin-grid">
+            <!-- CREAR USUARIO MANUAL -->
+            <div class="card">
+                <h2>👤 Crear Usuario Manual</h2>
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label>Empresa *</label>
+                        <input type="text" id="empresa" required placeholder="Ej: Taller Mecánico López">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" required placeholder="empresa@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="telefono" placeholder="+34 666 777 888">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Usuario (opcional)</label>
+                        <input type="text" id="usuarioManual" placeholder="Si está vacío, se genera automáticamente">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Contraseña (opcional)</label>
+                        <input type="text" id="passwordManual" placeholder="Si está vacío, se genera automáticamente">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Duración (días)</label>
+                        <select id="duracion">
+                            <option value="15">15 días (Prueba)</option>
+                            <option value="30">30 días</option>
+                            <option value="90">90 días</option>
+                            <option value="365">1 año</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <span id="createBtn">🚀 Crear Usuario</span>
+                        <div id="createLoading" class="loading" style="display: none;"></div>
+                    </button>
+                </form>
+                
+                <div id="createResult" class="result"></div>
+            </div>
+
+            <!-- BUSCAR USUARIO -->
+            <div class="card">
+                <h2>🔍 Buscar Usuario</h2>
+                <form id="searchUserForm">
+                    <div class="form-group">
+                        <label>Buscar por</label>
+                        <select id="searchType">
+                            <option value="username">Username</option>
+                            <option value="email">Email</option>
+                            <option value="empresa">Empresa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Término de búsqueda</label>
+                        <input type="text" id="searchTerm" placeholder="Ingrese el término a buscar">
+                    </div>
+                    
+                    <button type="submit" class="btn">
+                        <span id="searchBtn">🔍 Buscar</span>
+                        <div id="searchLoading" class="loading" style="display: none;"></div>
+                    </button>
+                </form>
+                
+                <div id="searchResult" class="result"></div>
+            </div>
+
+            <!-- PROBAR LOGIN -->
+            <div class="card">
+                <h2>🔐 Probar Login</h2>
+                <form id="testLoginForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="testUsername" placeholder="Username del usuario">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="testPassword" placeholder="Password del usuario">
+                    </div>
+                    
+                    <button type="submit" class="btn">
+                        <span id="loginBtn">🔐 Probar Login</span>
+                        <div id="loginLoading" class="loading" style="display: none;"></div>
+                    </button>
+                </form>
+                
+                <div id="loginResult" class="result"></div>
+            </div>
+
+            <!-- SISTEMA STATUS -->
+            <div class="card">
+                <h2>📊 Estado del Sistema</h2>
+                <button onclick="checkSystemStatus()" class="btn">🔄 Verificar Sistema</button>
+                <div id="systemStatus" class="result"></div>
+            </div>
+        </div>
+
+        <!-- LISTA DE USUARIOS RECIENTES -->
+        <div class="card users-list">
+            <h2>👥 Usuarios Recientes</h2>
+            <button onclick="loadRecentUsers()" class="btn">🔄 Cargar Usuarios</button>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.fixlytaller.com';
+
+        // CREAR USUARIO
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const createBtn = document.getElementById('createBtn');
+            const createLoading = document.getElementById('createLoading');
+            const createResult = document.getElementById('createResult');
+            
+            createBtn.style.display = 'none';
+            createLoading.style.display = 'inline-block';
+            
+            const userData = {
+                empresa: document.getElementById('empresa').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                duracion: parseInt(document.getElementById('duracion').value),
+                tipo: 'manual'
+            };
+            
+            // Añadir credenciales manuales si están especificadas
+            const usuarioManual = document.getElementById('usuarioManual').value;
+            const passwordManual = document.getElementById('passwordManual').value;
+            
+            if (usuarioManual) userData.usuarioManual = usuarioManual;
+            if (passwordManual) userData.passwordManual = passwordManual;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/generate-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    createResult.className = 'result success';
+                    createResult.style.display = 'block';
+                    createResult.innerHTML = `
+                        <h4>✅ Usuario creado exitosamente</h4>
+                        <strong>Username:</strong> ${data.username}<br>
+                        <strong>Password:</strong> ${data.password}<br>
+                        <strong>Código:</strong> ${data.codigo}<br>
+                        <strong>Email:</strong> ${data.email}<br>
+                        <strong>Empresa:</strong> ${data.empresa}<br>
+                        <strong>Fecha Expiración:</strong> ${new Date(data.fechaExpiracion).toLocaleDateString()}<br>
+                        <strong>Telegram:</strong> ${data.notificaciones.telegram}<br>
+                        <strong>Email:</strong> ${data.notificaciones.email}
+                    `;
+                    
+                    // Limpiar formulario
+                    document.getElementById('createUserForm').reset();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                createResult.className = 'result error';
+                createResult.style.display = 'block';
+                createResult.innerHTML = `<h4>❌ Error</h4>${error.message}`;
+            }
+            
+            createBtn.style.display = 'inline';
+            createLoading.style.display = 'none';
+        });
+
+        // PROBAR LOGIN
+        document.getElementById('testLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const loginLoading = document.getElementById('loginLoading');
+            const loginResult = document.getElementById('loginResult');
+            
+            loginBtn.style.display = 'none';
+            loginLoading.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('testUsername').value,
+                        password: document.getElementById('testPassword').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loginResult.className = 'result success';
+                    loginResult.style.display = 'block';
+                    loginResult.innerHTML = `
+                        <h4>✅ Login exitoso</h4>
+                        <strong>Usuario:</strong> ${data.user.username}<br>
+                        <strong>Empresa:</strong> ${data.user.empresa}<br>
+                        <strong>Email:</strong> ${data.user.email}<br>
+                        <strong>Plan:</strong> ${data.user.plan}<br>
+                        <strong>Token:</strong> ${data.token.substring(0, 20)}...<br>
+                        <strong>Expira:</strong> ${new Date(data.expiresAt).toLocaleString()}
+                    `;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                loginResult.className = 'result error';
+                loginResult.style.display = 'block';
+                loginResult.innerHTML = `<h4>❌ Login falló</h4>${error.message}`;
+            }
+            
+            loginBtn.style.display = 'inline';
+            loginLoading.style.display = 'none';
+        });
+
+        // VERIFICAR SISTEMA
+        async function checkSystemStatus() {
+            const systemStatus = document.getElementById('systemStatus');
+            systemStatus.style.display = 'block';
+            systemStatus.innerHTML = '<div class="loading"></div> Verificando sistema...';
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                systemStatus.className = 'result success';
+                systemStatus.innerHTML = `
+                    <h4>✅ Sistema operativo</h4>
+                    <strong>Version:</strong> ${data.version}<br>
+                    <strong>Status:</strong> ${data.status}<br>
+                    <strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}<br>
+                    <strong>Features:</strong> ${data.features.join(', ')}<br>
+                    <strong>Email Status:</strong> ${data.emailStatus}
+                `;
+            } catch (error) {
+                systemStatus.className = 'result error';
+                systemStatus.innerHTML = `<h4>❌ Sistema no disponible</h4>${error.message}`;
+            }
+        }
+
+        // CARGAR AL INICIO
+        window.addEventListener('load', () => {
+            checkSystemStatus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Cloudflare Pages redirects for app.fixlytaller.com
+
+# App redirects
+/login              /index.html
+/login/             /index.html
+/dashboard          /dashboard.html
+/dashboard/         /dashboard.html
+/taller             /dashboard.html
+/                   /index.html
+
+# SPA fallback
+/*                  /index.html   200
