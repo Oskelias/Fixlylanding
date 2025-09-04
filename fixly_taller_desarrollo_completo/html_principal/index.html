@@ -1139,7 +1139,7 @@
             document.getElementById('modalConfirmacion').classList.add('hidden');
         }
         
-        async function enviarFormularioModal() {
+        async function enviarFormularioModal (event){if (event) event.preventDefault();
             const empresa = document.getElementById('modalNombreTaller').value.trim();
             const propietario = document.getElementById('modalNombrePropietario').value.trim();
             const email = document.getElementById('modalEmail').value.trim();
@@ -1163,7 +1163,7 @@
             try {
                 console.log('🌐 Enviando request desde modal...');
                 
-                const response = await fetch('https://fixly-backend.oscarelias.workers.dev/api/lead-registro', {
+                const response = await fetch('https://fixly-backend.oscarelias.workers.dev/', {
                     method: 'POST',
                     mode: 'no-cors',  // SOLUCIÓN CORS
                     headers: {
