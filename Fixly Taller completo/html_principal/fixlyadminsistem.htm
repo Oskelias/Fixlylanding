@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin - Gestión de Cuentas</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(2px);
+        }
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-prueba { background-color: #fef3c7; color: #d97706; }
+        .status-activo { background-color: #d1fae5; color: #059669; }
+        .status-expirado { background-color: #fee2e2; color: #dc2626; }
+        .status-suspendido { background-color: #e5e7eb; color: #6b7280; }
+        
+        .role-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .role-admin { background-color: #dbeafe; color: #1e40af; }
+        .role-tecnico { background-color: #d1fae5; color: #059669; }
+        .role-recepcionista { background-color: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<!-- Login Screen -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-96">
+        <div class="text-center mb-8">
+            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-cogs text-blue-600 text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Fixly Admin</h1>
+            <p class="text-gray-600">Gestión de Cuentas</p>
+        </div>
+        <div id="loginMessages" class="mb-4"></div>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <input type="email" id="loginEmail" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                <input type="password" id="loginPassword" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+            </button>
+        </form>
+        <div class="mt-6 text-center text-sm text-gray-600">
+            <p>Admin por defecto: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="08696c656166486e61706471266b6765">[email&#160;protected]</a></strong></p>
+            <p>Contraseña: <strong>admin123</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Application -->
+<div id="mainApp" class="hidden">
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="p-6 border-b">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-cogs text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-800">Fixly</h1>
+                        <h1 class="text-lg font-bold text-blue-600">Admin</h1>
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-600">
+                    <i class="fas fa-user mr-1"></i>
+                    <span id="currentUser"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="442520292d2a04222d3c283d6a272b29">[email&#160;protected]</a></span>
+                </div>
+            </div>
+            <nav class="mt-6">
+                <a href="#" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('talleres')">
+                    <i class="fas fa-store mr-3"></i>
+                    Talleres
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('usuarios')">
+                    <i class="fas fa-users mr-3"></i>
+                    Usuarios
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('pruebas')">
+                    <i class="fas fa-clock mr-3"></i>
+                    Cuentas Prueba
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('configuracion')">
+                    <i class="fas fa-cog mr-3"></i>
+                    Configuración
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Cerrar Sesión
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- Dashboard -->
+            <div class="section active p-8" id="dashboard">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Talleres Activos</p>
+                                <p class="text-2xl font-bold text-gray-900" id="kpi-talleres">0</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-store text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Cuentas Prueba</p>
+                                <p class="text-2xl font-bold text-gray-900" id="kpi-pruebas">0</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-clock text-yellow-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Usuarios Total</p>
+                                <p class="text-2xl font-bold text-gray-900" id="kpi-usuarios">0</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-users text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Ingresos Mes</p>
+                                <p class="text-2xl font-bold text-gray-900" id="kpi-ingresos">$0</p>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <i class="fas fa-dollar-sign text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Estados de Cuentas</h3>
+                        <div style="height: 300px;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Registros por Mes</h3>
+                        <div style="height: 300px;">
+                            <canvas id="registrosChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Talleres -->
+            <div class="section p-8" id="talleres">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Gestión de Talleres</h1>
+                    <button onclick="showModalNuevoTaller()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>Nuevo Taller
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="bg-white p-4 rounded-xl shadow-md mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="filtroTaller" placeholder="Buscar taller..." class="px-4 py-2 border border-gray-300 rounded-lg">
+                        <select id="filtroEstadoTaller" class="px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Todos los estados</option>
+                            <option value="prueba">Prueba</option>
+                            <option value="activo">Activo</option>
+                            <option value="expirado">Expirado</option>
+                            <option value="suspendido">Suspendido</option>
+                        </select>
+                        <button onclick="aplicarFiltrosTalleres()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-search mr-2"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Talleres -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuarios</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaTalleres" class="divide-y divide-gray-200">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Usuarios -->
+            <div class="section p-8" id="usuarios">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h1>
+                    <button onclick="showModalNuevoUsuario()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>Nuevo Usuario
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="bg-white p-4 rounded-xl shadow-md mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input type="text" id="filtroUsuario" placeholder="Buscar usuario..." class="px-4 py-2 border border-gray-300 rounded-lg">
+                        <select id="filtroTallerUsuario" class="px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Todos los talleres</option>
+                        </select>
+                        <select id="filtroRolUsuario" class="px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Todos los roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="recepcionista">Recepcionista</option>
+                        </select>
+                        <button onclick="aplicarFiltrosUsuarios()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-search mr-2"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Usuarios -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Último Acceso</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuarios" class="divide-y divide-gray-200">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cuentas Prueba -->
+            <div class="section p-8" id="pruebas">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Cuentas de Prueba</h1>
+                    <div class="flex gap-2">
+                        <button onclick="procesarExpiraciones()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition duration-200">
+                            <i class="fas fa-clock mr-2"></i>Procesar Expiraciones
+                        </button>
+                        <button onclick="enviarRecordatorios()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            <i class="fas fa-envelope mr-2"></i>Enviar Recordatorios
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estadísticas de Prueba -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-2">Pruebas Activas</h3>
+                        <p class="text-3xl font-bold text-blue-600" id="pruebasActivas">0</p>
+                        <p class="text-sm text-gray-600">Cuentas en período de prueba</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-2">Expiran Hoy</h3>
+                        <p class="text-3xl font-bold text-red-600" id="expiranHoy">0</p>
+                        <p class="text-sm text-gray-600">Requieren seguimiento</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-2">Conversión</h3>
+                        <p class="text-3xl font-bold text-green-600" id="tasaConversion">0%</p>
+                        <p class="text-sm text-gray-600">Prueba → Pago</p>
+                    </div>
+                </div>
+
+                <!-- Lista de Cuentas Próximas a Expirar -->
+                <div class="bg-white rounded-xl shadow-md">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold">Cuentas Próximas a Expirar (Próximos 3 días)</h3>
+                    </div>
+                    <div class="overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Última Conexión</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaPruebasExpiran" class="divide-y divide-gray-200">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración -->
+            <div class="section p-8" id="configuracion">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">Configuración del Sistema</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Configuración de Prueba -->
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Configuración de Prueba</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Días de Prueba</label>
+                                <input type="number" id="diasPrueba" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Usuarios Máximos en Prueba</label>
+                                <input type="number" id="usuariosMaxPrueba" value="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <button onclick="guardarConfigPrueba()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                                Guardar Configuración
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Configuración de Precios -->
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Precios de Planes</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Plan Pro (ARS)</label>
+                                <input type="number" id="precioPro" value="19900" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Plan Enterprise (ARS)</label>
+                                <input type="number" id="precioEnterprise" value="39900" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <button onclick="guardarConfigPrecios()" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
+                                Guardar Precios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones de Sistema -->
+                <div class="bg-white p-6 rounded-xl shadow-md mt-8">
+                    <h3 class="text-lg font-semibold mb-4">Acciones de Sistema</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="exportarDatos()" class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-download mr-2"></i>Exportar Datos
+                        </button>
+                        <button onclick="limpiarDatosPrueba()" class="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700">
+                            <i class="fas fa-broom mr-2"></i>Limpiar Datos de Prueba
+                        </button>
+                        <button onclick="resetearSistema()" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Resetear Sistema
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nuevo Taller -->
+<div id="modalNuevoTaller" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl w-96 max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Nuevo Taller</h3>
+            <button onclick="closeModal('modalNuevoTaller')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="formNuevoTaller">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Taller</label>
+                    <input type="text" name="nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input type="tel" name="telefono" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                    <input type="text" name="ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                    <select name="estado" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="prueba">Prueba (15 días)</option>
+                        <option value="activo">Activo</option>
+                        <option value="suspendido">Suspendido</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-6">
+                <button type="button" onclick="closeModal('modalNuevoTaller')" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                    Crear Taller
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Nuevo Usuario -->
+<div id="modalNuevoUsuario" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl w-96 max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Nuevo Usuario</h3>
+            <button onclick="closeModal('modalNuevoUsuario')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="formNuevoUsuario">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <input type="text" name="nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Taller</label>
+                    <select name="tallerId" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" id="selectTallerUsuario">
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                    <select name="rol" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="admin">Admin</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="recepcionista">Recepcionista</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+            </div>
+            <div class="flex gap-2 mt-6">
+                <button type="button" onclick="closeModal('modalNuevoUsuario')" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                    Crear Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Sistema de Base de Datos Simulada
+class FixlyDB {
+    constructor() {
+        this.initDB();
+        this.loadSampleData();
+    }
+
+    initDB() {
+        if (!localStorage.getItem('fixly_admin_session')) {
+            localStorage.setItem('fixly_admin_session', JSON.stringify({
+                isLoggedIn: false,
+                user: null
+            }));
+        }
+
+        if (!localStorage.getItem('fixly_talleres')) {
+            localStorage.setItem('fixly_talleres', JSON.stringify([]));
+        }
+
+        if (!localStorage.getItem('fixly_usuarios')) {
+            localStorage.setItem('fixly_usuarios', JSON.stringify([]));
+        }
+
+        if (!localStorage.getItem('fixly_config')) {
+            localStorage.setItem('fixly_config', JSON.stringify({
+                diasPrueba: 15,
+                usuariosMaxPrueba: 2,
+                precioPro: 19900,
+                precioEnterprise: 39900
+            }));
+        }
+    }
+
+    loadSampleData() {
+        const talleres = this.getTalleres();
+        if (talleres.length === 0) {
+            // Crear datos de muestra
+            const sampleTalleres = [
+                {
+                    id: 1,
+                    nombre: "Electrónica Rivadavia",
+                    email: "info@electrorivaadvia.com",
+                    telefono: "+54 9 11 1234-5678",
+                    ciudad: "Buenos Aires",
+                    estado: "activo",
+                    fechaRegistro: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    fechaExpiracion: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+                    plan: "pro"
+                },
+                {
+                    id: 2,
+                    nombre: "TallerTech Demo",
+                    email: "demo@tallertech.com",
+                    telefono: "+54 9 11 8765-4321",
+                    ciudad: "Córdoba",
+                    estado: "prueba",
+                    fechaRegistro: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    fechaExpiracion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+                    plan: "prueba"
+                },
+                {
+                    id: 3,
+                    nombre: "Mundo Electrónico",
+                    email: "contacto@mundoelectronico.ar",
+                    telefono: "+54 9 11 5555-1234",
+                    ciudad: "Rosario",
+                    estado: "prueba",
+                    fechaRegistro: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                    fechaExpiracion: new Date(Date.now() + 13 * 24 * 60 * 60 * 1000).toISOString(),
+                    plan: "prueba"
+                }
+            ];
+            localStorage.setItem('fixly_talleres', JSON.stringify(sampleTalleres));
+
+            const sampleUsuarios = [
+                {
+                    id: 1,
+                    nombre: "Admin Sistema",
+                    email: "admin@fixly.com",
+                    tallerId: 0,
+                    tallerNombre: "Sistema",
+                    rol: "admin",
+                    password: "admin123",
+                    ultimoAcceso: new Date().toISOString(),
+                    activo: true
+                },
+                {
+                    id: 2,
+                    nombre: "María González",
+                    email: "maria@electrorivadavia.com",
+                    tallerId: 1,
+                    tallerNombre: "Electrónica Rivadavia",
+                    rol: "admin",
+                    password: "123456",
+                    ultimoAcceso: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                    activo: true
+                },
+                {
+                    id: 3,
+                    nombre: "Juan Pérez",
+                    email: "juan@electrorivadavia.com",
+                    tallerId: 1,
+                    tallerNombre: "Electrónica Rivadavia",
+                    rol: "tecnico",
+                    password: "123456",
+                    ultimoAcceso: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                    activo: true
+                },
+                {
+                    id: 4,
+                    nombre: "Demo User",
+                    email: "demo@tallertech.com",
+                    tallerId: 2,
+                    tallerNombre: "TallerTech Demo",
+                    rol: "admin",
+                    password: "demo123",
+                    ultimoAcceso: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                    activo: true
+                }
+            ];
+            localStorage.setItem('fixly_usuarios', JSON.stringify(sampleUsuarios));
+        }
+    }
+
+    // Métodos de Autenticación
+    login(email, password) {
+        const usuarios = this.getUsuarios();
+        const user = usuarios.find(u => u.email === email && u.password === password && u.activo);
+        
+        if (user && user.rol === 'admin' && user.tallerId === 0) {
+            localStorage.setItem('fixly_admin_session', JSON.stringify({
+                isLoggedIn: true,
+                user: user
+            }));
+            return { success: true, user };
+        }
+        
+        return { success: false, message: 'Credenciales inválidas o acceso no autorizado' };
+    }
+
+    logout() {
+        localStorage.setItem('fixly_admin_session', JSON.stringify({
+            isLoggedIn: false,
+            user: null
+        }));
+    }
+
+    getCurrentUser() {
+        const session = JSON.parse(localStorage.getItem('fixly_admin_session'));
+        return session.isLoggedIn ? session.user : null;
+    }
+
+    // Métodos de Talleres
+    getTalleres() {
+        return JSON.parse(localStorage.getItem('fixly_talleres'));
+    }
+
+    addTaller(taller) {
+        const talleres = this.getTalleres();
+        const newId = Math.max(0, ...talleres.map(t => t.id)) + 1;
+        const newTaller = {
+            id: newId,
+            ...taller,
+            fechaRegistro: new Date().toISOString(),
+            fechaExpiracion: taller.estado === 'prueba' 
+                ? new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString()
+                : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            plan: taller.estado === 'prueba' ? 'prueba' : 'pro'
+        };
+        talleres.push(newTaller);
+        localStorage.setItem('fixly_talleres', JSON.stringify(talleres));
+        return newTaller;
+    }
+
+    updateTaller(id, updates) {
+        const talleres = this.getTalleres();
+        const index = talleres.findIndex(t => t.id === id);
+        if (index !== -1) {
+            talleres[index] = { ...talleres[index], ...updates };
+            localStorage.setItem('fixly_talleres', JSON.stringify(talleres));
+            return talleres[index];
+        }
+        return null;
+    }
+
+    deleteTaller(id) {
+        const talleres = this.getTalleres();
+        const filtered = talleres.filter(t => t.id !== id);
+        localStorage.setItem('fixly_talleres', JSON.stringify(filtered));
+        
+        // También eliminar usuarios del taller
+        const usuarios = this.getUsuarios();
+        const filteredUsuarios = usuarios.filter(u => u.tallerId !== id);
+        localStorage.setItem('fixly_usuarios', JSON.stringify(filteredUsuarios));
+    }
+
+    // Métodos de Usuarios
+    getUsuarios() {
+        return JSON.parse(localStorage.getItem('fixly_usuarios'));
+    }
+
+    addUsuario(usuario) {
+        const usuarios = this.getUsuarios();
+        const newId = Math.max(0, ...usuarios.map(u => u.id)) + 1;
+        const taller = this.getTalleres().find(t => t.id == usuario.tallerId);
+        const newUsuario = {
+            id: newId,
+            ...usuario,
+            tallerNombre: taller ? taller.nombre : 'Sistema',
+            ultimoAcceso: new Date().toISOString(),
+            activo: true
+        };
+        usuarios.push(newUsuario);
+        localStorage.setItem('fixly_usuarios', JSON.stringify(usuarios));
+        return newUsuario;
+    }
+
+    updateUsuario(id, updates) {
+        const usuarios = this.getUsuarios();
+        const index = usuarios.findIndex(u => u.id === id);
+        if (index !== -1) {
+            usuarios[index] = { ...usuarios[index], ...updates };
+            localStorage.setItem('fixly_usuarios', JSON.stringify(usuarios));
+            return usuarios[index];
+        }
+        return null;
+    }
+
+    deleteUsuario(id) {
+        const usuarios = this.getUsuarios();
+        const filtered = usuarios.filter(u => u.id !== id);
+        localStorage.setItem('fixly_usuarios', JSON.stringify(filtered));
+    }
+
+    // Utilidades
+    getDiasRestantes(fechaExpiracion) {
+        const now = new Date();
+        const expiry = new Date(fechaExpiracion);
+        const diffTime = expiry - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return Math.max(0, diffDays);
+    }
+
+    getConfig() {
+        return JSON.parse(localStorage.getItem('fixly_config'));
+    }
+
+    updateConfig(config) {
+        localStorage.setItem('fixly_config', JSON.stringify(config));
+    }
+}
+
+// Instancia global de la base de datos
+const db = new FixlyDB();
+
+// Sistema de Autenticación
+function checkAuth() {
+    const user = db.getCurrentUser();
+    if (!user) {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('mainApp').classList.add('hidden');
+        return false;
+    } else {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        document.getElementById('currentUser').textContent = user.email;
+        return true;
+    }
+}
+
+function login(event) {
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    const result = db.login(email, password);
+    
+    if (result.success) {
+        checkAuth();
+        loadDashboard();
+        showMessage('loginMessages', 'Acceso autorizado', 'success');
+    } else {
+        showMessage('loginMessages', result.message, 'error');
+    }
+}
+
+function logout() {
+    if (confirm('¿Está seguro que desea cerrar sesión?')) {
+        db.logout();
+        checkAuth();
+    }
+}
+
+// Navegación
+function showSection(sectionId) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Mostrar la sección seleccionada
+    document.getElementById(sectionId).classList.add('active');
+    
+    // Actualizar sidebar
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Cargar datos específicos de la sección
+    switch(sectionId) {
+        case 'dashboard':
+            loadDashboard();
+            break;
+        case 'talleres':
+            loadTalleres();
+            break;
+        case 'usuarios':
+            loadUsuarios();
+            break;
+        case 'pruebas':
+            loadPruebas();
+            break;
+    }
+}
+
+// Dashboard
+function loadDashboard() {
+    const talleres = db.getTalleres();
+    const usuarios = db.getUsuarios();
+    
+    // KPIs
+    const talleresActivos = talleres.filter(t => t.estado === 'activo').length;
+    const cuentasPrueba = talleres.filter(t => t.estado === 'prueba').length;
+    const totalUsuarios = usuarios.filter(u => u.tallerId > 0).length;
+    const ingresosMes = talleresActivos * 19900;
+
+    document.getElementById('kpi-talleres').textContent = talleresActivos;
+    document.getElementById('kpi-pruebas').textContent = cuentasPrueba;
+    document.getElementById('kpi-usuarios').textContent = totalUsuarios;
+    document.getElementById('kpi-ingresos').textContent = `$${ingresosMes.toLocaleString()}`;
+
+    // Gráficos
+    loadCharts();
+}
+
+function loadCharts() {
+    const talleres = db.getTalleres();
+    
+    // Gráfico de Estados
+    const estadosCount = {
+        'prueba': talleres.filter(t => t.estado === 'prueba').length,
+        'activo': talleres.filter(t => t.estado === 'activo').length,
+        'expirado': talleres.filter(t => t.estado === 'expirado').length,
+        'suspendido': talleres.filter(t => t.estado === 'suspendido').length
+    };
+
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: ['Prueba', 'Activo', 'Expirado', 'Suspendido'],
+            datasets: [{
+                data: Object.values(estadosCount),
+                backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#6b7280'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Gráfico de Registros por Mes
+    const ctxRegistros = document.getElementById('registrosChart').getContext('2d');
+    new Chart(ctxRegistros, {
+        type: 'line',
+        data: {
+            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Nuevos Registros',
+                data: [12, 19, 8, 15, 25, 18],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Gestión de Talleres
+function loadTalleres() {
+    const talleres = db.getTalleres();
+    const tbody = document.getElementById('tablaTalleres');
+    
+    tbody.innerHTML = talleres.map(taller => {
+        const diasRestantes = db.getDiasRestantes(taller.fechaExpiracion);
+        const usuarios = db.getUsuarios().filter(u => u.tallerId === taller.id);
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4">
+                    <div>
+                        <div class="font-medium text-gray-900">${taller.nombre}</div>
+                        <div class="text-sm text-gray-500">${taller.ciudad}</div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${taller.email}</td>
+                <td class="px-6 py-4">
+                    <span class="status-badge status-${taller.estado}">${taller.estado}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                    ${taller.estado === 'prueba' ? `${diasRestantes} días` : '∞'}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${usuarios.length}</td>
+                <td class="px-6 py-4 text-sm font-medium">
+                    <div class="flex gap-2">
+                        <button onclick="editarTaller(${taller.id})" class="text-blue-600 hover:text-blue-900">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="verUsuariosTaller(${taller.id})" class="text-green-600 hover:text-green-900">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <button onclick="eliminarTaller(${taller.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function showModalNuevoTaller() {
+    document.getElementById('modalNuevoTaller').classList.remove('hidden');
+    document.getElementById('modalNuevoTaller').classList.add('flex');
+}
+
+function eliminarTaller(id) {
+    if (confirm('¿Está seguro de eliminar este taller? También se eliminarán todos sus usuarios.')) {
+        db.deleteTaller(id);
+        loadTalleres();
+        loadDashboard();
+        showAlert('Taller eliminado correctamente');
+    }
+}
+
+// Gestión de Usuarios
+function loadUsuarios() {
+    const usuarios = db.getUsuarios().filter(u => u.tallerId > 0); // Excluir admin del sistema
+    const tbody = document.getElementById('tablaUsuarios');
+    
+    tbody.innerHTML = usuarios.map(usuario => `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4">
+                <div class="font-medium text-gray-900">${usuario.nombre}</div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">${usuario.email}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">${usuario.tallerNombre}</td>
+            <td class="px-6 py-4">
+                <span class="role-badge role-${usuario.rol}">${usuario.rol}</span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">
+                ${new Date(usuario.ultimoAcceso).toLocaleDateString()}
+            </td>
+            <td class="px-6 py-4 text-sm font-medium">
+                <div class="flex gap-2">
+                    <button onclick="editarUsuario(${usuario.id})" class="text-blue-600 hover:text-blue-900">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarUsuario(${usuario.id})" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    // Llenar select de talleres para formulario
+    loadTalleresSelect();
+}
+
+function loadTalleresSelect() {
+    const talleres = db.getTalleres();
+    const selects = ['selectTallerUsuario', 'filtroTallerUsuario'];
+    
+    selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.innerHTML = selectId.includes('filtro') ? '<option value="">Todos los talleres</option>' : '';
+            talleres.forEach(taller => {
+                select.innerHTML += `<option value="${taller.id}">${taller.nombre}</option>`;
+            });
+        }
+    });
+}
+
+function showModalNuevoUsuario() {
+    loadTalleresSelect();
+    document.getElementById('modalNuevoUsuario').classList.remove('hidden');
+    document.getElementById('modalNuevoUsuario').classList.add('flex');
+}
+
+function eliminarUsuario(id) {
+    if (confirm('¿Está seguro de eliminar este usuario?')) {
+        db.deleteUsuario(id);
+        loadUsuarios();
+        loadDashboard();
+        showAlert('Usuario eliminado correctamente');
+    }
+}
+
+// Cuentas de Prueba
+function loadPruebas() {
+    const talleres = db.getTalleres();
+    const cuentasPrueba = talleres.filter(t => t.estado === 'prueba');
+    
+    // Estadísticas
+    const pruebasActivas = cuentasPrueba.length;
+    const expiranHoy = cuentasPrueba.filter(t => db.getDiasRestantes(t.fechaExpiracion) <= 0).length;
+    const totalTalleres = talleres.length;
+    const tasaConversion = totalTalleres > 0 ? Math.round((talleres.filter(t => t.estado === 'activo').length / totalTalleres) * 100) : 0;
+
+    document.getElementById('pruebasActivas').textContent = pruebasActivas;
+    document.getElementById('expiranHoy').textContent = expiranHoy;
+    document.getElementById('tasaConversion').textContent = `${tasaConversion}%`;
+
+    // Tabla de próximas a expirar
+    const proximasExpirar = cuentasPrueba.filter(t => db.getDiasRestantes(t.fechaExpiracion) <= 3);
+    const tbody = document.getElementById('tablaPruebasExpiran');
+    
+    tbody.innerHTML = proximasExpirar.map(taller => {
+        const diasRestantes = db.getDiasRestantes(taller.fechaExpiracion);
+        const usuario = db.getUsuarios().find(u => u.tallerId === taller.id && u.rol === 'admin');
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4">
+                    <div class="font-medium text-gray-900">${taller.nombre}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${taller.email}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${diasRestantes <= 0 ? 'bg-red-100 text-red-800' : diasRestantes <= 1 ? 'bg-orange-100 text-orange-800' : 'bg-yellow-100 text-yellow-800'}">
+                        ${diasRestantes} días
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                    ${usuario ? new Date(usuario.ultimoAcceso).toLocaleDateString() : 'Nunca'}
+                </td>
+                <td class="px-6 py-4 text-sm font-medium">
+                    <div class="flex gap-2">
+                        <button onclick="extenderPrueba(${taller.id})" class="text-blue-600 hover:text-blue-900">
+                            <i class="fas fa-clock"></i> Extender
+                        </button>
+                        <button onclick="convertirAPago(${taller.id})" class="text-green-600 hover:text-green-900">
+                            <i class="fas fa-credit-card"></i> Convertir
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function procesarExpiraciones() {
+    const talleres = db.getTalleres();
+    let procesados = 0;
+    
+    talleres.forEach(taller => {
+        if (taller.estado === 'prueba' && db.getDiasRestantes(taller.fechaExpiracion) <= 0) {
+            db.updateTaller(taller.id, { estado: 'expirado' });
+            procesados++;
+        }
+    });
+    
+    showAlert(`${procesados} cuentas han sido marcadas como expiradas`);
+    loadPruebas();
+    loadTalleres();
+    loadDashboard();
+}
+
+function enviarRecordatorios() {
+    const talleres = db.getTalleres();
+    const proximasExpirar = talleres.filter(t => 
+        t.estado === 'prueba' && 
+        db.getDiasRestantes(t.fechaExpiracion) <= 3 && 
+        db.getDiasRestantes(t.fechaExpiracion) > 0
+    );
+    
+    // Simular envío de emails
+    if (proximasExpirar.length > 0) {
+        showAlert(`Recordatorios enviados a ${proximasExpirar.length} talleres`);
+    } else {
+        showAlert('No hay cuentas que requieran recordatorios');
+    }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Fecha actual
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-AR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    // Verificar autenticación
+    checkAuth();
+
+    // Form handlers
+    document.getElementById('loginForm').addEventListener('submit', login);
+    
+    document.getElementById('formNuevoTaller').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const taller = Object.fromEntries(formData);
+        
+        db.addTaller(taller);
+        closeModal('modalNuevoTaller');
+        loadTalleres();
+        loadDashboard();
+        showAlert('Taller creado correctamente');
+        e.target.reset();
+    });
+
+    document.getElementById('formNuevoUsuario').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const usuario = Object.fromEntries(formData);
+        usuario.tallerId = parseInt(usuario.tallerId);
+        
+        db.addUsuario(usuario);
+        closeModal('modalNuevoUsuario');
+        loadUsuarios();
+        loadDashboard();
+        showAlert('Usuario creado correctamente');
+        e.target.reset();
+    });
+});
+
+// Utilidades
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    document.getElementById(modalId).classList.remove('flex');
+}
+
+function showAlert(message) {
+    alert(message); // En producción usar un sistema de notificaciones más elegante
+}
+
+function showMessage(containerId, message, type) {
+    const container = document.getElementById(containerId);
+    const className = type === 'success' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300';
+    
+    container.innerHTML = `
+        <div class="p-3 border rounded-lg ${className}">
+            ${message}
+        </div>
+    `;
+    
+    setTimeout(() => {
+        container.innerHTML = '';
+    }, 5000);
+}
+
+// Funciones de configuración
+function guardarConfigPrueba() {
+    const config = db.getConfig();
+    config.diasPrueba = parseInt(document.getElementById('diasPrueba').value);
+    config.usuariosMaxPrueba = parseInt(document.getElementById('usuariosMaxPrueba').value);
+    db.updateConfig(config);
+    showAlert('Configuración de prueba guardada');
+}
+
+function guardarConfigPrecios() {
+    const config = db.getConfig();
+    config.precioPro = parseInt(document.getElementById('precioPro').value);
+    config.precioEnterprise = parseInt(document.getElementById('precioEnterprise').value);
+    db.updateConfig(config);
+    showAlert('Precios actualizados');
+}
+
+function exportarDatos() {
+    const data = {
+        talleres: db.getTalleres(),
+        usuarios: db.getUsuarios(),
+        config: db.getConfig(),
+        timestamp: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'fixly_backup_' + new Date().toISOString().split('T')[0] + '.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+function limpiarDatosPrueba() {
+    if (confirm('¿Está seguro de eliminar todas las cuentas de prueba expiradas?')) {
+        const talleres = db.getTalleres();
+        const talleresActivos = talleres.filter(t => t.estado !== 'expirado');
+        localStorage.setItem('fixly_talleres', JSON.stringify(talleresActivos));
+        
+        const usuarios = db.getUsuarios();
+        const talleresActivosIds = talleresActivos.map(t => t.id);
+        const usuariosActivos = usuarios.filter(u => u.tallerId === 0 || talleresActivosIds.includes(u.tallerId));
+        localStorage.setItem('fixly_usuarios', JSON.stringify(usuariosActivos));
+        
+        loadDashboard();
+        loadTalleres();
+        loadUsuarios();
+        showAlert('Datos de prueba limpiados');
+    }
+}
+
+function resetearSistema() {
+    if (confirm('¿ESTÁ SEGURO? Esto eliminará TODOS los datos del sistema.')) {
+        if (confirm('Esta acción no se puede deshacer. ¿Continuar?')) {
+            localStorage.removeItem('fixly_talleres');
+            localStorage.removeItem('fixly_usuarios');
+            localStorage.removeItem('fixly_config');
+            db.initDB();
+            db.loadSampleData();
+            location.reload();
+        }
+    }
+}
+
+// Filtros (implementación básica)
+function aplicarFiltrosTalleres() {
+    loadTalleres(); // Por simplicidad, recarga todo
+}
+
+function aplicarFiltrosUsuarios() {
+    loadUsuarios(); // Por simplicidad, recarga todo
+}
+
+// Funciones adicionales para acciones específicas
+function extenderPrueba(tallerId) {
+    const dias = prompt('¿Cuántos días adicionales?', '7');
+    if (dias && !isNaN(dias)) {
+        const taller = db.getTalleres().find(t => t.id === tallerId);
+        const nuevaFecha = new Date(taller.fechaExpiracion);
+        nuevaFecha.setDate(nuevaFecha.getDate() + parseInt(dias));
+        
+        db.updateTaller(tallerId, { 
+            fechaExpiracion: nuevaFecha.toISOString() 
+        });
+        
+        loadPruebas();
+        showAlert(`Prueba extendida ${dias} días`);
+    }
+}
+
+function convertirAPago(tallerId) {
+    if (confirm('¿Convertir cuenta de prueba a plan Pro?')) {
+        const nuevaExpiracion = new Date();
+        nuevaExpiracion.setFullYear(nuevaExpiracion.getFullYear() + 1);
+        
+        db.updateTaller(tallerId, { 
+            estado: 'activo',
+            plan: 'pro',
+            fechaExpiracion: nuevaExpiracion.toISOString()
+        });
+        
+        loadPruebas();
+        loadTalleres();
+        loadDashboard();
+        showAlert('Cuenta convertida a Plan Pro');
+    }
+}
+</script>
+
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDgAStjJt%2BWvRRmUCjPcej1J3SReBMb8nkOJzI2Fb0hPCeL3y9y6rHNJ2zPxqZp%2FYkHZc5GN18r3rD%2B5jvdE2%2FOMwHard%2F2UNCw0IcHfg1hXXP7unh%2BAPKfNqkZqHfQWgEwXoUAt%2Bs%2BHFAuomqy9JYI3MNHsL2n8kG7nhEu%2BSdKajegGKVt%2BbRCQ9T9rkTeYQQ23SQ9Tc50Ok%2BP4xgB2fkIqECHVPdRvk6Qvl%2BwEM8VTv%2Bcju19xauHA%2B0WF1AG5Ye9q0i%2FUuCd%2Bw%2BoXMtRVlSJZrSx1LZgWwPMyCiwgoYAzSkikz0CArVd9rdTg8y7uf2025Kr55RaN%2BuDpIZD0AG8Iiyt8mm26YVqiiiYMbhqK8%2BU2YuTVy%2Fn7yrDn1CdCNQRj6mBHW%2BUai7MxR%2BUmmU2810ict68OG07EjicsqBUFBBSGQn%2FIJ36RNKGYTPwogtTsHj4MwPtWr4iP3rJKXdQwOEvwAKYmkvS2ukVXUkrTpnZjXQ%2FexDyo7aVNtJ1X6lg%3D%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDgAStjJt+WvRRmUCjPcej1J3SReBMb8nkOJzI2Fb0hPCeL3y9y6rHNJ2zPxqZp/YkHZc5GN18r3rD+5jvdE2/OMwHard/2UNCw0IcHfg1hXXP7unh+APKfNqkZqHfQWgEwXoUAt+s+HFAuomqy9JYI3MNHsL2n8kG7nhEu+SdKajegGKVt+bRCQ9T9rkTeYQQ23SQ9Tc50Ok+P4xgB2fkIqECHVPdRvk6Qvl+wEM8VTv+cju19xauHA+0WF1AG5Ye9q0i/UuCd+w+oXMtRVlSJZrSx1LZgWwPMyCiwgoYAzSkikz0CArVd9rdTg8y7uf2025Kr55RaN+uDpIZD0AG8Iiyt8mm26YVqiiiYMbhqK8+U2YuTVy/n7yrDn1CdCNQRj6mBHW+Uai7MxR+UmmU2810ict68OG07EjicsqBUFBBSGQn/IJ36RNKGYTPwogtTsHj4MwPtWr4iP3rJKXdQwOEvwAKYmkvS2ukVXUkrTpnZjXQ/exDyo7aVNtJ1X6lg==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    

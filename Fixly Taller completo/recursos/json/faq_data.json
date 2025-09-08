@@ -1,0 +1,54 @@
+{
+  "faq": [
+    {
+      "id": 1,
+      "question": "¿Qué es Fixly Taller y cómo funciona?",
+      "answer": "Fixly Taller es un sistema integral de gestión para talleres de reparación que integra WhatsApp para mejorar la comunicación con clientes. Permite gestionar órdenes de trabajo, inventario, facturación y seguimiento de reparaciones desde una sola plataforma."
+    },
+    {
+      "id": 2,
+      "question": "¿Puedo usar Fixly Taller en mi teléfono móvil?",
+      "answer": "Sí, Fixly Taller tiene diseño responsive y funciona perfectamente en dispositivos móviles. Puedes acceder desde cualquier navegador en tu smartphone o tablet sin necesidad de descargar aplicaciones adicionales."
+    },
+    {
+      "id": 3,
+      "question": "¿Cómo funciona la integración con WhatsApp?",
+      "answer": "La integración con WhatsApp permite enviar automáticamente actualizaciones de estado a los clientes, notificaciones de presupuestos, confirmaciones de citas y recordatorios. Todo desde la plataforma sin cambiar de aplicación."
+    },
+    {
+      "id": 4,
+      "question": "¿Qué incluye el plan Starter gratuito?",
+      "answer": "El plan Starter incluye 15 días gratuitos con funciones básicas de gestión, integración con WhatsApp para hasta 2 usuarios y soporte por email. Es perfecto para probar el sistema antes de actualizar."
+    },
+    {
+      "id": 5,
+      "question": "¿Puedo cancelar mi suscripción en cualquier momento?",
+      "answer": "Sí, puedes cancelar tu suscripción en cualquier momento sin penalizaciones. Tus datos se mantienen seguros durante 30 días después de la cancelación por si decides reactivar tu cuenta."
+    },
+    {
+      "id": 6,
+      "question": "¿Mis datos están seguros en la nube?",
+      "answer": "Absolutamente. Utilizamos cifrado de grado empresarial y backups automáticos diarios. Todos los datos se almacenan en servidores seguros con certificación internacional y cumplimos con normativas de protección de datos."
+    },
+    {
+      "id": 7,
+      "question": "¿Ofrecen capacitación para usar el sistema?",
+      "answer": "Sí, incluimos capacitación completa con videos tutoriales, documentación detallada y soporte en vivo. Los planes Pro y Enterprise incluyen sesiones de capacitación personalizadas."
+    },
+    {
+      "id": 8,
+      "question": "¿Puedo importar datos desde mi sistema actual?",
+      "answer": "Sí, ofrecemos asistencia para migrar datos desde sistemas existentes como Excel, otros software de gestión o bases de datos. Nuestro equipo te ayuda con el proceso de migración."
+    }
+  ],
+  "categories": [
+    "General",
+    "Funcionalidades",
+    "Precios",
+    "Soporte",
+    "Seguridad",
+    "Integración"
+  ],
+  "updated": "2025-08-24",
+  "total_questions": 8
+}

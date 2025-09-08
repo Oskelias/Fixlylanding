@@ -1,0 +1,79 @@
+{
+  "project": {
+    "name": "Fixly Taller",
+    "version": "1.0.0",
+    "description": "Sistema de gestión para talleres de reparación con WhatsApp integrado",
+    "author": "Equipo de Desarrollo",
+    "created": "2025-08-24",
+    "rating": 4.8,
+    "reviews": 120
+  },
+  "features": {
+    "whatsapp_integration": true,
+    "inventory_management": true,
+    "customer_tracking": true,
+    "billing_system": true,
+    "reporting": true,
+    "multi_user": true,
+    "cloud_backup": true,
+    "mobile_responsive": true
+  },
+  "pricing_plans": {
+    "starter": {
+      "name": "Starter",
+      "price": 0,
+      "duration": "15 días",
+      "max_users": 2,
+      "features": [
+        "Gestión básica",
+        "WhatsApp",
+        "Soporte email"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": 19900,
+      "currency": "CLP",
+      "billing": "mensual",
+      "max_users": 5,
+      "badge": "PRO",
+      "features": [
+        "Todas las funciones Starter",
+        "Reportes avanzados",
+        "Integración completa",
+        "Soporte prioritario",
+        "Backup automático"
+      ]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "custom",
+      "max_users": "unlimited",
+      "features": [
+        "Todas las funciones Pro",
+        "Personalización completa",
+        "Integración API",
+        "Soporte 24/7",
+        "Consultoría incluida"
+      ]
+    }
+  },
+  "contact": {
+    "whatsapp": "+56912345678",
+    "email": "contacto@fixlytaller.com",
+    "website": "https://fixlytaller.com",
+    "support_hours": "Lunes a Viernes 9:00 - 18:00"
+  },
+  "technical": {
+    "framework": "Tailwind CSS",
+    "icons": "Font Awesome 6",
+    "fonts": "Inter, system-ui",
+    "responsive": true,
+    "browser_support": [
+      "Chrome",
+      "Firefox",
+      "Safari",
+      "Edge"
+    ]
+  }
+}
